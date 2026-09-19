@@ -1,0 +1,67 @@
+-- This function calculates total working hours for drivers and assistants (Per week)
+-- It is based on the route maximum delivery times 
+
+DROP FUNCTION IF EXISTS fn_calculate_weekly_hours;
+
+DELIMITER //
+
+CREATE FUNCTION fn_calculate_weekly_hours (PersonType VARCHAR(20), PersonID INT, WeekDate Date)
+    RETURNS DECIMAL(5,2)
+    
+    NOT DETERMINISTIC
+    READS SQL DATA
+
+    BEGIN
+        DECLARE total_hours DECIMAL(5,2) DEFAULT 0.00;
+        
+        IF UPPER(PersonType) = 'DRIVER' THEN
+            SELECT COALESCE(SUM(r.MaxDeliveryTime), 0.00) INTO total_hours
+            FROM TruckTrip tt
+            INNER JOIN Route r ON tt.RouteID = r.RouteID
+            WHERE tt.DriverID = PersonID
+                AND YEARWEEK(tt.TripDate, 1) = YEARWEEK(WeekDate, 1);
+
+        ELSEIF UPPER(PersonType) = 'ASSISTANT' THEN
+            SELECT COALESCE(SUM(r.MaxDeliveryTime), 0.00) INTO total_hours
+            FROM TruckTrip tt
+            INNER JOIN Route r ON tt.RouteID = r.RouteID
+            WHERE tt.AssistantID = PersonID
+                AND YEARWEEK(tt.TripDate, 1) = YEARWEEK(WeekDate, 1);
+        END IF;
+        
+        RETURN total_hours;
+    END //
+
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS GetDriverWeeklyHours;
+
+DELIMITER //
+
+CREATE FUNCTION GetDriverWeeklyHours (DriverID INT, WeekDate Date)
+    RETURNS DECIMAL(5,2)
+    
+    NOT DETERMINISTIC
+    READS SQL DATA
+
+    BEGIN
+        RETURN fn_calculate_weekly_hours('DRIVER', DriverID, WeekDate);
+    END //
+
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS GetAssistantWeeklyHours;
+
+DELIMITER //
+
+CREATE FUNCTION GetAssistantWeeklyHours (AssistantID INT, WeekDate Date)
+    RETURNS DECIMAL(5,2)
+
+    NOT DETERMINISTIC
+    READS SQL DATA
+
+    BEGIN
+        RETURN fn_calculate_weekly_hours('ASSISTANT', AssistantID, WeekDate);
+    END //
+
+DELIMITER ;
