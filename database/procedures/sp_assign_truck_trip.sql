@@ -82,6 +82,18 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
         SET MESSAGE_TEXT = 'Roster Constraint Violation: Assistant cannot be scheduled for more than 2 consecutive trips.';
     END IF;
 
+    -- Preventing overlaps or double booking (Truck, Driver, or Assistant)
+    SELECT COUNT(*) INTO conflict_count
+    FROM TruckTrip
+    WHERE TripDate = p_TripDate
+      AND (TruckID = p_TruckID OR DriverID = p_DriverID OR AssistantID = p_AssistantID)
+      AND (p_DispatchTime < ReturnTime AND p_ReturnTime > DispatchTime); -- Check if (Truck, Driver, or Assistant) is already booked for another trip overlapping time window
+
+    IF conflict_count > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Schedule Conflict: The Truck, Driver, or Assistant is already booked for an overlapping time window.';
+    END IF;
+
 END //
 
 DELIMITER ;
