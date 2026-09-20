@@ -51,5 +51,38 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
         SET MESSAGE_TEXT = 'Roster Constraint Violation: Assistant exceeds weekly limit of 60 hours.';
     END IF;
 
+    -- Check if the Driver's last trip ended 30 minutes or more before the new dispatch time
+    SELECT COUNT(*) INTO consecutive_trips
+    FROM TruckTrip
+    WHERE DriverID = p_DriverID 
+      AND TripDate = p_TripDate 
+      AND (ReturnTime <= p_DispatchTime AND TIMEDIFF(p_DispatchTime, ReturnTime) < '00:30:00') -- Checks if an existing trip ends right before the new trip starts with less than 30 minutes of rest.
+          OR
+          (p_ReturnTime <= DispatchTime AND TIMEDIFF(DispatchTime, p_ReturnTime) < '00:30:00'); -- Checks if the new trip ends right before an already-scheduled trip starts with less than 30 minutes of rest.
+
+    IF consecutive_trips > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Roster Constraint Violation: Driver needs at least 30 minutes rest between trips.';
+    END IF;
+
+    -- Assitant can do two back-to-back trips before taking a break
+    -- Checking this condition for Assistant for a 30 minute break
+    SELECT COUNT(*) INTO consecutive_trips
+    FROM TruckTrip t1
+    INNER JOIN TruckTrip t2 ON t1.AssistantID = t2.AssistantID
+                           AND t1.TripDate = t2.TripDate
+                           AND t1.ReturnTime = t2.DispatchTime -- Identifies two back-to-back trips
+    WHERE t1.AssistantID = p_AssistantID
+      AND t1.TripDate = p_TripDate
+      -- Checking if the 3rd trip is within 30 minutes
+      AND (t2.ReturnTime <= p_DispatchTime AND TIMEDIFF(p_DispatchTime, t2.ReturnTime) < '00:30:00');
+
+    IF consecutive_trips > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Roster Constraint Violation: Assistant cannot be scheduled for more than 2 consecutive trips.';
+    END IF;
+
+END //
+
 DELIMITER ;
 
