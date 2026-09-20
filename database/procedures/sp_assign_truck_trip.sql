@@ -94,6 +94,21 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
         SET MESSAGE_TEXT = 'Schedule Conflict: The Truck, Driver, or Assistant is already booked for an overlapping time window.';
     END IF;
 
+    -- Insert new truck trip inside transaction
+    START TRANSACTION;
+
+    -- Adds the new scheduled trip to the TruckTrip
+    INSERT INTO TruckTrip (TruckID, RouteID, DriverID, AssistantID, TripDate, DispatchTime, ReturnTime)
+    VALUES (p_TruckID, p_RouteID, p_DriverID, p_AssistantID, p_TripDate, p_DispatchTime, p_ReturnTime);
+
+    SET p_TripID = LAST_INSERT_ID(); -- Backend application or caller knows the ID of the created trip
+
+    -- Creates an immutable trail in the AuditLog table
+    INSERT INTO AuditLog (TableName, ActionType, RecordID, ChangedBy, Details)
+    VALUES ('TruckTrip', 'INSERT', p_TripID, 'FLEET_COORDINATOR', 
+            CONCAT('TruckTrip #', p_TripID, ' created with Truck #', p_TruckID, ', Driver #', p_DriverID, ', Assistant #', p_AssistantID));
+
+    COMMIT; -- Permanently writes both inserts (TruckTrip and AuditLog)
 END //
 
 DELIMITER ;
