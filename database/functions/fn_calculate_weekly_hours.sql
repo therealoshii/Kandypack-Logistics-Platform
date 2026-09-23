@@ -2,6 +2,8 @@
 -- It is based on the route maximum delivery times 
 
 DROP FUNCTION IF EXISTS fn_calculate_weekly_hours;
+DROP FUNCTION IF EXISTS GetDriverWeeklyHours;
+DROP FUNCTION IF EXISTS GetAssistantWeeklyHours;
 
 DELIMITER //
 
@@ -32,11 +34,6 @@ CREATE FUNCTION fn_calculate_weekly_hours (PersonType VARCHAR(20), PersonID INT,
         RETURN total_hours;
     END //
 
-DELIMITER ;
-
-DROP FUNCTION IF EXISTS GetDriverWeeklyHours;
-
-DELIMITER //
 
 CREATE FUNCTION GetDriverWeeklyHours (DriverID INT, WeekDate Date)
     RETURNS DECIMAL(5,2)
@@ -48,11 +45,6 @@ CREATE FUNCTION GetDriverWeeklyHours (DriverID INT, WeekDate Date)
         RETURN fn_calculate_weekly_hours('DRIVER', DriverID, WeekDate);
     END //
 
-DELIMITER ;
-
-DROP FUNCTION IF EXISTS GetAssistantWeeklyHours;
-
-DELIMITER //
 
 CREATE FUNCTION GetAssistantWeeklyHours (AssistantID INT, WeekDate Date)
     RETURNS DECIMAL(5,2)
