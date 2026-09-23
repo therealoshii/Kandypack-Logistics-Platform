@@ -1,5 +1,5 @@
 -- This procedure assigns truck trips to Drivers and Assistants
--- Automated dispatch controller before a tip is saved in the database
+-- Automated dispatch controller before a trip is saved in the database
 
 -- Requirements:
 --   - SRS Section 4.4: Driver 40h & Assistant 60h caps, consecutive trip rules
@@ -38,17 +38,19 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
     SET trip_duration = TIME_TO_SEC(TIMEDIFF(p_ReturnTime, p_DispatchTime)) / 3600.0;
 
     -- Validate Driver has no more than 40 hours weekly
-    SET driver_current_hours = fn_calculate_weekly_hours('DRIVER', p_DriverID, p_TripDate);
+    SET driver_current_hours = GetDriverWeeklyHours(p_DriverID, p_TripDate);
     IF (driver_current_hours + trip_duration) > 40.0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Roster Constraint Violation: Driver exceeds weekly limit of 40 hours.';
     END IF;
 
     -- Validate Assistant has no more than 60 hours weekly
-    SET assistant_current_hours = fn_calculate_weekly_hours('ASSISTANT', p_AssistantID, p_TripDate);
-    IF (assistant_current_hours + trip_duration) > 60.0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Roster Constraint Violation: Assistant exceeds weekly limit of 60 hours.';
+    IF p_AssistantID IS NOT NULL THEN
+        SET assistant_current_hours = GetAssistantWeeklyHours(p_AssistantID, p_TripDate);
+        IF (assistant_current_hours + trip_duration) > 60.0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Roster Constraint Violation: Assistant exceeds weekly limit of 60 hours.';
+        END IF;
     END IF;
 
     -- Check if the Driver's last trip ended 30 minutes or more before the new dispatch time
@@ -56,9 +58,11 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
     FROM TruckTrip
     WHERE DriverID = p_DriverID 
       AND TripDate = p_TripDate 
-      AND (ReturnTime <= p_DispatchTime AND TIMEDIFF(p_DispatchTime, ReturnTime) < '00:30:00') -- Checks if an existing trip ends right before the new trip starts with less than 30 minutes of rest.
+      AND (
+          (ReturnTime <= p_DispatchTime AND TIMEDIFF(p_DispatchTime, ReturnTime) < '00:30:00') -- Checks if an existing trip ends right before the new trip starts with less than 30 minutes of rest.
           OR
-          (p_ReturnTime <= DispatchTime AND TIMEDIFF(DispatchTime, p_ReturnTime) < '00:30:00'); -- Checks if the new trip ends right before an already-scheduled trip starts with less than 30 minutes of rest.
+          (p_ReturnTime <= DispatchTime AND TIMEDIFF(DispatchTime, p_ReturnTime) < '00:30:00') -- Checks if the new trip ends right before an already-scheduled trip starts with less than 30 minutes of rest.
+      );
 
     IF consecutive_trips > 0 THEN
         SIGNAL SQLSTATE '45000'
