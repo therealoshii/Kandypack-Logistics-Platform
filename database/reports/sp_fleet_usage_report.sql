@@ -1,3 +1,6 @@
+-- Fleet usage report
+-- Shows monthly trips, operating hours and mileage for each truck
+
 DROP PROCEDURE IF EXISTS sp_fleet_usage_report;
 
 DELIMITER //
