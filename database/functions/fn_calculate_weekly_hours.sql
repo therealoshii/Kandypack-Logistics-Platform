@@ -29,6 +29,11 @@ CREATE FUNCTION fn_calculate_weekly_hours (PersonType VARCHAR(20), PersonID INT,
             INNER JOIN Route r ON tt.RouteID = r.RouteID
             WHERE tt.AssistantID = PersonID
                 AND YEARWEEK(tt.TripDate, 1) = YEARWEEK(WeekDate, 1);
+
+        ELSE
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Validation Error: Invalid PersonType. Must be DRIVER or ASSISTANT.';
+
         END IF;
         
         RETURN total_hours;
