@@ -14,8 +14,12 @@ BEGIN
     SELECT SpaceConsumption INTO v_SpaceRate
     FROM Product
     WHERE ProductID = p_ProductID;
+    
 
-    SET v_TotalSpace = p_Quantity * IFNULL(v_SpaceRate, 0.00);
+    IF v_SpaceRate IS NULL THEN
+        SET v_SpaceRate = 0.00; -- Default to 0 if no space rate is found
+    END IF;
+    SET v_TotalSpace = p_Quantity * v_SpaceRate;
     RETURN v_TotalSpace;
 END //
 
