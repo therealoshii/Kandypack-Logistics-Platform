@@ -1,3 +1,6 @@
+-- Geographic sales report
+-- Shows sales by city and route for a selected date range
+
 DROP PROCEDURE IF EXISTS sp_geographic_sales_report;
 
 DELIMITER //
