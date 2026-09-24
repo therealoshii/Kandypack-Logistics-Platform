@@ -15,8 +15,11 @@ CREATE TABLE Truck (
     RegistrationNumber VARCHAR(20) NOT NULL UNIQUE,
     Capacity DECIMAL(10,2) NOT NULL,
     StoreID INT NOT NULL,
+
     CONSTRAINT fk_truck_store FOREIGN KEY (StoreID)
-        REFERENCES Store(StoreID) ON DELETE RESTRICT ON UPDATE CASCADE
+        REFERENCES Store(StoreID) ON DELETE RESTRICT ON UPDATE CASCADE,
+
+    CONSTRAINT chk_truck_capacity CHECK (Capacity > 0)
 );
 
 -- Driver Table (The heavy vehicle delivery drivers)
@@ -44,6 +47,7 @@ CREATE TABLE TruckTrip (
     DispatchTime TIME NOT NULL,
     ReturnTime TIME NOT NULL,
     TripDate DATE NOT NULL,
+
     CONSTRAINT fk_trucktrip_truck FOREIGN KEY (TruckID)
         REFERENCES Truck(TruckID) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_trucktrip_route FOREIGN KEY (RouteID)
@@ -60,7 +64,7 @@ CREATE TABLE Delivery (
     OrderID INT NOT NULL UNIQUE, -- Strict 1:1 relationship between Order and Delivery
     TripID INT NOT NULL,
     DeliveryDate DATE NOT NULL,
-    Status VARCHAR(30) NOT NULL DEFAULT 'Scheduled', -- Can be 'Scheduled', 'In Transit', 'Delivered'
+    Status ENUM('Scheduled', 'In Transit', 'Delivered', 'Cancelled') NOT NULL DEFAULT 'Scheduled', -- Can be 'Scheduled', 'In Transit', 'Delivered'
     CONSTRAINT fk_delivery_order FOREIGN KEY (OrderID)
         REFERENCES Orders(OrderID) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_delivery_trip FOREIGN KEY (TripID)

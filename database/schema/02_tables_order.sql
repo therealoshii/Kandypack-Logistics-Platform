@@ -24,8 +24,9 @@ CREATE TABLE Orders (
     RouteID INT NOT NULL,
     AdminID INT NULL, -- Assigned/updated when processed by administrative staff
     OrderDate DATE NOT NULL,
-    Status VARCHAR(30) NOT NULL DEFAULT 'Placed', -- 'Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered', 'Cancelled'
+    Status ENUM('Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered', 'Cancelled') NOT NULL DEFAULT 'Placed',
     TotalAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+
     CONSTRAINT fk_order_customer FOREIGN KEY (CustomerID)
         REFERENCES Customer(CustomerID) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_order_route FOREIGN KEY (RouteID)
@@ -41,10 +42,14 @@ CREATE TABLE OrderDetail (
     ProductID INT NOT NULL,
     Quantity INT NOT NULL,
     LineTotal DECIMAL(12,2) NOT NULL,
+
     CONSTRAINT fk_orderdetail_order FOREIGN KEY (OrderID)
         REFERENCES Orders(OrderID) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_orderdetail_product FOREIGN KEY (ProductID)
-        REFERENCES Product(ProductID) ON DELETE RESTRICT ON UPDATE CASCADE
+        REFERENCES Product(ProductID) ON DELETE RESTRICT ON UPDATE CASCADE,
+        
+    CONSTRAINT chk_detail_quantity CHECK (Quantity > 0),
+    CONSTRAINT chk_detail_total CHECK (LineTotal >= 0)
 );
 
 -- AuditLog Table (Security & ACID Auditing per SRS Section 5.3)
