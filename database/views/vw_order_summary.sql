@@ -1,6 +1,5 @@
 -- Kandypack Logistics Platform - Order Summary View
 
-
 DROP VIEW IF EXISTS vw_order_summary;
 
 CREATE VIEW vw_order_summary AS
