@@ -12,8 +12,7 @@ DROP TRIGGER IF EXISTS trg_before_insert_trucktrip;
 DELIMITER //
 
 CREATE TRIGGER trg_before_insert_trucktrip
--- checking before we insert a record
-BEFORE INSERT ON TruckTrip
+BEFORE INSERT ON TruckTrip -- checking before we insert a record
 FOR EACH ROW
 
 BEGIN
