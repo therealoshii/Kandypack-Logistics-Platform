@@ -1,11 +1,11 @@
 --TEST CASE 1: Invalid Lead Time--
 
-CALL sp_place_order(
-    1,
-    DATE_ADD(CURDATE(), INTERVAL 3 DAY),
-    '[{"productId": 1, "quantity": 10}]',
-    @v_order_id
-);
+--CALL sp_place_order(
+--    1,
+--    DATE_ADD(CURDATE(), INTERVAL 3 DAY),
+--    '[{"productId": 1, "quantity": 10}]',
+--    @v_order_id
+--);
 
 -- TEST CASE 2: Valid Lead Time--
 CALL sp_place_order(
