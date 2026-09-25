@@ -3,6 +3,7 @@
 
 -- Before running this file, these should be run:
 -- All 4 schemas -> all functions -> all procedures -> all views/indexes -> all triggers
+-- Uncomment each test case one at a time to verify errors
 
 -- Requirements:
 --   - SRS Section 4.4 / REQ-2: Driver no two consecutive trips (30-min rest)
@@ -80,7 +81,7 @@ VALUES (1, 2, 1, 4, '2026-10-08', '08:00:00', '22:00:00');
 -- EXPECTED: SUCCESS (1 row inserted)
 -- =============================================================================
 INSERT INTO TruckTrip (TruckID, RouteID, DriverID, AssistantID, TripDate, DispatchTime, ReturnTime)
-VALUES (2, 2, 2, 5, '2026-10-06', '08:00:00', '11:00:00');
+VALUES (4, 2, 2, 5, '2026-10-06', '08:00:00', '11:00:00');
 
 -- Verify inserted test records
 SELECT * FROM TruckTrip WHERE TripDate >= '2026-10-05' ORDER BY TripDate, DispatchTime;

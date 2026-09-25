@@ -17,16 +17,14 @@ CREATE FUNCTION fn_calculate_weekly_hours (PersonType VARCHAR(20), PersonID INT,
         DECLARE total_hours DECIMAL(5,2) DEFAULT 0.00;
         
         IF UPPER(PersonType) = 'DRIVER' THEN
-            SELECT COALESCE(SUM(r.MaxDeliveryTime), 0.00) INTO total_hours
+            SELECT COALESCE(SUM(TIME_TO_SEC(TIMEDIFF(tt.ReturnTime, tt.DispatchTime)) / 3600.0), 0.00) INTO total_hours
             FROM TruckTrip tt
-            INNER JOIN Route r ON tt.RouteID = r.RouteID
             WHERE tt.DriverID = PersonID
                 AND YEARWEEK(tt.TripDate, 1) = YEARWEEK(WeekDate, 1);
 
         ELSEIF UPPER(PersonType) = 'ASSISTANT' THEN
-            SELECT COALESCE(SUM(r.MaxDeliveryTime), 0.00) INTO total_hours
+            SELECT COALESCE(SUM(TIME_TO_SEC(TIMEDIFF(tt.ReturnTime, tt.DispatchTime)) / 3600.0), 0.00) INTO total_hours
             FROM TruckTrip tt
-            INNER JOIN Route r ON tt.RouteID = r.RouteID
             WHERE tt.AssistantID = PersonID
                 AND YEARWEEK(tt.TripDate, 1) = YEARWEEK(WeekDate, 1);
 

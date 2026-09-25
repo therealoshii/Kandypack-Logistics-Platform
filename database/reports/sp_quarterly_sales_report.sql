@@ -14,7 +14,7 @@ BEGIN
         COUNT(DISTINCT o.OrderID) AS TotalOrders,
         COALESCE(SUM(od.Quantity), 0) AS TotalUnitsSold,
         COALESCE(SUM(od.Quantity * p.SpaceConsumption), 0) AS TotalVolumeSpace,
-        COALESCE(SUM(o.TotalAmount), 0.00) AS TotalRevenueLKR
+        COALESCE(SUM(od.LineTotal), 0.00) AS TotalRevenueLKR
     FROM Orders o
     INNER JOIN OrderDetail od ON o.OrderID = od.OrderID
     INNER JOIN Product p ON od.ProductID = p.ProductID
