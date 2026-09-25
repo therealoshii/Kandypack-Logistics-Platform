@@ -36,7 +36,7 @@ BEGIN
     SELECT COUNT(*) INTO conflict_count
     FROM TruckTrip
     WHERE TripDate = NEW.TripDate
-      --check for overlapping trips for the same Truck, Driver, or Assistant
+      -- check for overlapping trips for the same Truck, Driver, or Assistant
       AND (TruckID = NEW.TruckID OR DriverID = NEW.DriverID OR AssistantID = NEW.AssistantID)
       AND (NEW.DispatchTime < ReturnTime AND NEW.ReturnTime > DispatchTime);
 
