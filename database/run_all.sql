@@ -12,9 +12,9 @@ SELECT '>>> Initializing Kandypack Logistics Platform Database Deployment...' AS
 -- --------------------------------------------------------------------
 SELECT '>>> [1/7] Creating Schemas...' AS Step;
 SOURCE schema/01_tables_core.sql;
-SOURCE schema/02_tables_rail.sql;
-SOURCE schema/03_tables_delivery.sql;
-SOURCE schema/04_tables_order.sql;
+SOURCE schema/02_tables_order.sql;
+SOURCE schema/03_tables_rail.sql;
+SOURCE schema/04_tables_delivery.sql;
 
 -- --------------------------------------------------------------------
 -- 2. FUNCTIONS (Calculations & Lookups)
@@ -33,6 +33,7 @@ SOURCE procedures/sp_place_order.sql;
 SOURCE procedures/sp_schedule_shipment.sql;
 SOURCE procedures/sp_assign_truck_trip.sql;
 SOURCE procedures/sp_update_delivery_status.sql;
+SOURCE procedures/sp_staff_weekly_hours_report.sql;
 
 -- Management Reports (Moved to /reports directory)
 SOURCE reports/sp_quarterly_sales_report.sql;
@@ -46,13 +47,10 @@ SOURCE reports/sp_customer_order_history.sql;
 -- 4. TRIGGERS (ACID Integrity & Constraint Enforcement)
 -- --------------------------------------------------------------------
 SELECT '>>> [4/7] Creating Triggers...' AS Step;
-SOURCE triggers/trg_check_cargo_capacity.sql;
-SOURCE triggers/trg_check_driver_consecutive.sql;
-SOURCE triggers/trg_check_assistant_consecutive.sql;
-SOURCE triggers/trg_check_weekly_hours.sql;
-SOURCE triggers/trg_check_schedule_conflict.sql;
-SOURCE triggers/trg_update_stock_on_dispatch.sql;
-SOURCE triggers/trg_audit_log.sql;
+SOURCE triggers/trg_check_cargo_capacity.sql; 
+SOURCE triggers/trg_before_insert_trucktrip.sql;
+SOURCE triggers/trg_update_stock_on_dispatch.sql; 
+SOURCE triggers/trg_audit_log.sql; 
 
 -- --------------------------------------------------------------------
 -- 5. INDEXES (B-Tree Performance Optimization)
@@ -66,7 +64,7 @@ SOURCE indexes/01_indexes.sql;
 SELECT '>>> [6/7] Creating Views...' AS Step;
 SOURCE views/vw_order_summary.sql;
 SOURCE views/vw_truck_utilization.sql;
-SOURCE views/vw_driver_weekly_hours.sql;
+SOURCE views/vw_staff_weekly_hours.sql;
 
 -- --------------------------------------------------------------------
 -- 7. SEED DATA (Base Configuration & 40+ Orders)

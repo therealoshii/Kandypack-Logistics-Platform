@@ -1,3 +1,5 @@
+DROP PROCEDURE IF EXISTS sp_schedule_shipment;
+
 DELIMITER //
 
 CREATE PROCEDURE sp_schedule_shipment(

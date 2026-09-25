@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS fn_get_available_capacity;
+
 DELIMITER //
 
 CREATE FUNCTION fn_get_available_capacity(

@@ -1,17 +1,17 @@
---This function is used to find the correct route for the address given by customer--
+-- This function is used to find the correct route for the address given by customer
 
---if there is already a function in the same name then delete it--
+-- if there is already a function in the same name then delete it
 DROP FUNCTION IF EXISTS fn_get_route_for_address;
 
 DELIMITER //
---create a funtion as fn_get_route_for_address--
---this gets p_City as input  and return an integer output--
+-- create a funtion as fn_get_route_for_address
+-- this gets p_City as input  and return an integer output
 CREATE FUNCTION fn_get_route_for_address(p_City VARCHAR(50)) 
 RETURNS INT
 DETERMINISTIC
 READS SQL DATA
 BEGIN
-    --create a variable as v_route_id for storing the route id and set it to null--
+    -- create a variable as v_route_id for storing the route id and set it to null
     DECLARE v_route_id INT DEFAULT NULL;
 
     -- 1.match route through the regional store located in that destination city--

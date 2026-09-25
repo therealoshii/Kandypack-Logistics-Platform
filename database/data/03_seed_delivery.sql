@@ -1,7 +1,7 @@
 -- Truck seed data
 
---Trucks assigned to the regional stores
---Two trucks are assigned to each store
+-- Trucks assigned to the regional stores
+-- Two trucks are assigned to each store
 
 INSERT INTO Truck
     (TruckID, RegistrationNumber, Capacity, StoreID)

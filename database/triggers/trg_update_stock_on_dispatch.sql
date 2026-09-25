@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS trg_update_stock_on_dispatch;
+
 DELIMITER //
 
 CREATE TRIGGER trg_update_stock_on_dispatch

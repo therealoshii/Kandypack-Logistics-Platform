@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS trg_check_cargo_capacity;
+
 DELIMITER //
 
 CREATE TRIGGER trg_check_cargo_capacity

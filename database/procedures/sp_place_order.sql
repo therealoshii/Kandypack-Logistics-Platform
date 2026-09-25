@@ -1,4 +1,4 @@
---if there is any procedure in same name then delete it
+-- if there is any procedure in same name then delete it
 DROP PROCEDURE IF EXISTS sp_place_order;
 
 DELIMITER //
@@ -10,7 +10,7 @@ CREATE PROCEDURE sp_place_order(
     OUT p_OrderID INT
 )
 proc_label: BEGIN
-    --declare variables--
+    -- declare variables
     DECLARE v_lead_time_days INT;
     DECLARE v_customer_city VARCHAR(50);
     DECLARE v_route_id INT;
@@ -24,14 +24,14 @@ proc_label: BEGIN
     DECLARE v_line_total DECIMAL(12,2);
     DECLARE v_stock INT;
 
-    -- Error handler for transaction rollback--
+    -- Error handler for transaction rollback
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
         RESIGNAL;
     END;
 
-    --1.validate 7 day advance lead time rule--
+    -- 1. validate 7 day advance lead time rule
     SET v_lead_time_days = DATEDIFF(p_DeliveryDate, CURDATE());
     IF v_lead_time_days < 7 THEN
         SIGNAL SQLSTATE '45000'
@@ -51,16 +51,16 @@ proc_label: BEGIN
     -- 3.automatically match route for destination address--
     SET v_route_id = fn_get_route_for_address(v_customer_city);
 
-    -- 4.ACID Transaction--
+    -- 4. ACID Transaction
     START TRANSACTION;
 
-    --insert order master record--
+    -- insert order master record
     INSERT INTO Orders (CustomerID, RouteID, AdminID, OrderDate, Status, TotalAmount)
     VALUES (p_CustomerID, v_route_id, NULL, CURDATE(), 'Placed', 0.00);
 
     SET p_OrderID = LAST_INSERT_ID();
 
-    -- 5.process JSON items array--
+    -- 5. process JSON items array
     SET v_item_count = JSON_LENGTH(p_Items);
     IF v_item_count IS NULL OR v_item_count = 0 THEN
         ROLLBACK;
@@ -78,7 +78,7 @@ proc_label: BEGIN
             SET MESSAGE_TEXT = 'Validation Error: Quantity must be greater than zero.';
         END IF;
 
-        --retrieve price and stock--
+        -- retrieve price and stock
         SELECT UnitPrice, StockQuantity
         INTO v_unit_price, v_stock
         FROM Product
@@ -90,7 +90,7 @@ proc_label: BEGIN
             SET MESSAGE_TEXT = 'Validation Error: Product does not exist.';
         END IF;
 
-        --validate sufficient stock--
+        -- validate sufficient stock
         IF v_stock < v_quantity THEN
             ROLLBACK;
             SIGNAL SQLSTATE '45000'
@@ -100,19 +100,19 @@ proc_label: BEGIN
         SET v_line_total = v_quantity * v_unit_price;
         SET v_total_amount = v_total_amount + v_line_total;
 
-        --insert order detail--
+        -- insert order detail
         INSERT INTO OrderDetail (OrderID, ProductID, Quantity, LineTotal)
         VALUES (p_OrderID, v_product_id, v_quantity, v_line_total);
 
         SET i = i + 1;
     END WHILE;
 
-    --order total Amount--
+    -- order total Amount
     UPDATE Orders
     SET TotalAmount = v_total_amount
     WHERE OrderID = p_OrderID;
 
-    --log transaction in AuditLog--
+    -- log transaction in AuditLog
     INSERT INTO AuditLog (TableName, ActionType, RecordID, ChangedBy, Details)
     VALUES ('Orders', 'INSERT', p_OrderID, 'CUSTOMER', CONCAT('Order placed with ', v_item_count, ' items. Total: LKR ', v_total_amount));
 

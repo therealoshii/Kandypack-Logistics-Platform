@@ -1,5 +1,5 @@
---Truck utilization view
---Shows trip activity, operating hours and completed deliveries for each truck
+-- Truck utilization view
+-- Shows trip activity, operating hours and completed deliveries for each truck
 
 DROP VIEW IF EXISTS vw_truck_utilization;
 

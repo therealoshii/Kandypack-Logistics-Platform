@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS fn_calculate_total_space;
+
 DELIMITER //
 
 CREATE FUNCTION fn_calculate_total_space(
