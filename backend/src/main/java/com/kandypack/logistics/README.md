@@ -35,4 +35,16 @@ com/kandypack/logistics/               <--- SHARED ROOT (For the entire 
     ├── dto/                           -- QuarterlyReportDTO, TopItemsDTO
     ├── service/                       -- ReportService
     └── controller/                    -- ReportController
+```
 
+### In a standard Spring Boot architecture, code is separated into dedicated concerns:
+
+- `controller/`: Handles incoming HTTP requests and responses.
+
+- `dto/`: Carries data transfer contracts between API clients and our server.
+
+- `service/`: Holds core business logic, validations, and workflow orchestrations.
+
+- `entity/`: Models the relational database tables.
+
+- `repository/`: Directly talks to the database. It isolates all database operations (queries, insertions, updates, deletions) so the business logic in `service/` never has to execute raw SQL or manage database connections directly.
