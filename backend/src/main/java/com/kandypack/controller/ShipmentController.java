@@ -3,7 +3,7 @@ package com.kandypack.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Map;
 
 @RestController
@@ -11,8 +11,11 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class ShipmentController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public ShipmentController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @PostMapping("/schedule")
     public ResponseEntity<?> scheduleShipment(@RequestBody Map<String, Object> request) {
