@@ -3,3 +3,6 @@
  This file is shared by everyone
 
 ### Oshan
+- ResourceNotFoundException
+- ErrorResponse
+- GlobalExceptionHandler
