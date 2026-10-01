@@ -1,1 +1,2 @@
 # Database queries (JPA)
+# Houses the Data Access Layer (DAO layer) of the application
