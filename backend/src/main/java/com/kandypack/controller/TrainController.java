@@ -1,6 +1,5 @@
 package com.kandypack.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,13 +11,16 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class TrainController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public TrainController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @GetMapping("/schedules")
     public List<Map<String, Object>> getTrainSchedules(@RequestParam("date") String shipmentDate) {
         String sql = """
-            SELECT 
+            SELECT
                 ts.ScheduleID,
                 ts.TrainName,
                 ts.DepartureTime,
