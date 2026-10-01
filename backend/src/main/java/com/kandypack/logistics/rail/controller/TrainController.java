@@ -1,4 +1,4 @@
-package com.kandypack.controller;
+package com.kandypack.logistics.rail.controller;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ public class TrainController {
     @GetMapping("/schedules")
     public List<Map<String, Object>> getTrainSchedules(@RequestParam("date") String shipmentDate) {
         String sql = """
-            SELECT
+            SELECT 
                 ts.ScheduleID,
                 ts.TrainName,
                 ts.DepartureTime,

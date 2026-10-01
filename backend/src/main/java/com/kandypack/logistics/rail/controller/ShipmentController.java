@@ -1,4 +1,4 @@
-package com.kandypack.controller;
+package com.kandypack.logistics.rail.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
