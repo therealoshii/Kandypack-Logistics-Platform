@@ -1,1 +1,12 @@
-# Business logic & stored procedure calls
+# Business logic & stored procedure calls to connect to MySQL
+
+# Act as the coordinator between
+- Controllers
+- Respositories
+- Database Rules
+- DTOs
+
+# Main responsibilities
+- Trip Assignment
+- Delivery Status Transition
+- Staff Quota Lookup
