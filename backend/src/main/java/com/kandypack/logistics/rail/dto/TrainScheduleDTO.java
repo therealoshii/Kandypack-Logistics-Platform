@@ -5,7 +5,7 @@ public class TrainScheduleDTO {
     private String trainName;
     private String departureTime;
     private Integer maxCapacity;
-    private Integer AvailableCapacity;
+    private Integer availableCapacity;
     
     public TrainScheduleDTO() {}
 
@@ -14,7 +14,7 @@ public class TrainScheduleDTO {
         this.trainName = trainName;
         this.departureTime = departureTime;
         this.maxCapacity = maxCapacity;
-        this.AvailableCapacity = AvailableCapacity;
+        this.availableCapacity = AvailableCapacity;
     }
 
     public Integer getScheduleId() { return scheduleId; }
@@ -29,7 +29,7 @@ public class TrainScheduleDTO {
     public Integer getmaxCapacity() { return maxCapacity; }
     public void setmaxCapacity(Integer maxCapacity) { this.maxCapacity = maxCapacity; }
     
-    public Integer getAvailableCapacity() { return AvailableCapacity; }
-    public void setAvailableCapacity(Integer AvailableCapacity) { this.AvailableCapacity = AvailableCapacity; }
+    public Integer getAvailableCapacity() { return availableCapacity; }
+    public void setAvailableCapacity(Integer AvailableCapacity) { this.availableCapacity = AvailableCapacity; }
     
 }
