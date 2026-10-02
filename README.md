@@ -4,7 +4,6 @@
 
 A database-driven logistics management system for managing
 Kandypack's rail and road-based supply chain distribution process.
-
 ## Project Overview
 
 The system manages the complete logistics process from customer
@@ -61,7 +60,6 @@ The main areas of the system are:
 - Truck assignment
 - Truck trips
 - Truck scheduling
-
 ### 4. Driver, Assistant & Delivery Management
 - Driver management
 - Assistant management
