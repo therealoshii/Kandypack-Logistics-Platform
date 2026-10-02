@@ -1,4 +1,4 @@
-// Handles all business logic and CRUD operations for drivers
+// REST Controller for Driver management endpoints
 
 package com.kandypack.logistics.delivery.controller;
 
