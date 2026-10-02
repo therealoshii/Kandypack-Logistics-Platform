@@ -29,13 +29,14 @@ public class TruckTripService {
     private final DriverRepository driverRepository;
     private final AssistantRepository assistantRepository;
 
+    // A truck trip be isolated it needs driver, assistant, truck, route
     public TruckTripService(TruckTripRepository truckTripRepository, DriverRepository driverRepository, AssistantRepository assistantRepository) {
         this.truckTripRepository = truckTripRepository;
         this.driverRepository = driverRepository;
         this.assistantRepository = assistantRepository;
     }
 
-    // Get all truck trips
+    // Get all truck trips  
     @Transactional(readOnly = true)
     public List<TruckTripDTO> getAllTrips() {
         return truckTripRepository.findAll().stream()
@@ -51,19 +52,18 @@ public class TruckTripService {
         return toDTO(trip);
     }
 
-    /**
-     * Create a new truck trip.
-     * The INSERT fires trg_before_insert_trucktrip which validates:
+    
+    // Create a new truck trip
+    /* The INSERT fires trigger trg_before_insert_trucktrip which validates:
      *   - ReturnTime > DispatchTime
-     *   - No schedule conflicts (SRS REQ-6)
-     *   - Driver 30-min rest between trips (SRS REQ-2)
-     *   - Assistant max 2 consecutive trips (SRS REQ-3)
-     *   - Driver 40h weekly cap (SRS REQ-4)
-     *   - Assistant 60h weekly cap (SRS REQ-5)
-     * If any validation fails, MySQL raises SQLSTATE 45000 which
-     * Spring translates to a DataIntegrityViolationException.
+     *   - No schedule conflicts
+     *   - Driver 30-min rest between trips
+     *   - Assistant max 2 consecutive trips
+     *   - Driver 40h weekly max
+     *   - Assistant 60h weekly max
      */
     public TruckTripDTO createTrip(TruckTripDTO dto) {
+        // Validate driver and assistant existence
         Driver driver = driverRepository.findById(dto.getDriverId())
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found with ID: " + dto.getDriverId()));
         Assistant assistant = assistantRepository.findById(dto.getAssistantId())
@@ -112,7 +112,7 @@ public class TruckTripService {
         truckTripRepository.deleteById(id);
     }
 
-    // Get trips by date
+    // Get trips by a specific date
     @Transactional(readOnly = true)
     public List<TruckTripDTO> getTripsByDate(LocalDate date) {
         return truckTripRepository.findByTripDate(date).stream()
@@ -136,8 +136,7 @@ public class TruckTripService {
                 .collect(Collectors.toList());
     }
 
-    // --- Mapping helpers ---
-
+    // (Entity -> DTO): Unpacks database records into safe data containers before returning them over the network
     private TruckTripDTO toDTO(TruckTrip trip) {
         TruckTripDTO dto = new TruckTripDTO();
         dto.setTripId(trip.getTripId());

@@ -1,4 +1,6 @@
 # Business logic & stored procedure calls to connect to MySQL
+# Service Layer
+# CRUD = Create, Read, Update, Delete
 
 # Act as the coordinator between
 - Controllers
