@@ -2,6 +2,7 @@ package com.kandypack.logistics.rail.controller;
 
 import com.kandypack.logistics.rail.dto.ShipmentDTO;
 import com.kandypack.logistics.rail.service.ShipmentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,8 @@ public class ShipmentController {
     }
 
     @PostMapping("/schedule")
-    public ResponseEntity<?> scheduleShipment(@RequestBody ShipmentDTO shipmentDTO) {
-        try {
-            shipmentService.processShipmentSchedule(shipmentDTO);
-            return ResponseEntity.ok(Map.of("message", "Shipment scheduled successfully!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> scheduleShipment(@Valid @RequestBody ShipmentDTO shipmentDTO) {
+        shipmentService.processShipmentSchedule(shipmentDTO);
+        return ResponseEntity.ok(Map.of("message", "Shipment scheduled successfully!"));
     }
 }
