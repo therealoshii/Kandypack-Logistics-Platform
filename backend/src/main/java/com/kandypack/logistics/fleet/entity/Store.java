@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+//represents a regional store/warehouse in the logistics system
+
 @Entity
 @Table(name = "Store")
 public class Store {

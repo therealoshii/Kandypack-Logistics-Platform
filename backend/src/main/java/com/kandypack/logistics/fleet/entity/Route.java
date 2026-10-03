@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+//Represents a delivery route connected to a regional store
+
 @Entity
 @Table(name = "Route")
 public class Route {
