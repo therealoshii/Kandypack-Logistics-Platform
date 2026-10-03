@@ -1,4 +1,7 @@
+//Repository for accessing delivery route records
+
 package com.kandypack.logistics.fleet.repository;
+
 
 import com.kandypack.logistics.fleet.entity.Route;
 import org.springframework.data.jpa.repository.JpaRepository;

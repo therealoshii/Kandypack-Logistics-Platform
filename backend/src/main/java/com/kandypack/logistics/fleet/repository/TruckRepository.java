@@ -1,3 +1,5 @@
+//Repository for accessing truck records
+
 package com.kandypack.logistics.fleet.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
