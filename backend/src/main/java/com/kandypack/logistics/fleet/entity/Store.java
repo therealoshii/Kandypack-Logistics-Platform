@@ -1,5 +1,6 @@
 package com.kandypack.logistics.fleet.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -9,11 +10,18 @@ import jakarta.persistence.Table;
 public class Store {
 
     @Id
+    @Column(name = "StoreID")
     private Integer storeID;
 
+    @Column(name = "StoreName")
     private String storeName;
+
+    @Column(name = "Capacity")
     private Double capacity;
+
+    @Column(name = "City")
     private String city;
+
 
     public Store() {
     }
