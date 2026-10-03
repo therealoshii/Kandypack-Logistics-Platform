@@ -1,3 +1,5 @@
+//Data transfer object for truck details
+
 package com.kandypack.logistics.fleet.dto;
 
 public class TruckDTO {

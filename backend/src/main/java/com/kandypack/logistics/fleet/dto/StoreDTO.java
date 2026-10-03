@@ -1,3 +1,5 @@
+//Data transfer object for store details and connected routes
+
 package com.kandypack.logistics.fleet.dto;
 
 import java.util.List;

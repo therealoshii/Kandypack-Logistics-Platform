@@ -1,3 +1,5 @@
+//Data transfer object for delivery route details
+
 package com.kandypack.logistics.fleet.dto;
 
 public class RouteDTO {
