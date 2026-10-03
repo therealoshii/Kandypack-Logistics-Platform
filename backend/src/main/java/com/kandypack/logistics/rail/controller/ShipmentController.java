@@ -1,7 +1,8 @@
 package com.kandypack.logistics.rail.controller;
 
+import com.kandypack.logistics.rail.dto.ShipmentDTO;
+import com.kandypack.logistics.rail.service.ShipmentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -11,23 +12,16 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class ShipmentController {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final ShipmentService shipmentService;
 
-    public ShipmentController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public ShipmentController(ShipmentService shipmentService) {
+        this.shipmentService = shipmentService;
     }
 
     @PostMapping("/schedule")
-    public ResponseEntity<?> scheduleShipment(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> scheduleShipment(@RequestBody ShipmentDTO shipmentDTO) {
         try {
-            Integer orderDetailId = (Integer) request.get("orderDetailId");
-            Integer scheduleId = (Integer) request.get("scheduleId");
-            String shipmentDate = (String) request.get("shipmentDate");
-            Integer quantity = (Integer) request.get("quantity");
-
-            String sql = "CALL sp_schedule_shipment(?, ?, ?, ?)";
-            jdbcTemplate.update(sql, orderDetailId, scheduleId, shipmentDate, quantity);
-
+            shipmentService.processShipmentSchedule(shipmentDTO);
             return ResponseEntity.ok(Map.of("message", "Shipment scheduled successfully!"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
