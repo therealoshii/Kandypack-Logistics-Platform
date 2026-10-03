@@ -1,4 +1,4 @@
-package com.kandypack.order.controller;
+package com.kandypack.logistics.order.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kandypack.order.dto.OrderRequest;
-import com.kandypack.order.service.OrderService;
+import com.kandypack.logistics.order.dto.OrderRequest;
+import com.kandypack.logistics.order.service.OrderService;
 
 @RestController
 @RequestMapping("/api/orders")

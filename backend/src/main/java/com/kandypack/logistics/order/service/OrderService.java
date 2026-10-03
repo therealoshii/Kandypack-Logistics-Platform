@@ -1,4 +1,4 @@
-package com.kandypack.order.service;
+package com.kandypack.logistics.order.service;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kandypack.order.dto.OrderRequest;
+import com.kandypack.logistics.order.dto.OrderRequest;
 
 @Service
 public class OrderService {

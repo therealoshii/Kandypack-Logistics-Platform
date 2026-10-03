@@ -1,4 +1,4 @@
-package com.kandypack.order.dto;
+package com.kandypack.logistics.order.dto;
 
 public class OrderItemDto {
     private Long productId;
