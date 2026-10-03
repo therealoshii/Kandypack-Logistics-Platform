@@ -4,7 +4,6 @@
 
 A database-driven logistics management system for managing
 Kandypack's rail and road-based supply chain distribution process.
-
 ## Project Overview
 
 The system manages the complete logistics process from customer
@@ -61,7 +60,6 @@ The main areas of the system are:
 - Truck assignment
 - Truck trips
 - Truck scheduling
-
 ### 4. Driver, Assistant & Delivery Management
 - Driver management
 - Assistant management
@@ -87,6 +85,15 @@ The system uses MySQL 8+ as the relational database.
 
 The database is based on the project's ER diagram and includes
 the required entities, relationships, primary keys and foreign keys.
+
+## Backend Build
+
+The Spring Boot backend uses Maven and requires JDK 17 or later. From the
+repository root, compile it with:
+
+```sh
+mvn -f backend/pom.xml compile
+```
 
 ## Git Workflow
 
