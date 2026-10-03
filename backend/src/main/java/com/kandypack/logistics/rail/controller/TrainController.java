@@ -1,6 +1,6 @@
 package com.kandypack.logistics.rail.controller;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.kandypack.logistics.rail.service.TrainService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,23 +11,14 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class TrainController {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final TrainService trainService;
 
-    public TrainController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public TrainController(TrainService trainService) {
+        this.trainService = trainService;
     }
 
     @GetMapping("/schedules")
     public List<Map<String, Object>> getTrainSchedules(@RequestParam("date") String shipmentDate) {
-        String sql = """
-            SELECT 
-                ts.ScheduleID,
-                ts.TrainName,
-                ts.DepartureTime,
-                ts.CargoCapacity AS maxCapacity,
-                fn_get_available_capacity(ts.ScheduleID, ?) AS availableCapacity
-            FROM TrainSchedule ts
-            """;
-        return jdbcTemplate.queryForList(sql, shipmentDate);
+        return trainService.getTrainSchedules(shipmentDate);
     }
 }
