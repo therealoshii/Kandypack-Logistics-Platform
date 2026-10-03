@@ -18,6 +18,7 @@ public class FleetService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @SuppressWarnings("unchecked")
     public List<TruckUtilizationDTO> getTruckUtilization() {
         List<Object[]> results = entityManager
                 .createNativeQuery("SELECT * FROM vw_truck_utilization")
@@ -42,6 +43,7 @@ public class FleetService {
                 .toList();
     }
 
+    @SuppressWarnings("unchecked")
     public List<FleetUsageDTO> getFleetUsage(int year, int month) {
         List<Object[]> results = entityManager
                 .createNativeQuery("CALL sp_fleet_usage_report(:year, :month)")
@@ -66,6 +68,7 @@ public class FleetService {
                 .toList();
     }
 
+    @SuppressWarnings("unchecked")
     public List<GeographicSalesDTO> getGeographicSales(Date startDate, Date endDate) {
         List<Object[]> results = entityManager
                 .createNativeQuery(
