@@ -4,23 +4,23 @@ import java.math.BigDecimal;
 
 public class GeographicSalesReportDTO {
     private String city;
-    private Long totalOrdersDelivered;
-    private BigDecimal totalSalesValue;
+    private Long totalOrders;
+    private BigDecimal totalSales;
 
     public GeographicSalesReportDTO() {}
 
-    public GeographicSalesReportDTO(String city, Long totalOrdersDelivered, BigDecimal totalSalesValue) {
+    public GeographicSalesReportDTO(String city, Long totalOrders, BigDecimal totalSales) {
         this.city = city;
-        this.totalOrdersDelivered = totalOrdersDelivered;
-        this.totalSalesValue = totalSalesValue;
+        this.totalOrders = totalOrders;
+        this.totalSales = totalSales;
     }
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
 
-    public Long getTotalOrdersDelivered() { return totalOrdersDelivered; }
-    public void setTotalOrdersDelivered(Long totalOrdersDelivered) { this.totalOrdersDelivered = totalOrdersDelivered; }
+    public Long getTotalOrders() { return totalOrders; }
+    public void setTotalOrders(Long totalOrders) { this.totalOrders = totalOrders; }
 
-    public BigDecimal getTotalSalesValue() { return totalSalesValue; }
-    public void setTotalSalesValue(BigDecimal totalSalesValue) { this.totalSalesValue = totalSalesValue; }
+    public BigDecimal getTotalSales() { return totalSales; }
+    public void setTotalSales(BigDecimal totalSales) { this.totalSales = totalSales; }
 }
