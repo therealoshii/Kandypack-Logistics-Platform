@@ -28,7 +28,7 @@ public class OrderService {
             // Call stored procedure sp_place_order
             Long orderId = jdbcTemplate.execute((Connection conn) -> {
                 try (CallableStatement stmt = conn.prepareCall("{CALL sp_place_order(?, ?, ?, ?)}")) {
-                    stmt.setLong(1, request.getCustomerId());
+                    stmt.setInt(1, request.getCustomerID()); // Changed from setLong to setInt for Integer customerId
                     stmt.setDate(2, java.sql.Date.valueOf(request.getDeliveryDate()));
                     stmt.setString(3, itemsJson);
                     stmt.registerOutParameter(4, Types.BIGINT);

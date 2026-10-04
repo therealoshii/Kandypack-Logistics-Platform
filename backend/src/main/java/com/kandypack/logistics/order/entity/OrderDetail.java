@@ -1,5 +1,8 @@
 package com.kandypack.logistics.order.entity;
 
+import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,28 +10,40 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "order_details")
+@Table(name = "OrderDetail")
 public class OrderDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "OrderDetailID")
+    private Integer orderDetailID;
 
-    private Long productId;
+    @Column(name = "OrderID")
+    private Integer orderID;
+
+    @Column(name = "ProductID")
+    private Integer productID;
+
+    @Column(name = "Quantity")
     private Integer quantity;
-    private Double price;
+
+    @Column(name = "LineTotal")
+    private BigDecimal lineTotal;
 
     public OrderDetail() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getOrderDetailID() { return orderDetailID; }
+    public void setOrderDetailID(Integer orderDetailID) { this.orderDetailID = orderDetailID; }
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    public Integer getOrderID() { return orderID; }
+    public void setOrderID(Integer orderID) { this.orderID = orderID; }
+
+    public Integer getProductID() { return productID; }
+    public void setProductID(Integer productID) { this.productID = productID; }
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getLineTotal() { return lineTotal; }
+    public void setLineTotal(BigDecimal lineTotal) { this.lineTotal = lineTotal; }
 }

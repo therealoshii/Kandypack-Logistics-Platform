@@ -1,9 +1,11 @@
 package com.kandypack.logistics.order.entity;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,40 +15,58 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "Orders")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "OrderID")
+    private Integer orderID;
 
-    private Long customerId;
-    private LocalDateTime orderDate;
+    @Column(name = "CustomerID")
+    private Integer customerID;
+
+    @Column(name = "RouteID")
+    private Integer routeID;
+
+    @Column(name = "AdminID")
+    private Integer adminID;
+
+    @Column(name = "OrderDate")
+    private LocalDate orderDate;
+
+    @Column(name = "Status")
     private String status;
-    private Double totalPrice;
+
+    @Column(name = "TotalAmount")
+    private BigDecimal totalAmount;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "OrderID")
     private List<OrderDetail> orderDetails;
 
-    public Order() {
-        this.orderDate = LocalDateTime.now();
-    }
+    public Order() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getOrderID() { return orderID; }
+    public void setOrderID(Integer orderID) { this.orderID = orderID; }
 
-    public Long getCustomerId() { return customerId; }
-    public void setCustomerId(Long customerId) { this.customerId = customerId; }
+    public Integer getCustomerID() { return customerID; }
+    public void setCustomerID(Integer customerID) { this.customerID = customerID; }
 
-    public LocalDateTime getOrderDate() { return orderDate; }
-    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+    public Integer getRouteID() { return routeID; }
+    public void setRouteID(Integer routeID) { this.routeID = routeID; }
+
+    public Integer getAdminID() { return adminID; }
+    public void setAdminID(Integer adminID) { this.adminID = adminID; }
+
+    public LocalDate getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDate orderDate) { this.orderDate = orderDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
     public List<OrderDetail> getOrderDetails() { return orderDetails; }
     public void setOrderDetails(List<OrderDetail> orderDetails) { this.orderDetails = orderDetails; }
