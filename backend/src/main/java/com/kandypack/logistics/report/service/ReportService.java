@@ -1,5 +1,6 @@
 package com.kandypack.logistics.report.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,11 +22,11 @@ public class ReportService {
     public List<QuarterlyReportDTO> getQuarterlySalesReport(Integer year, Integer quarter) {
         String sql = "CALL sp_quarterly_sales_report(?, ?)";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new QuarterlyReportDTO(
-                rs.getInt("Year"),
-                rs.getInt("Quarter"),
+                rs.getInt("OrderYear"),
+                rs.getInt("OrderQuarter"),
                 rs.getLong("TotalOrders"),
                 rs.getLong("TotalUnitsSold"),
-                rs.getBigDecimal("TotalRevenue")
+                rs.getBigDecimal("TotalRevenueLKR")
         ), year, quarter);
     }
 
@@ -34,17 +35,17 @@ public class ReportService {
         return jdbcTemplate.query(sql, (rs, rowNum) -> new TopItemsDTO(
                 rs.getInt("ProductID"),
                 rs.getString("ProductName"),
-                rs.getLong("TotalQuantitySold"),
+                rs.getLong("TotalQuantityOrdered"),
                 rs.getBigDecimal("TotalRevenueGenerated")
         ), year, quarter, limit != null ? limit : 10);
     }
 
-    public List<GeographicSalesReportDTO> getGeographicSalesReport() {
-        String sql = "CALL sp_geographic_sales_report()";
+    public List<GeographicSalesReportDTO> getGeographicSalesReport(LocalDate startDate, LocalDate endDate) {
+        String sql = "CALL sp_geographic_sales_report(?, ?)";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new GeographicSalesReportDTO(
                 rs.getString("City"),
-                rs.getLong("TotalOrdersDelivered"),
-                rs.getBigDecimal("TotalSalesValue")
-        ));
+                rs.getLong("TotalOrders"),
+                rs.getBigDecimal("TotalSales")
+        ), startDate, endDate);
     }
 }
