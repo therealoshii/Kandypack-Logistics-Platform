@@ -23,7 +23,7 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<CustomerDTO> getCustomerById(Long id) {
+    public Optional<CustomerDTO> getCustomerById(Integer id) {
         return customerRepository.findById(id).map(this::convertToDTO);
     }
 
@@ -33,28 +33,34 @@ public class CustomerService {
         return convertToDTO(savedCustomer);
     }
 
-    public void deleteCustomer(Long id) {
+    public void deleteCustomer(Integer id) {
         customerRepository.deleteById(id);
     }
 
     // Helper conversion methods
     private CustomerDTO convertToDTO(Customer customer) {
         CustomerDTO dto = new CustomerDTO();
-        dto.setId(customer.getId());
-        dto.setName(customer.getName());
+        dto.setCustomerID(customer.getCustomerID());
+        dto.setFullName(customer.getFullName());
         dto.setEmail(customer.getEmail());
-        dto.setPhone(customer.getPhone());
+        dto.setContactNumber(customer.getContactNumber());
         dto.setAddress(customer.getAddress());
+        dto.setCity(customer.getCity());
+        dto.setUsername(customer.getUsername());
+        dto.setPassword(customer.getPassword());
         return dto;
     }
 
     private Customer convertToEntity(CustomerDTO dto) {
         Customer customer = new Customer();
-        customer.setId(dto.getId());
-        customer.setName(dto.getName());
+        customer.setCustomerID(dto.getCustomerID());
+        customer.setFullName(dto.getFullName());
         customer.setEmail(dto.getEmail());
-        customer.setPhone(dto.getPhone());
+        customer.setContactNumber(dto.getContactNumber());
         customer.setAddress(dto.getAddress());
+        customer.setCity(dto.getCity());
+        customer.setUsername(dto.getUsername());
+        customer.setPassword(dto.getPassword());
         return customer;
     }
 }
