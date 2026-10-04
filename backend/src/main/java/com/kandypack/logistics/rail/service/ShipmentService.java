@@ -17,8 +17,8 @@ public class ShipmentService {
         shipmentRepository.scheduleShipment(
             shipmentDTO.getOrderDetailId(),
             shipmentDTO.getScheduleId(),
-            shipmentDTO.getShipmentDate(),
-            shipmentDTO.getQuantity()
+            shipmentDTO.getShipmentDate()
+            
         );
     }
 }

@@ -25,6 +25,6 @@ class ShipmentServiceTest {
 
         shipmentService.processShipmentSchedule(dto);
 
-        verify(shipmentRepository).scheduleShipment(101, 202, "2026-10-15", 50);
+        verify(shipmentRepository).scheduleShipment(101, 202, "2026-10-15");
     }
 }
