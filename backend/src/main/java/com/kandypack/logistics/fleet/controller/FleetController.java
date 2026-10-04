@@ -2,7 +2,6 @@
 
 package com.kandypack.logistics.fleet.controller;
 
-import java.sql.Date;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.fleet.dto.FleetUsageDTO;
-import com.kandypack.logistics.fleet.dto.GeographicSalesDTO;
 import com.kandypack.logistics.fleet.dto.TruckUtilizationDTO;
 import com.kandypack.logistics.fleet.service.FleetService;
 
@@ -36,13 +34,5 @@ public class FleetController {
             @RequestParam int month) {
 
         return fleetService.getFleetUsage(year, month);
-    }
-
-    @GetMapping("/reports/geographic-sales")
-    public List<GeographicSalesDTO> getGeographicSales(
-            @RequestParam Date startDate,
-            @RequestParam Date endDate) {
-
-        return fleetService.getGeographicSales(startDate, endDate);
     }
 }
