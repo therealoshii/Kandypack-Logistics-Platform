@@ -12,9 +12,9 @@ public class ShipmentRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void scheduleShipment(Integer orderDetailId, Integer scheduleId, String shipmentDate, Integer quantity) {
-        String sql = "CALL sp_schedule_shipment(?, ?, ?, ?)";
-        jdbcTemplate.update(sql, orderDetailId, scheduleId, shipmentDate, quantity);
+    public void scheduleShipment(Integer orderDetailId, Integer scheduleId, String shipmentDate) {
+        String sql = "CALL sp_schedule_shipment(?, ?, ?)";
+        jdbcTemplate.update(sql, orderDetailId, scheduleId, shipmentDate);
     }
     
 }
