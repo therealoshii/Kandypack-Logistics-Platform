@@ -95,6 +95,44 @@ repository root, compile it with:
 mvn -f backend/pom.xml compile
 ```
 
+## 🐳 Running with Docker & Docker Compose
+
+The entire platform (Spring Boot Backend + MySQL 8.0 Database) can be launched in **1 single command** using Docker Compose.
+
+### Prerequisites
+- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / macOS / Linux).
+- Ensure Docker Desktop is open and running.
+
+### 🚀 Quick Start (1-Command Launch)
+
+From the repository root directory, execute:
+
+```bash
+docker compose up --build
+```
+
+### What Docker Handles Automatically:
+1. **Multi-Stage Build:** Compiles the Spring Boot backend using Maven in JDK 17 and packages it into a lightweight production container.
+2. **Database Auto-Initialization:** Launches the MySQL 8.0 container (`kandypack-mysql`) and automatically populates all 31 database components (tables, functions, procedures, triggers, indexes, views, and seed data) from `database/docker-init.sql`.
+3. **Healthcheck Guard:** The backend container (`kandypack-backend`) automatically waits until MySQL reports healthy before starting.
+4. **Ports:**
+   - **Spring Boot Backend API:** `http://localhost:8080`
+   - **MySQL Database:** `localhost:3307` (container internal `mysqldb:3306`)
+
+### 🛑 Stopping the Application
+
+To stop the running containers:
+
+```bash
+docker compose down
+```
+
+To stop containers and reset the database volume to start fresh:
+
+```bash
+docker compose down -v
+```
+
 ## Git Workflow
 
 Each team member works on a separate feature branch.
