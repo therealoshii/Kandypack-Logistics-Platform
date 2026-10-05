@@ -1,0 +1,55 @@
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: kandypack-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: kandypack_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Automatically populates tables, procedures, functions, triggers & seed data on container initialization
+      - ./database/schema/01_tables_core.sql:/docker-entrypoint-initdb.d/01_tables_core.sql
+      - ./database/schema/02_tables_order.sql:/docker-entrypoint-initdb.d/02_tables_order.sql
+      - ./database/schema/03_tables_rail.sql:/docker-entrypoint-initdb.d/03_tables_rail.sql
+      - ./database/schema/04_tables_delivery.sql:/docker-entrypoint-initdb.d/04_tables_delivery.sql
+      - ./database/views/vw_staff_weekly_hours.sql:/docker-entrypoint-initdb.d/05_vw_staff_weekly_hours.sql
+      - ./database/functions/fn_calculate_weekly_hours.sql:/docker-entrypoint-initdb.d/06_fn_calculate_weekly_hours.sql
+      - ./database/functions/fn_get_available_capacity.sql:/docker-entrypoint-initdb.d/07_fn_get_available_capacity.sql
+      - ./database/functions/fn_get_route_for_address.sql:/docker-entrypoint-initdb.d/08_fn_get_route_for_address.sql
+      - ./database/procedures/sp_assign_truck_trip.sql:/docker-entrypoint-initdb.d/09_sp_assign_truck_trip.sql
+      - ./database/procedures/sp_place_order.sql:/docker-entrypoint-initdb.d/10_sp_place_order.sql
+      - ./database/procedures/sp_schedule_shipment.sql:/docker-entrypoint-initdb.d/11_sp_schedule_shipment.sql
+      - ./database/procedures/sp_update_delivery_status.sql:/docker-entrypoint-initdb.d/12_sp_update_delivery_status.sql
+      - ./database/triggers/trg_before_insert_trucktrip.sql:/docker-entrypoint-initdb.d/13_trg_before_insert_trucktrip.sql
+      - ./database/reports/sp_fleet_usage_report.sql:/docker-entrypoint-initdb.d/14_sp_fleet_usage_report.sql
+      - ./database/reports/sp_geographic_sales_report.sql:/docker-entrypoint-initdb.d/15_sp_geographic_sales_report.sql
+      - ./database/reports/sp_quarterly_sales_report.sql:/docker-entrypoint-initdb.d/16_sp_quarterly_sales_report.sql
+      - ./database/reports/sp_staff_weekly_hours_report.sql:/docker-entrypoint-initdb.d/17_sp_staff_weekly_hours_report.sql
+      - ./database/reports/sp_top_items_report.sql:/docker-entrypoint-initdb.d/18_sp_top_items_report.sql
+      - ./database/reports/sp_truck_utilization_report.sql:/docker-entrypoint-initdb.d/19_sp_truck_utilization_report.sql
+      - ./database/seeds/05_seeds.sql:/docker-entrypoint-initdb.d/20_seeds.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: kandypack-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      DB_PASSWORD: root
+
+volumes:
+  mysql_data:
