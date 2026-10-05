@@ -16,7 +16,7 @@ import com.kandypack.logistics.order.service.OrderService;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class OrderController {
 
     @Autowired
