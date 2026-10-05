@@ -95,7 +95,7 @@ repository root, compile it with:
 mvn -f backend/pom.xml compile
 ```
 
-## 🐳 Running with Docker & Docker Compose
+## Running with Docker & Docker Compose
 
 The entire platform (Spring Boot Backend + MySQL 8.0 Database) can be launched in **1 single command** using Docker Compose.
 
@@ -103,7 +103,7 @@ The entire platform (Spring Boot Backend + MySQL 8.0 Database) can be launched i
 - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / macOS / Linux).
 - Ensure Docker Desktop is open and running.
 
-### 🚀 Quick Start (1-Command Launch)
+### Quick Start (1-Command Launch)
 
 From the repository root directory, execute:
 
@@ -119,7 +119,7 @@ docker compose up --build
    - **Spring Boot Backend API:** `http://localhost:8080`
    - **MySQL Database:** `localhost:3307` (container internal `mysqldb:3306`)
 
-### 🛑 Stopping the Application
+### Stopping the Application
 
 To stop the running containers:
 
