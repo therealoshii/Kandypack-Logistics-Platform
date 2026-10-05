@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shipments")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class ShipmentController {
 
     private final ShipmentService shipmentService;

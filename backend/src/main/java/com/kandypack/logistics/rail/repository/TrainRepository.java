@@ -19,7 +19,7 @@ public class TrainRepository {
         String sql = """
             SELECT 
                 ts.ScheduleID,
-                ts.TrainName,
+                t.TrainName,
                 ts.DepartureTime,
                 ts.CargoCapacity AS maxCapacity,
                 fn_get_available_capacity(ts.ScheduleID, ?) AS availableCapacity

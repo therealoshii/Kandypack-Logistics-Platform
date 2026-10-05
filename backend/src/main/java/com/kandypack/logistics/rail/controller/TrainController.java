@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/trains")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class TrainController {
 
     private final TrainService trainService;
