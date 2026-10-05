@@ -1,0 +1,4 @@
+# Database queries (JPA)
+# Houses the Data Access Layer (DAO layer) of the application
+# These interfaces extend JpaRepository
+# Gives basic operations (findAll(), findById(), save(), delete()) without writing raw SQL for simple CRUD.

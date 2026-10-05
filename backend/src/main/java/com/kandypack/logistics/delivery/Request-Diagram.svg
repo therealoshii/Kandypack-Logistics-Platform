@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1370.3375 732.45" width="1370.3375" height="732.45" style="--bg:#1F1F1F;--fg:#CCCCCC;--line:#CCCCCC;--accent:#0078D4;--muted:#CCCCCCCC;--surface:#181818;--border:#CCCCCC;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<g class="block" data-type="alt" data-label="Violation Found (e.g. Driver worked &gt; 40h)">
+  <rect x="30" y="318.45" width="1087.045" height="364.00000000000006" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="30" y="318.45" width="254.59000000000006" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="36" y="327.45" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">alt [Violation Found (e.g. Driver worked &gt; 40h)]</text>
+  <line x1="30" y1="514.45" x2="1117.045" y2="514.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+  <text x="38" y="528.45" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">[All Constraints Pass]</text>
+</g>
+<g class="block" data-type="rect" data-label="rgb(240, 248, 255)">
+  <rect x="30" y="235.45" width="1087.045" height="447.00000000000006" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="30" y="235.45" width="141.07000000000002" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="36" y="244.45" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">rect [rgb(240, 248, 255)]</text>
+</g>
+<line class="lifeline" data-actor="Dispatcher" x1="121.07149999999999" y1="92.45" x2="121.07149999999999" y2="702.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="UI" x1="342.4805" y1="70" x2="342.4805" y2="702.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Ctrl" x1="560.5550000000001" y1="70" x2="560.5550000000001" y2="702.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="Svc" x1="750.1010000000001" y1="70" x2="750.1010000000001" y2="702.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="DB" x1="984.4775000000001" y1="70" x2="984.4775000000001" y2="702.45" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="Dispatcher" data-to="UI" data-label="Fills form &amp; clicks &quot;Dispatch Truck&quot;" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="121.07149999999999" y1="112.45" x2="342.4805" y2="112.45" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="231.776" y="102.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Fills form &amp; clicks &quot;Dispatch Truck&quot;</text>
+</g>
+<g class="message" data-from="UI" data-to="Ctrl" data-label="POST /api/truck-trips (JSON: truckId, driverId, date, times)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="342.4805" y1="152.45" x2="560.5550000000001" y2="152.45" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="451.51775000000004" y="142.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">POST /api/truck-trips (JSON: truckId, driverId, date, times)</text>
+</g>
+<g class="message" data-from="Ctrl" data-to="Svc" data-label="createTrip(TruckTripDTO)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="560.5550000000001" y1="192.45" x2="750.1010000000001" y2="192.45" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="655.3280000000001" y="182.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">createTrip(TruckTripDTO)</text>
+</g>
+<g class="message" data-from="Svc" data-to="DB" data-label="INSERT INTO TruckTrip (...)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="750.1010000000001" y1="275.45" x2="984.4775000000001" y2="275.45" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="867.28925" y="265.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">INSERT INTO TruckTrip (...)</text>
+</g>
+<g class="message" data-from="DB" data-to="Svc" data-label="ERROR 45000: Driver exceeds weekly limit of 40h!" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="984.4775000000001" y1="358.45" x2="750.1010000000001" y2="358.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="867.28925" y="348.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">ERROR 45000: Driver exceeds weekly limit of 40h!</text>
+</g>
+<g class="message" data-from="Svc" data-to="Ctrl" data-label="DataIntegrityViolationException" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="750.1010000000001" y1="398.45" x2="560.5550000000001" y2="398.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="655.3280000000001" y="388.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">DataIntegrityViolationException</text>
+</g>
+<g class="message" data-from="Ctrl" data-to="UI" data-label="HTTP 400 Bad Request {&quot;message&quot;: &quot;Driver exceeds 40h limit&quot;}" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="560.5550000000001" y1="438.45" x2="342.4805" y2="438.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="451.51775000000004" y="428.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">HTTP 400 Bad Request {&quot;message&quot;: &quot;Driver exceeds 40h limit&quot;}</text>
+</g>
+<g class="message" data-from="UI" data-to="Dispatcher" data-label="Displays Red Warning Toast ❌" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="342.4805" y1="478.45" x2="121.07149999999999" y2="478.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="231.776" y="468.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Displays Red Warning Toast ❌</text>
+</g>
+<g class="message" data-from="DB" data-to="Svc" data-label="Success: 1 row inserted (TripID = 28)" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="984.4775000000001" y1="542.45" x2="750.1010000000001" y2="542.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="867.28925" y="532.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Success: 1 row inserted (TripID = 28)</text>
+</g>
+<g class="message" data-from="Svc" data-to="Ctrl" data-label="TruckTripDTO (with new TripID)" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="750.1010000000001" y1="582.45" x2="560.5550000000001" y2="582.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="655.3280000000001" y="572.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">TruckTripDTO (with new TripID)</text>
+</g>
+<g class="message" data-from="Ctrl" data-to="UI" data-label="HTTP 201 Created + JSON" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="560.5550000000001" y1="622.45" x2="342.4805" y2="622.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="451.51775000000004" y="612.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">HTTP 201 Created + JSON</text>
+</g>
+<g class="message" data-from="UI" data-to="Dispatcher" data-label="Displays Green Success Toast &amp; Updates Quota Card ✅" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="342.4805" y1="662.45" x2="121.07149999999999" y2="662.45" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="231.776" y="652.45" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Displays Green Success Toast &amp; Updates Quota Card ✅</text>
+</g>
+<g class="note" data-position="over" data-actors="Svc,DB">
+  <polygon points="764.1762500000001,200.45 964.4022500000001,200.45 970.4022500000001,206.45 970.4022500000001,223.45 764.1762500000001,223.45" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="964.4022500000001,200.45 970.4022500000001,206.45 964.4022500000001,206.45" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="867.28925" y="211.95" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Database &amp; Business Validation Phase</text>
+</g>
+<g class="note" data-position="over" data-actors="DB">
+  <polygon points="628.6175000000001,283.45 1334.3375,283.45 1340.3375,289.45 1340.3375,306.45 628.6175000000001,306.45" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="1334.3375,283.45 1340.3375,289.45 1334.3375,289.45" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="984.4775000000002" y="294.95" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)"><tspan x="984.4775000000002" dy="-17.6">trg_before_insert_trucktrip executes:</tspan><tspan x="984.4775000000002" dy="14.3">1. Checks driver weekly hours &lt;= 40h</tspan><tspan x="984.4775000000002" dy="14.3">2. Checks 30-min rest between shifts</tspan><tspan x="984.4775000000002" dy="14.3">3. Checks overlapping time slots</tspan></text>
+</g>
+<g class="actor" data-id="Dispatcher" data-label="Logistics Coordinator" data-type="actor">
+  <g transform="translate(103.07149999999999,32) scale(1.5)">
+    <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" fill="none" stroke="var(--_line)" stroke-width="0.6666666666666666" />
+    <path d="M15 10C15 11.6569 13.6569 13 12 13C10.3431 13 9 11.6569 9 10C9 8.34315 10.3431 7 12 7C13.6569 7 15 8.34315 15 10Z" fill="none" stroke="var(--_line)" stroke-width="0.6666666666666666" />
+    <path d="M5.62842 18.3563C7.08963 17.0398 9.39997 16 12 16C14.6 16 16.9104 17.0398 18.3716 18.3563" fill="none" stroke="var(--_line)" stroke-width="0.6666666666666666" />
+  </g>
+  <text x="121.07149999999999" y="84" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Logistics Coordinator</text>
+</g>
+<g class="actor" data-id="UI" data-label="RosterDispatchPage (React)" data-type="participant">
+  <rect x="242.14300000000003" y="30" width="200.67499999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="342.4805" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">RosterDispatchPage (React)</text>
+</g>
+<g class="actor" data-id="Ctrl" data-label="TruckTripController" data-type="participant">
+  <rect x="482.8180000000001" y="30" width="155.474" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="560.5550000000001" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">TruckTripController</text>
+</g>
+<g class="actor" data-id="Svc" data-label="TruckTripService" data-type="participant">
+  <rect x="678.2920000000001" y="30" width="143.618" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="750.1010000000001" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">TruckTripService</text>
+</g>
+<g class="actor" data-id="DB" data-label="MySQL (TruckTrip Table &amp; Trigger)" data-type="participant">
+  <rect x="861.9100000000001" y="30" width="245.13499999999996" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="984.4775000000001" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">MySQL (TruckTrip Table &amp; Trigger)</text>
+</g>
+</svg>
