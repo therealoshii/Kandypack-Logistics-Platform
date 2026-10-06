@@ -1,0 +1,31 @@
+
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: kandypack-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: kandypack_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+
+  backend:
+    build: ./backend
+    container_name: kandypack-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      DB_PASSWORD: root
+
+volumes:
+  mysql_data:

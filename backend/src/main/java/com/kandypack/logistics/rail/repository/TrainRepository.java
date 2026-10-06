@@ -1,6 +1,5 @@
 package com.kandypack.logistics.rail.repository;
 
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -28,5 +27,4 @@ public class TrainRepository {
             """;
         return jdbcTemplate.queryForList(sql, shipmentDate);
     }
-    
 }
