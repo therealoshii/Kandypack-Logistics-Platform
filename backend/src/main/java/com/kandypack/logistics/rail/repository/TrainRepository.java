@@ -21,7 +21,7 @@ public class TrainRepository {
                 t.TrainName,
                 ts.DepartureTime,
                 ts.CargoCapacity AS maxCapacity,
-                kandypack_db.fn_get_available_capacity(ts.ScheduleID, ?) AS availableCapacity
+                fn_get_available_capacity(ts.ScheduleID, ?) AS availableCapacity
             FROM TrainSchedule ts
             INNER JOIN Train t ON ts.TrainID = t.TrainID
             """;
