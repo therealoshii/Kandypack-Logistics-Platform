@@ -46,5 +46,6 @@ export default function AnalyticsDashboardPage() {
     <section className="panel activity-panel"><div className="panel-heading"><div><p className="eyebrow">WORKSPACE SHORTCUTS</p><h2>Feature domains</h2></div></div><div className="shortcut-grid"><Link to="/orders/new"><ClipboardIcon /><span><strong>Customer & orders</strong><small>Place an order and manage products</small></span><ArrowRight size={16} /></Link><Link to="/cargo/dispatch"><TrainFront size={19} /><span><strong>Rail cargo</strong><small>Check schedules and allocate shipments</small></span><ArrowRight size={16} /></Link><Link to="/fleet/overview"><Warehouse size={19} /><span><strong>Warehouses & fleet</strong><small>View stores, routes and truck use</small></span><ArrowRight size={16} /></Link><Link to="/roster/dispatch"><Truck size={19} /><span><strong>Roster & dispatch</strong><small>Assign trips and update delivery state</small></span><ArrowRight size={16} /></Link></div></section>
   </>;
 }
+//--
 
 function ClipboardIcon() { return <PackageCheck size={19} />; }
