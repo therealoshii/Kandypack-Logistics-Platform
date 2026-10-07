@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight, Search, Send, TrainFront } from 'lucide-react';
 import { get, post } from '../../api';
 import type { RailSchedule } from '../../types';
-import { EmptyState, NoticeBanner, PageHeading } from '../../shared/ui';
 
 function normalizeSchedule(record: Record<string, unknown>): RailSchedule {
   return {
@@ -88,17 +87,25 @@ export default function TrainCargoPage() {
 
   return (
     <>
-      <NoticeBanner notice={notice} onDismiss={() => setNotice(null)} />
-      <PageHeading
-        eyebrow="RAIL CARGO & SHIPMENTS"
-        title="Train cargo dispatch"
-        description="Review train capacity for a shipment date and assign order lines to a schedule."
-        action={
-          <span className="rule-chip">
-            <TrainFront size={15} /> Kandy origin
-          </span>
-        }
-      />
+      {notice && (
+        <div className={`notice-banner ${notice.kind}`}>
+          <span>{notice.text}</span>
+          <button onClick={() => setNotice(null)}>×</button>
+        </div>
+      )}
+
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">RAIL CARGO & SHIPMENTS</p>
+          <h1>Train cargo dispatch</h1>
+          <p className="description">
+            Review train capacity for a shipment date and assign order lines to a schedule.
+          </p>
+        </div>
+        <span className="rule-chip">
+          <TrainFront size={15} /> Kandy origin
+        </span>
+      </div>
 
       <div className="rail-grid">
         <section className="panel table-panel rail-schedule-panel">
@@ -173,11 +180,11 @@ export default function TrainCargoPage() {
               })}
             </div>
           ) : (
-            <EmptyState
-              icon={TrainFront}
-              title="No schedules for this date"
-              text="Try another shipment date to see train availability."
-            />
+            <div className="empty-state">
+              <TrainFront size={32} />
+              <h3>No schedules for this date</h3>
+              <p>Try another shipment date to see train availability.</p>
+            </div>
           )}
         </section>
 
