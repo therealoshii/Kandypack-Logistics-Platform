@@ -10,6 +10,7 @@ import CatalogPage from './features/orders/CatalogPage';
 import OrderPlacementPage from './features/orders/OrderPlacementPage';
 import TrainCargoPage from './features/rail/TrainCargoPage';
 import RosterDispatchPage from './features/roster/RosterDispatchPage';
+import FleetOverviewPage from './features/fleet/FleetOverviewPage'; 
 
 const navGroups = [
   { label: 'Workspace', items: [{ to: '/', label: 'Analytics dashboard', icon: LayoutDashboard, end: true }] },
@@ -35,14 +36,14 @@ const routeTitles: Record<string, string> = {
   '/analytics/reports': 'Reports',
 };
 
-function PlaceholderPage({ title }: { title: string }) {
+/*function PlaceholderPage({ title }: { title: string }) {
   return (
     <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.7 }}>
       <h2>{title}</h2>
       <p>This module is currently under development.</p>
     </div>
   );
-}
+}*/
 
 export default function App() {
   return (
@@ -53,7 +54,7 @@ export default function App() {
           <Route path="orders/new" element={<OrderPlacementPage />} />
           <Route path="orders/catalog" element={<CatalogPage />} />
           <Route path="cargo/dispatch" element={<TrainCargoPage />} />
-          <Route path="fleet/overview" element={<PlaceholderPage title="Store & Fleet Hub" />} />
+          <Route path="fleet/overview" element={<FleetOverviewPage />} />
           <Route path="roster/dispatch" element={<RosterDispatchPage />} />
           <Route path="analytics/reports" element={<ReportsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
