@@ -4,7 +4,12 @@ import {
   Activity, ArrowRight, BarChart3, Boxes, CalendarDays, ChevronDown, ClipboardList,
   LayoutDashboard, Menu, PackageCheck, Search, Settings2, TrainFront, Warehouse, X,
 } from 'lucide-react';
+import AnalyticsDashboardPage from './features/analytics/AnalyticsDashboardPage';
+import ReportsPage from './features/analytics/ReportsPage';
+import CatalogPage from './features/orders/CatalogPage';
+import OrderPlacementPage from './features/orders/OrderPlacementPage';
 import TrainCargoPage from './features/rail/TrainCargoPage';
+import RosterDispatchPage from './features/roster/RosterDispatchPage';
 
 const navGroups = [
   { label: 'Workspace', items: [{ to: '/', label: 'Analytics dashboard', icon: LayoutDashboard, end: true }] },
@@ -44,13 +49,13 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route index element={<PlaceholderPage title="Analytics Dashboard" />} />
-          <Route path="orders/new" element={<PlaceholderPage title="Order Placement" />} />
-          <Route path="orders/catalog" element={<PlaceholderPage title="Customers & Products" />} />
+          <Route index element={<AnalyticsDashboardPage />} />
+          <Route path="orders/new" element={<OrderPlacementPage />} />
+          <Route path="orders/catalog" element={<CatalogPage />} />
           <Route path="cargo/dispatch" element={<TrainCargoPage />} />
           <Route path="fleet/overview" element={<PlaceholderPage title="Store & Fleet Hub" />} />
-          <Route path="roster/dispatch" element={<PlaceholderPage title="Roster & Dispatch" />} />
-          <Route path="analytics/reports" element={<PlaceholderPage title="Reports" />} />
+          <Route path="roster/dispatch" element={<RosterDispatchPage />} />
+          <Route path="analytics/reports" element={<ReportsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
