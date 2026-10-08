@@ -1,7 +1,5 @@
 package com.kandypack.logistics.security;
 
-public package com.kandypack.logistics.security;
-
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,7 +43,4 @@ public final class StaffPrincipal implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-}
- {
-    
 }
