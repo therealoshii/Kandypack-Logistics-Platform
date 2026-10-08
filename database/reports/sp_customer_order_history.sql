@@ -11,6 +11,8 @@ CREATE PROCEDURE sp_customer_order_history(
 BEGIN
     SELECT 
         o.OrderID,
+        c.CustomerID,
+        c.FullName AS CustomerName,
         o.OrderDate,
         o.Status AS OrderStatus,
         o.TotalAmount AS OrderTotalLKR,
@@ -35,8 +37,8 @@ BEGIN
     LEFT JOIN Driver drv ON tt.DriverID = drv.DriverID
     LEFT JOIN Assistant ast ON tt.AssistantID = ast.AssistantID
     LEFT JOIN Truck t ON tt.TruckID = t.TruckID
-    WHERE o.CustomerID = p_CustomerID
-    GROUP BY o.OrderID, o.OrderDate, o.Status, o.TotalAmount, r.RouteName, s.City, 
+    WHERE (p_CustomerID IS NULL OR p_CustomerID = 0 OR o.CustomerID = p_CustomerID)
+    GROUP BY o.OrderID, c.CustomerID, c.FullName, o.OrderDate, o.Status, o.TotalAmount, r.RouteName, s.City, 
              d.DeliveryID, d.DeliveryDate, d.Status, tt.TripID, drv.Name, ast.Name, t.RegistrationNumber
     ORDER BY o.OrderDate DESC, o.OrderID DESC;
 END //
