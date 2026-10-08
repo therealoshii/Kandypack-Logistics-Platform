@@ -4,6 +4,8 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS AuditLog;
+DROP TABLE IF EXISTS AdministratorRole;
+DROP TABLE IF EXISTS StaffRole;
 DROP TABLE IF EXISTS OrderDetail;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Administrator;
@@ -14,7 +16,24 @@ CREATE TABLE Administrator (
     Name VARCHAR(100) NOT NULL,
     Username VARCHAR(50) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
-    Email VARCHAR(100) NOT NULL UNIQUE
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE StaffRole (
+    RoleID INT AUTO_INCREMENT PRIMARY KEY,
+    Code VARCHAR(40) NOT NULL UNIQUE,
+    DisplayName VARCHAR(80) NOT NULL
+);
+
+CREATE TABLE AdministratorRole (
+    AdminID INT NOT NULL,
+    RoleID INT NOT NULL,
+    PRIMARY KEY (AdminID, RoleID),
+    CONSTRAINT fk_administrator_role_admin FOREIGN KEY (AdminID)
+        REFERENCES Administrator(AdminID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_administrator_role_role FOREIGN KEY (RoleID)
+        REFERENCES StaffRole(RoleID) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- Orders Table (Customer purchase orders placed with 7+ day lead time)
