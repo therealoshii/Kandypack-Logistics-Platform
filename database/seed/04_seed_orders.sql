@@ -10,10 +10,24 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Administrators
+TRUNCATE TABLE AdministratorRole;
 TRUNCATE TABLE Administrator;
 INSERT INTO Administrator (AdminID, Name, Username, Password, Email) VALUES
 (1, 'Admin User', 'admin', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash', 'admin@kandypack.lk'),
 (2, 'Logistics Manager', 'logistics_mgr', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash', 'manager@kandypack.lk');
+
+INSERT IGNORE INTO StaffRole (Code, DisplayName) VALUES
+('ADMIN', 'Administrator'),
+('ORDER_MANAGER', 'Order manager'),
+('RAIL_DISPATCHER', 'Rail dispatcher'),
+('FLEET_MANAGER', 'Fleet manager'),
+('ROSTER_DISPATCHER', 'Roster and delivery dispatcher'),
+('ANALYST', 'Analytics viewer');
+
+INSERT IGNORE INTO AdministratorRole (AdminID, RoleID)
+SELECT a.AdminID, r.RoleID
+FROM Administrator a CROSS JOIN StaffRole r
+WHERE a.Username = 'admin' AND r.Code = 'ADMIN';
 
 -- Orders (42 distinct orders across 12 routes and 12 customers)
 TRUNCATE TABLE Orders;
