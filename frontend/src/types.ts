@@ -109,18 +109,67 @@ export interface QuarterlyReport {
   quarter: number;
   totalOrders: number;
   totalUnitsSold: number;
+  totalVolumeSpace?: number;
   totalRevenue: number;
 }
 
 export interface TopItem {
   productId: number;
   productName: string;
+  category?: string;
+  unitPrice?: number;
   totalQuantitySold: number;
+  totalQuantityOrdered?: number;
   totalRevenueGenerated: number;
+  distinctOrdersCount?: number;
 }
 
 export interface GeographicSales {
   city: string;
+  routeId?: number;
+  routeName?: string;
   totalOrders: number;
+  totalUnits?: number;
   totalSales: number;
 }
+
+export interface WorkingHoursReport {
+  staffRole: string;
+  staffId: number;
+  staffName: string;
+  referenceId: string;
+  totalTripsCompleted: number;
+  totalHoursWorked: number;
+  standardWeeklyLimit: number;
+}
+
+export interface FleetUsageReport {
+  truckID: number;
+  registrationNumber: string;
+  storeName: string;
+  city: string;
+  totalTrips: number;
+  operatingHours: number;
+  totalMileage: number;
+}
+
+export interface CustomerOrderHistory {
+  orderId: number;
+  customerId: number;
+  customerName: string;
+  orderDate: string;
+  orderStatus: string;
+  orderTotalLKR: number;
+  routeName: string;
+  destinationCity: string;
+  deliveryId?: number;
+  deliveryDate?: string;
+  deliveryStatus?: string;
+  tripId?: number;
+  assignedDriver?: string;
+  assignedAssistant?: string;
+  assignedTruck?: string;
+  totalItemLines?: number;
+  totalUnitsOrdered?: number;
+}
+
