@@ -27,5 +27,14 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       DB_PASSWORD: root
 
+  frontend:
+    build: ./frontend
+    container_name: kandypack-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      
 volumes:
   mysql_data:
