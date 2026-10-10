@@ -1,3 +1,4 @@
+
 -- Truck utilization view
 -- Shows trip activity, operating hours and completed deliveries for each truck
 
@@ -11,31 +12,34 @@ SELECT
     s.StoreID,
     s.StoreName,
     s.City AS StationCity,
-    COUNT(tt.TripID) AS TotalDispatchedTrips,
-    COALESCE(
-        ROUND(
-            SUM(
-                TIME_TO_SEC(
-                    TIMEDIFF(tt.ReturnTime, tt.DispatchTime)
-                ) / 3600.0
-            ),
-            2
-        ),
-        0.00
-    ) AS TotalOperatingHours,
-    COUNT(DISTINCT d.DeliveryID) AS TotalDeliveriesCompleted
+    COALESCE(trip_stats.TotalDispatchedTrips, 0) AS TotalDispatchedTrips,
+    COALESCE(trip_stats.TotalOperatingHours, 0.00) AS TotalOperatingHours,
+    COALESCE(delivery_stats.TotalDeliveriesCompleted, 0) AS TotalDeliveriesCompleted
 FROM Truck t
 INNER JOIN Store s
     ON t.StoreID = s.StoreID
-LEFT JOIN TruckTrip tt
-    ON t.TruckID = tt.TruckID
-LEFT JOIN Delivery d
-    ON d.TripID = tt.TripID
-    AND d.Status = 'Delivered'
-GROUP BY
-    t.TruckID,
-    t.RegistrationNumber,
-    t.Capacity,
-    s.StoreID,
-    s.StoreName,
-    s.City;
+LEFT JOIN (
+    SELECT
+        TruckID,
+        COUNT(TripID) AS TotalDispatchedTrips,
+        ROUND(
+            SUM(
+                TIME_TO_SEC(TIMEDIFF(ReturnTime, DispatchTime)) / 3600.0
+            ),
+            2
+        ) AS TotalOperatingHours
+    FROM TruckTrip
+    GROUP BY TruckID
+) trip_stats
+    ON t.TruckID = trip_stats.TruckID
+LEFT JOIN (
+    SELECT
+        tt.TruckID,
+        COUNT(DISTINCT d.DeliveryID) AS TotalDeliveriesCompleted
+    FROM TruckTrip tt
+    LEFT JOIN Delivery d
+        ON d.TripID = tt.TripID
+        AND d.Status = 'Delivered'
+    GROUP BY tt.TruckID
+) delivery_stats
+    ON t.TruckID = delivery_stats.TruckID;
