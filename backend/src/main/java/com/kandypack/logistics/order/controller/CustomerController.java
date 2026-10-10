@@ -3,6 +3,7 @@ package com.kandypack.logistics.order.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
+import com.kandypack.logistics.order.entity.DeliveryArea;
+import com.kandypack.logistics.order.repository.DeliveryAreaRepository;
 import com.kandypack.logistics.order.service.CustomerService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -22,6 +27,9 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private DeliveryAreaRepository deliveryAreaRepository;
 
     @GetMapping
     public List<CustomerDTO> getAllCustomers() {
@@ -35,9 +43,19 @@ public class CustomerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/areas")
+    public List<DeliveryArea> getAllDeliveryAreas() {
+        return deliveryAreaRepository.findAll();
+    }
+
     @PostMapping
-    public CustomerDTO createCustomer(@RequestBody CustomerCreateRequest request) {
-        return customerService.createCustomer(request);
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CustomerCreateRequest request) {
+        try {
+            CustomerDTO created = customerService.createCustomer(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

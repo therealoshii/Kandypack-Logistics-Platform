@@ -31,6 +31,12 @@ proc_label: BEGIN
         RESIGNAL;
     END;
 
+    -- 0. validate delivery date is not null
+    IF p_DeliveryDate IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: Delivery date cannot be null.';
+    END IF;
+
     -- 1. validate 7 day advance lead time rule
     SET v_lead_time_days = DATEDIFF(p_DeliveryDate, CURDATE());
     IF v_lead_time_days < 7 THEN

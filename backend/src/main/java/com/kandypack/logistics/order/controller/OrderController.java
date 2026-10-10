@@ -27,36 +27,21 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest request) {
-        try {
-            Long orderId = orderService.placeOrder(request);
+    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest request) throws Exception {
+        Long orderId = orderService.placeOrder(request);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Order placed successfully!");
-            response.put("orderId", orderId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Order placed successfully!");
+        response.put("orderId", orderId);
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+        return ResponseEntity.ok(response);
     }
 
-    //to get orders history
+    // to get orders history
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<?> getOrdersByCustomer(@PathVariable Integer customerId) {
-        try {
-            List<Order> orders = orderService.getOrdersByCustomerId(customerId);
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+    public ResponseEntity<List<Order>> getOrdersByCustomer(@PathVariable Integer customerId) {
+        List<Order> orders = orderService.getOrdersByCustomerId(customerId);
+        return ResponseEntity.ok(orders);
     }
 }

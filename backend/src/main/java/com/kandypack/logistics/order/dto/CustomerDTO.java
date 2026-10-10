@@ -11,32 +11,76 @@ public class CustomerDTO {
     private String city;
     private String username;
 
-    public CustomerDTO() {}
+    // Getters and Setters
+    public Integer getCustomerID() {
+        return customerID;
+    }
 
-    public Integer getCustomerID() { return customerID; }
-    public void setCustomerID(Integer customerID) { this.customerID = customerID; }
+    public void setCustomerID(Integer customerID) {
+        this.customerID = customerID;
+    }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-    public String getContactNumber() { return contactNumber; }
-    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public Integer getAreaId() { return areaId; }
-    public void setAreaId(Integer areaId) { this.areaId = areaId; }
+    public String getContactNumber() {
+        return contactNumber;
+    }
 
-    public String getAreaName() { return areaName; }
-    public void setAreaName(String areaName) { this.areaName = areaName; }
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Integer getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Integer areaId) {
+        this.areaId = areaId;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
