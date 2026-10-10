@@ -12,21 +12,23 @@ INSERT INTO Store (StoreID, StoreName, Capacity, City) VALUES
 (5, 'Jaffna Northern Hub', 4500.00, 'Jaffna'),
 (6, 'Trincomalee Eastern Center', 3200.00, 'Trincomalee');
 
--- Routes(12 routes connecting regional stores to delivery zones)--
+-- Routes (12 routes connecting regional stores to delivery zones)
+-- Distance is the estimated total round-trip road distance in kilometres.
 TRUNCATE TABLE Route;
+
 INSERT INTO Route (RouteID, StoreID, RouteName, MaxDeliveryTime, Distance) VALUES
-(1, 1, 'Colombo Fort & Pettah Commercial Route', 3.50, 115.00),
-(2, 1, 'Greater Colombo Suburban Route', 4.00, 130.00),
-(3, 2, 'Negombo Town & Lagoon Route', 3.00, 95.00),
-(4, 2, 'Kochchikade & Katunayake Logistics Route', 3.50, 110.00),
-(5, 3, 'Galle Fort & Coastal District Route', 4.50, 160.00),
-(6, 3, 'Hikkaduwa & Southern Corridor Route', 5.00, 180.00),
-(7, 4, 'Matara City & Dondra Head Route', 5.50, 210.00),
-(8, 4, 'Weligama Bay Distribution Route', 5.00, 195.00),
-(9, 5, 'Jaffna City Center Route', 7.00, 320.00),
-(10, 5, 'Chavakachcheri & Vadamarachchi Route', 7.50, 345.00),
-(11, 6, 'Trincomalee Town & Harbor Route', 6.00, 215.00),
-(12, 6, 'Kinniya & Nilaveli Coastal Route', 6.50, 240.00);
+(1, 1, 'Colombo Fort & Pettah Commercial Route', 3.50, 20.00),
+(2, 1, 'Greater Colombo Suburban Route', 4.00, 40.00),
+(3, 2, 'Negombo Town & Lagoon Route', 3.00, 20.00),
+(4, 2, 'Kochchikade & Katunayake Logistics Route', 3.50, 35.00),
+(5, 3, 'Galle Fort & Coastal District Route', 4.50, 25.00),
+(6, 3, 'Hikkaduwa & Southern Corridor Route', 5.00, 50.00),
+(7, 4, 'Matara City & Dondra Head Route', 5.50, 30.00),
+(8, 4, 'Weligama Bay Distribution Route', 5.00, 40.00),
+(9, 5, 'Jaffna City Center Route', 7.00, 20.00),
+(10, 5, 'Chavakachcheri & Vadamarachchi Route', 7.50, 60.00),
+(11, 6, 'Trincomalee Town & Harbor Route', 6.00, 25.00),
+(12, 6, 'Kinniya & Nilaveli Coastal Route', 6.50, 50.00);
 
 -- Delivery Areas (3 areas for each route)
 TRUNCATE TABLE DeliveryArea;
