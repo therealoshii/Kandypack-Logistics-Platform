@@ -1,40 +1,37 @@
-
+version: '3.8'
 
 services:
   mysqldb:
     image: mysql:8.0
     container_name: kandypack-mysql
-    restart: always
     environment:
-      MYSQL_DATABASE: kandypack_db
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kandypack_db
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
+      - ./database:/docker-entrypoint-initdb.d:ro
+    # Health check uses 127.0.0.1 (not localhost) to verify the real server accepts TCP traffic after init scripts finish
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
 
   backend:
     build: ./backend
     container_name: kandypack-backend
-    restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - mysqldb
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
       DB_PASSWORD: root
-
-  frontend:
-    build: ./frontend
-    container_name: kandypack-frontend
-    restart: always
-    ports:
-      - "80:80"
     depends_on:
-      - backend
-      
+      mysqldb:
+        condition: service_healthy
+    restart: always
+
 volumes:
   mysql_data:
