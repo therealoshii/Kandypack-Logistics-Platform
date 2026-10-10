@@ -54,9 +54,9 @@ proc_label: BEGIN
     -- 4. ACID Transaction
     START TRANSACTION;
 
-    -- insert order master record
-    INSERT INTO Orders (CustomerID, RouteID, AdminID, OrderDate, Status, TotalAmount)
-    VALUES (p_CustomerID, v_route_id, NULL, CURDATE(), 'Placed', 0.00);
+    -- insert order master record with RequestedDeliveryDate 
+    INSERT INTO Orders (CustomerID, RouteID, AdminID, OrderDate, RequestedDeliveryDate, Status, TotalAmount)
+    VALUES (p_CustomerID, v_route_id, NULL, CURDATE(), p_DeliveryDate, 'Placed', 0.00);
 
     SET p_OrderID = LAST_INSERT_ID();
 
@@ -69,6 +69,9 @@ proc_label: BEGIN
     END IF;
 
     WHILE i < v_item_count DO
+        -- Reset loop variables to avoid carrying over previous item data (H2)
+        SET v_unit_price = NULL, v_stock = NULL;
+
         SET v_product_id = JSON_UNQUOTE(JSON_EXTRACT(p_Items, CONCAT('$[', i, '].productId')));
         SET v_quantity = JSON_UNQUOTE(JSON_EXTRACT(p_Items, CONCAT('$[', i, '].quantity')));
 

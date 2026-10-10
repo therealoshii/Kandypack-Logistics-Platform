@@ -5,8 +5,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
 import com.kandypack.logistics.order.entity.Customer;
 import com.kandypack.logistics.order.repository.CustomerRepository;
@@ -16,6 +18,9 @@ public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<CustomerDTO> getAllCustomers() {
         return customerRepository.findAll().stream()
@@ -27,8 +32,23 @@ public class CustomerService {
         return customerRepository.findById(id).map(this::convertToDTO);
     }
 
-    public CustomerDTO saveCustomer(CustomerDTO customerDTO) {
-        Customer customer = convertToEntity(customerDTO);
+    public CustomerDTO createCustomer(CustomerCreateRequest request) {
+        if (customerRepository.existsByUsernameIgnoreCase(request.username())) {
+            throw new IllegalArgumentException("That username is already taken.");
+        }
+        if (customerRepository.existsByEmailIgnoreCase(request.email())) {
+            throw new IllegalArgumentException("An account already uses that email.");
+        }
+
+        Customer customer = new Customer();
+        customer.setFullName(request.fullName());
+        customer.setEmail(request.email());
+        customer.setContactNumber(request.contactNumber());
+        customer.setAddress(request.address());
+        customer.setUsername(request.username());
+        //encrypt the password by bcrypt
+        customer.setPassword(passwordEncoder.encode(request.password()));
+
         Customer savedCustomer = customerRepository.save(customer);
         return convertToDTO(savedCustomer);
     }
@@ -47,20 +67,6 @@ public class CustomerService {
         dto.setAddress(customer.getAddress());
         dto.setCity(customer.getCity());
         dto.setUsername(customer.getUsername());
-        dto.setPassword(customer.getPassword());
         return dto;
-    }
-
-    private Customer convertToEntity(CustomerDTO dto) {
-        Customer customer = new Customer();
-        customer.setCustomerID(dto.getCustomerID());
-        customer.setFullName(dto.getFullName());
-        customer.setEmail(dto.getEmail());
-        customer.setContactNumber(dto.getContactNumber());
-        customer.setAddress(dto.getAddress());
-        customer.setCity(dto.getCity());
-        customer.setUsername(dto.getUsername());
-        customer.setPassword(dto.getPassword());
-        return customer;
     }
 }

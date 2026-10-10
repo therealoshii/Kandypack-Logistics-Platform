@@ -35,6 +35,9 @@ public class Order {
     @Column(name = "OrderDate")
     private LocalDate orderDate;
 
+    @Column(name = "RequestedDeliveryDate")
+    private LocalDate requestedDeliveryDate;
+
     @Column(name = "Status")
     private String status;
 
@@ -61,6 +64,9 @@ public class Order {
 
     public LocalDate getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDate orderDate) { this.orderDate = orderDate; }
+
+    public LocalDate getRequestedDeliveryDate() { return requestedDeliveryDate; }
+    public void setRequestedDeliveryDate(LocalDate requestedDeliveryDate) { this.requestedDeliveryDate = requestedDeliveryDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

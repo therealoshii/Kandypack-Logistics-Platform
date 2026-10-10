@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS OrderDetail;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Administrator;
 
--- Administrator Table (System Administrators and Logistics Managers)
+-- Administrator Table 
 CREATE TABLE Administrator (
     AdminID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
@@ -36,13 +36,14 @@ CREATE TABLE AdministratorRole (
         REFERENCES StaffRole(RoleID) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- Orders Table (Customer purchase orders placed with 7+ day lead time)
+-- Orders Table
 CREATE TABLE Orders (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
     CustomerID INT NOT NULL,
     RouteID INT NOT NULL,
     AdminID INT NULL, -- Assigned/updated when processed by administrative staff
     OrderDate DATE NOT NULL,
+    RequestedDeliveryDate DATE NULL, -- Added for lead time verification
     Status ENUM('Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered', 'Cancelled') NOT NULL DEFAULT 'Placed',
     TotalAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
 
@@ -51,10 +52,15 @@ CREATE TABLE Orders (
     CONSTRAINT fk_order_route FOREIGN KEY (RouteID)
         REFERENCES Route(RouteID) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_order_admin FOREIGN KEY (AdminID)
-        REFERENCES Administrator(AdminID) ON DELETE SET NULL ON UPDATE CASCADE
+        REFERENCES Administrator(AdminID) ON DELETE SET NULL ON UPDATE CASCADE,
+        
+    -- Lead time validation constraint
+    CONSTRAINT chk_order_lead_time
+        CHECK (RequestedDeliveryDate IS NULL
+               OR DATEDIFF(RequestedDeliveryDate, OrderDate) >= 7)
 );
 
--- OrderDetail Table (Products/Items within an order)
+-- OrderDetail Table
 CREATE TABLE OrderDetail (
     OrderDetailID INT AUTO_INCREMENT PRIMARY KEY,
     OrderID INT NOT NULL,
@@ -71,8 +77,6 @@ CREATE TABLE OrderDetail (
     CONSTRAINT chk_detail_total CHECK (LineTotal >= 0)
 );
 
--- AuditLog Table (Security & ACID Auditing per SRS Section 5.3)
--- This table was not included in the ER Diagram, but this was a requirement that was specified under section 5.3 of SRS
 CREATE TABLE AuditLog (
     LogID INT AUTO_INCREMENT PRIMARY KEY,
     TableName VARCHAR(50) NOT NULL,
