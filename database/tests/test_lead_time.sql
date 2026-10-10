@@ -15,12 +15,13 @@ CALL sp_place_order(
     @v_order_id
 );
 
--- verify created order
+-- verify created order (Updated to use DeliveryArea instead of removed Customer.City)
 SELECT 
-    o.OrderID, o.CustomerID, c.FullName, c.City,
+    o.OrderID, o.CustomerID, c.FullName, da.AreaName,
     o.RouteID, r.RouteName, o.OrderDate, o.Status, o.TotalAmount
 FROM Orders o
 INNER JOIN Customer c ON o.CustomerID = c.CustomerID
+INNER JOIN DeliveryArea da ON c.AreaID = da.AreaID
 INNER JOIN Route r ON o.RouteID = r.RouteID
 WHERE o.OrderID = @v_order_id;
 

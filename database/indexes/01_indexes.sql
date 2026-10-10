@@ -30,7 +30,7 @@ CREATE INDEX idx_delivery_date ON Delivery (DeliveryDate);
 CREATE INDEX idx_delivery_trip ON Delivery (TripID);
 
 -- 6. Indexes on Master Tables
-CREATE INDEX idx_customer_city ON Customer (City);
+
 CREATE INDEX idx_store_city ON Store (City);
 CREATE INDEX idx_product_category ON Product (Category);
 
