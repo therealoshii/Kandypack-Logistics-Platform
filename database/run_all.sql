@@ -37,6 +37,7 @@ SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_schedule_conflict.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_driver_consecutive.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_assistant_consecutive.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_weekly_hours.sql;
+SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_delivery.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_assign_truck_trip.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_update_delivery_status.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_staff_weekly_hours_report.sql;
@@ -55,6 +56,7 @@ SOURCE /docker-entrypoint-initdb.d/reports/sp_customer_order_history.sql;
 SELECT '>>> [4/7] Creating Triggers...' AS Step;
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_check_cargo_capacity.sql; 
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_before_insert_trucktrip.sql;
+SOURCE /docker-entrypoint-initdb.d/triggers/trg_validate_delivery.sql;
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_update_stock_on_dispatch.sql; 
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_audit_log.sql; 
 
