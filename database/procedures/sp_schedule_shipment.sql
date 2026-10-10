@@ -15,7 +15,7 @@ BEGIN
     DECLARE v_FitQty INT;
     DECLARE v_CurrScheduleID INT;
     DECLARE v_CurrDate DATE;
-    DECLARE v_Destination VARCHAR(50);
+    DECLARE v_DestStoreID INT;
 
     SELECT od.ProductID, od.Quantity INTO v_ProductID, v_RemainingQty
     FROM OrderDetail od
@@ -25,7 +25,7 @@ BEGIN
     FROM Product
     WHERE ProductID = v_ProductID;
 
-    SELECT Destination INTO v_Destination
+    SELECT StoreID INTO v_DestStoreID
     FROM TrainSchedule
     WHERE ScheduleID = p_TargetScheduleID;
 
