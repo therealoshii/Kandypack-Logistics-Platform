@@ -45,6 +45,7 @@ public class CustomerService {
         customer.setEmail(request.email());
         customer.setContactNumber(request.contactNumber());
         customer.setAddress(request.address());
+        customer.setAreaID(request.areaId());
         customer.setUsername(request.username());
         //encrypt the password by bcrypt
         customer.setPassword(passwordEncoder.encode(request.password()));
@@ -65,7 +66,7 @@ public class CustomerService {
         dto.setEmail(customer.getEmail());
         dto.setContactNumber(customer.getContactNumber());
         dto.setAddress(customer.getAddress());
-        dto.setCity(customer.getCity());
+        dto.setAreaId(customer.getAreaID());
         dto.setUsername(customer.getUsername());
         return dto;
     }

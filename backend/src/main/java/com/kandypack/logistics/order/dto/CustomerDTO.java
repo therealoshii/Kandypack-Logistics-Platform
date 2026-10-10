@@ -6,6 +6,8 @@ public class CustomerDTO {
     private String email;
     private String contactNumber;
     private String address;
+    private Integer areaId;
+    private String areaName;
     private String city;
     private String username;
 
@@ -25,6 +27,12 @@ public class CustomerDTO {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public Integer getAreaId() { return areaId; }
+    public void setAreaId(Integer areaId) { this.areaId = areaId; }
+
+    public String getAreaName() { return areaName; }
+    public void setAreaName(String areaName) { this.areaName = areaName; }
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
