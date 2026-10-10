@@ -9,14 +9,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Build a consistent error response.
     private ResponseEntity<ErrorResponse> buildErrorResponse(
             HttpStatus status,
             String message,
@@ -32,7 +33,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, status);
     }
 
-    // Find SQL exceptions inside wrapped exceptions.
+    // Find SQL exceptions wrapped inside Spring/JDBC exceptions.
     private static SQLException findSqlException(Throwable t) {
         while (t != null) {
             if (t instanceof SQLException sql) {
@@ -56,7 +57,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 2. Invalid request fields -> HTTP 400
+    // 2. Invalid request body fields -> HTTP 400
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex,
@@ -84,7 +85,51 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 3. Database integrity errors
+    // 3. Invalid business arguments -> HTTP 400
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex,
+            WebRequest request) {
+
+        String message = ex.getMessage() != null
+                ? ex.getMessage()
+                : "Invalid request argument.";
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request
+        );
+    }
+
+    // 4. Missing required query parameter -> HTTP 400
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParameter(
+            MissingServletRequestParameterException ex,
+            WebRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Missing required request parameter: "
+                        + ex.getParameterName(),
+                request
+        );
+    }
+
+    // 5. Wrong type for a query/path parameter -> HTTP 400
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleParameterTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            WebRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid value for request parameter: " + ex.getName(),
+                request
+        );
+    }
+
+    // 6. Database integrity violations and MySQL business-rule errors
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex,
@@ -92,7 +137,7 @@ public class GlobalExceptionHandler {
 
         SQLException sql = findSqlException(ex);
 
-        // Business-rule errors raised by MySQL triggers/procedures
+        // MySQL trigger/procedure SIGNAL SQLSTATE '45000'
         if (sql != null && "45000".equals(sql.getSQLState())) {
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST,
@@ -101,7 +146,7 @@ public class GlobalExceptionHandler {
             );
         }
 
-        // Actual duplicate-key or constraint violations
+        // Genuine constraint or duplicate-key violation
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
                 "Data integrity violation: possibly a duplicate key or constraint violation.",
@@ -109,7 +154,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 4. Unexpected exceptions
+    // 7. Unexpected errors, including wrapped SQL business-rule errors
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex,
