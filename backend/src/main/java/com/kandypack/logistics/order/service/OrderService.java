@@ -3,6 +3,7 @@ package com.kandypack.logistics.order.service;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,12 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kandypack.logistics.order.dto.OrderRequest;
+import com.kandypack.logistics.order.entity.Order;
+import com.kandypack.logistics.order.repository.OrderRepository;
 
 @Service
 public class OrderService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Transactional
     public Long placeOrder(OrderRequest request) {
@@ -42,5 +48,10 @@ public class OrderService {
         } catch (Exception e) {
             throw new RuntimeException("Error placing order: " + e.getMessage(), e);
         }
+    }
+
+    //to get order history by customer ID
+    public List<Order> getOrdersByCustomerId(Integer customerId) {
+        return orderRepository.findByCustomerID(customerId);
     }
 }
