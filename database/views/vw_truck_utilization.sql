@@ -30,7 +30,8 @@ INNER JOIN Store s
 LEFT JOIN TruckTrip tt
     ON t.TruckID = tt.TruckID
 LEFT JOIN Delivery d
-    ON tt.TripID = d.TripID
+    ON d.TripID = tt.TripID
+    AND d.Status = 'Delivered'
 GROUP BY
     t.TruckID,
     t.RegistrationNumber,
