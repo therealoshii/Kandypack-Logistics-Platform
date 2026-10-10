@@ -110,18 +110,18 @@ INSERT INTO Product (ProductID, ProductName, UnitPrice, SpaceConsumption, StockQ
 
 -- Customers--
 TRUNCATE TABLE Customer;
-INSERT INTO Customer (CustomerID, FullName, Email, ContactNumber, Address, City, Username, Password) VALUES
-(1, 'Lanka Super Center Colombo', 'orders@lankasuper.lk', '0112345678', 'No. 45 Galle Road, Colpetty', 'Colombo', 'lankasuper_col', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(2, 'Cargills Express Negombo', 'negombo@cargills.lk', '0312233445', 'No. 12 Main Street', 'Negombo', 'cargills_neg', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(3, 'Keells Super Galle', 'galle@keells.lk', '0912244556', 'No. 88 Matara Road', 'Galle', 'keells_gal', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(4, 'Arpico Supercentre Matara', 'matara@arpico.com', '0412223344', 'No. 15 Hakmana Road', 'Matara', 'arpico_mat', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(5, 'Northern Wholesale Mart Jaffna', 'contact@northernmart.lk', '0212224455', 'No. 200 Hospital Road', 'Jaffna', 'northmart_jaf', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(6, 'Eastern Traders Trincomalee', 'info@easterntraders.lk', '0262223311', 'No. 34 Dockyard Road', 'Trincomalee', 'eastern_trinco', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(7, 'Sunil Grocery Stores', 'sunil.stores@gmail.com', '0114567890', 'No. 102 High Level Road, Nugegoda', 'Colombo', 'sunilstores', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(8, 'Silva & Sons Wholesale', 'silva.sons@gmail.com', '0317894561', 'No. 54 Sea Street', 'Negombo', 'silvasons', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(9, 'Southern Distributors Galle', 'info@southerndist.lk', '0917418520', 'No. 19 Fort Street', 'Galle', 'southerndist', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(10, 'Ruhunu Food City Matara', 'ruhunu.food@gmail.com', '0419638520', 'No. 77 Beach Road', 'Matara', 'ruhunufood', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(11, 'Nallur Retailers Jaffna', 'nallur.retail@gmail.com', '0218529630', 'No. 14 Point Pedro Road', 'Jaffna', 'nallurretail', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
-(12, 'Harbor View Mart Trincomalee', 'harborview@yahoo.com', '0263692580', 'No. 6 Inner Harbor Road', 'Trincomalee', 'harborview', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash');
+INSERT INTO Customer (CustomerID, FullName, Email, ContactNumber, Address, AreaID, Username, Password) VALUES
+(1, 'Lanka Super Center Colombo', 'orders@lankasuper.lk', '0112345678', 'No. 45 Galle Road, Colpetty', 3, 'lankasuper_col', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(2, 'Cargills Express Negombo', 'negombo@cargills.lk', '0312233445', 'No. 12 Main Street', 7, 'cargills_neg', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(3, 'Keells Super Galle', 'galle@keells.lk', '0912244556', 'No. 88 Matara Road', 13, 'keells_gal', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(4, 'Arpico Supercentre Matara', 'matara@arpico.com', '0412223344', 'No. 15 Hakmana Road', 19, 'arpico_mat', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(5, 'Northern Wholesale Mart Jaffna', 'contact@northernmart.lk', '0212224455', 'No. 200 Hospital Road', 25, 'northmart_jaf', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(6, 'Eastern Traders Trincomalee', 'info@easterntraders.lk', '0262223311', 'No. 34 Dockyard Road', 31, 'eastern_trinco', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(7, 'Sunil Grocery Stores', 'sunil.stores@gmail.com', '0114567890', 'No. 102 High Level Road, Nugegoda', 4, 'sunilstores', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(8, 'Silva & Sons Wholesale', 'silva.sons@gmail.com', '0317894561', 'No. 54 Sea Street', 10, 'silvasons', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(9, 'Southern Distributors Galle', 'info@southerndist.lk', '0917418520', 'No. 19 Fort Street', 16, 'southerndist', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(10, 'Ruhunu Food City Matara', 'ruhunu.food@gmail.com', '0419638520', 'No. 77 Beach Road', 22, 'ruhunufood', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(11, 'Nallur Retailers Jaffna', 'nallur.retail@gmail.com', '0218529630', 'No. 14 Point Pedro Road', 28, 'nallurretail', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash'),
+(12, 'Harbor View Mart Trincomalee', 'harborview@yahoo.com', '0263692580', 'No. 6 Inner Harbor Road', 34, 'harborview', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash');
 
 SET FOREIGN_KEY_CHECKS = 1;
