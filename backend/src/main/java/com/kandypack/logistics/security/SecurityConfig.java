@@ -1,4 +1,3 @@
-
 package com.kandypack.logistics.security;
 
 import java.util.List;
@@ -7,10 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,198 +18,235 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /*
+     * Keep staff authentication separate from customer authentication.
+     * AuthController should inject this bean using:
+     * @Qualifier("staffAuthenticationManager")
+     */
     @Bean
-    SecurityContextRepository securityContextRepository() {
+    public AuthenticationManager staffAuthenticationManager(
+            StaffUserDetailsService staff,
+            PasswordEncoder encoder) {
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(staff);
+
+        provider.setPasswordEncoder(encoder);
+
+        return new ProviderManager(provider);
+    }
+
+    /*
+     * CustomerUserDetailsService must load customers by username
+     * and return a CustomerPrincipal with ROLE_CUSTOMER.
+     */
+    @Bean
+    public AuthenticationManager customerAuthenticationManager(
+            CustomerUserDetailsService customers,
+            PasswordEncoder encoder) {
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(customers);
+
+        provider.setPasswordEncoder(encoder);
+
+        return new ProviderManager(provider);
+    }
+
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
 
     @Bean
-    AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    org.springframework.web.cors.CorsConfigurationSource
-    corsConfigurationSource() {
-
-        org.springframework.web.cors.CorsConfiguration configuration =
-                new org.springframework.web.cors.CorsConfiguration();
-
-        configuration.setAllowedOriginPatterns(
-                List.of("http://localhost:*", "http://127.0.0.1:*"));
-
-        configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "PATCH",
-                        "DELETE", "OPTIONS"));
-
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
-                new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
-
-    @Bean
-    SecurityFilterChain securityFilterChain(
+    public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            SecurityContextRepository contextRepository) throws Exception {
-
-        CookieCsrfTokenRepository csrfRepository =
-                CookieCsrfTokenRepository.withHttpOnlyFalse();
-
-        CsrfTokenRequestAttributeHandler csrfHandler =
-                new CsrfTokenRequestAttributeHandler();
-
-        csrfHandler.setCsrfRequestAttributeName(null);
+            SecurityContextRepository securityContextRepository)
+            throws Exception {
 
         http
-            .cors(Customizer.withDefaults())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
             .csrf(csrf -> csrf
-                .csrfTokenRepository(csrfRepository)
-                .csrfTokenRequestHandler(csrfHandler)
-                // The existing staff login client does not send a CSRF token.
-                // Customer login continues to use the CSRF token endpoint.
-                .ignoringRequestMatchers("/api/auth/login")
+                .csrfTokenRepository(
+                    CookieCsrfTokenRepository.withHttpOnlyFalse()
+                )
+                .csrfTokenRequestHandler(
+                    new CsrfTokenRequestAttributeHandler()
+                )
+                .ignoringRequestMatchers(
+                    "/api/auth/login"
+                )
             )
 
-            .securityContext(context ->
-                context.securityContextRepository(contextRepository))
-
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(
-                        SessionCreationPolicy.IF_REQUIRED))
-
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .logout(AbstractHttpConfigurer::disable)
-            .requestCache(AbstractHttpConfigurer::disable)
-
-            .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint((request, response, exception) ->
-                    response.sendError(
-                            HttpServletResponse.SC_UNAUTHORIZED))
-                .accessDeniedHandler((request, response, exception) ->
-                    response.sendError(
-                            HttpServletResponse.SC_FORBIDDEN))
+            .securityContext(context -> context
+                .securityContextRepository(securityContextRepository)
+                .requireExplicitSave(true)
             )
 
-            .authorizeHttpRequests(authorize -> authorize
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation(fixation -> fixation.changeSessionId())
+            )
 
-                // Public CSRF token and delivery-area lookup.
-                .requestMatchers(HttpMethod.GET,
-                        "/api/auth/csrf",
-                        "/api/public/delivery-areas")
-                    .permitAll()
+            .authorizeHttpRequests(auth -> auth
 
-                // Public sign-in and customer registration.
-                .requestMatchers(HttpMethod.POST,
-                        "/api/auth/login",
-                        "/api/auth/customer/login",
-                        "/api/customers")
-                    .permitAll()
+                // Public endpoints
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/auth/csrf",
+                    "/api/public/delivery-areas"
+                ).permitAll()
 
-                // Customer-only profile and future customer auth routes.
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/auth/login",
+                    "/api/auth/customer/login",
+                    "/api/customers"
+                ).permitAll()
+
+                // Customer-only authentication/profile endpoints
                 .requestMatchers("/api/auth/customer/**")
                     .hasRole("CUSTOMER")
 
-                // Staff profile and password-change routes.
-                .requestMatchers(
-                        "/api/auth/me",
-                        "/api/auth/password")
+                // Staff authentication endpoints
+                .requestMatchers("/api/auth/me", "/api/auth/password")
                     .hasAnyRole(
                         "ADMIN",
-                        "ANALYST",
                         "ORDER_MANAGER",
                         "RAIL_DISPATCHER",
                         "FLEET_MANAGER",
-                        "ROSTER_DISPATCHER")
+                        "ROSTER_DISPATCHER",
+                        "ANALYST"
+                    )
 
-                // Shared logout endpoint: either authenticated role can log out.
-                .requestMatchers("/api/auth/logout")
-                    .authenticated()
+                .requestMatchers("/api/auth/logout").authenticated()
 
-                // Do not allow other authentication routes by default.
-                .requestMatchers("/api/auth/**")
-                    .denyAll()
+                // No other authentication endpoints are public
+                .requestMatchers("/api/auth/**").denyAll()
 
-                // Administrator management.
+                // Admin-only APIs
                 .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
 
-                // Staff scheduling and working-hours reports.
+                // Staff-hours and roster reports
                 .requestMatchers(
-                        "/api/reports/staff-hours/**",
-                        "/api/reports/working-hours/**",
-                        "/api/staff/roster-quota/**")
-                    .hasAnyRole(
-                        "ADMIN", "ANALYST", "ROSTER_DISPATCHER")
+                    "/api/reports/staff-hours/**",
+                    "/api/reports/working-hours/**",
+                    "/api/staff/roster-quota/**"
+                ).hasAnyRole(
+                    "ADMIN",
+                    "ANALYST",
+                    "ROSTER_DISPATCHER"
+                )
 
-                // Fleet reports.
+                // Fleet reports
                 .requestMatchers("/api/reports/fleet-usage/**")
-                    .hasAnyRole(
-                        "ADMIN", "ANALYST", "FLEET_MANAGER")
+                    .hasAnyRole("ADMIN", "ANALYST", "FLEET_MANAGER")
 
-                // Customer order history report for authorized staff.
-                .requestMatchers(
-                        "/api/reports/customer-order-history/**")
-                    .hasAnyRole(
-                        "ADMIN", "ANALYST", "ORDER_MANAGER")
+                // Customer order history reports
+                .requestMatchers("/api/reports/customer-order-history/**")
+                    .hasAnyRole("ADMIN", "ANALYST", "ORDER_MANAGER")
 
+                // General reports
                 .requestMatchers("/api/reports/**")
                     .hasAnyRole("ADMIN", "ANALYST")
 
-                // Staff order, customer and product management.
-                // The public POST /api/customers rule above takes precedence.
+                // Orders, customers and products
                 .requestMatchers(
-                        "/api/orders/**",
-                        "/api/customers/**",
-                        "/api/products/**")
-                    .hasAnyRole("ADMIN", "ORDER_MANAGER")
+                    "/api/orders/**",
+                    "/api/customers/**",
+                    "/api/products/**"
+                ).hasAnyRole("ADMIN", "ORDER_MANAGER")
 
-                // Rail operations.
+                // Allow customer registration before the staff-only rule
                 .requestMatchers(
-                        "/api/trains/**",
-                        "/api/shipments/**")
-                    .hasAnyRole("ADMIN", "RAIL_DISPATCHER")
+                    HttpMethod.POST,
+                    "/api/customers"
+                ).permitAll()
 
-                // Fleet operations.
+                // Rail operations
                 .requestMatchers(
-                        "/api/stores/**",
-                        "/api/trucks/**")
-                    .hasAnyRole("ADMIN", "FLEET_MANAGER")
+                    "/api/trains/**",
+                    "/api/shipments/**"
+                ).hasAnyRole("ADMIN", "RAIL_DISPATCHER")
 
-                // Delivery and roster operations.
+                // Fleet operations
                 .requestMatchers(
-                        "/api/truck-trips/**",
-                        "/api/deliveries/**",
-                        "/api/drivers/**",
-                        "/api/assistants/**")
-                    .hasAnyRole("ADMIN", "ROSTER_DISPATCHER")
+                    "/api/stores/**",
+                    "/api/trucks/**"
+                ).hasAnyRole("ADMIN", "FLEET_MANAGER")
 
-                // Any other API must at least be authenticated.
-                .requestMatchers("/api/**")
-                    .authenticated()
+                // Delivery and roster operations
+                .requestMatchers(
+                    "/api/truck-trips/**",
+                    "/api/deliveries/**",
+                    "/api/drivers/**",
+                    "/api/assistants/**"
+                ).hasAnyRole(
+                    "ADMIN",
+                    "ROSTER_DISPATCHER"
+                )
+
+                // Every other API is staff-only
+                .requestMatchers("/api/**").hasAnyRole(
+                    "ADMIN",
+                    "ORDER_MANAGER",
+                    "RAIL_DISPATCHER",
+                    "FLEET_MANAGER",
+                    "ROSTER_DISPATCHER",
+                    "ANALYST"
+                )
 
                 .anyRequest().permitAll()
             );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(
+            List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+            )
+        );
+
+        configuration.setAllowedMethods(
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+            )
+        );
+
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }
