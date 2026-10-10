@@ -1,17 +1,21 @@
 package com.kandypack.logistics.order.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.order.dto.OrderRequest;
+import com.kandypack.logistics.order.entity.Order;
 import com.kandypack.logistics.order.service.OrderService;
 
 @RestController
@@ -38,6 +42,20 @@ public class OrderController {
             errorResponse.put("success", false);
             errorResponse.put("message", e.getMessage());
 
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    //to get orders history
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<?> getOrdersByCustomer(@PathVariable Integer customerId) {
+        try {
+            List<Order> orders = orderService.getOrdersByCustomerId(customerId);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
