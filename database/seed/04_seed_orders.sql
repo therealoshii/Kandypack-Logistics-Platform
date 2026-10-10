@@ -1,209 +1,170 @@
--- This file contains the Orders, Shipments and Deliveries Seed Data
--- Added:
---   - 2 Administrators
---   - 42 Customer Orders (satisfying SRS 40+ requirement)
---   - 80+ Order Details (multi-item orders)
---   - 40+ Rail Shipments
---   - 15 Valid Truck Trips (respecting working hours and no overlaps)
---   - 42 Deliveries (1:1 with Orders)
+-- ============================================================================
+-- Kandypack Order & Logistics Seed Data (Task A5 Rebuild)
+-- Includes real TrainSchedule mapping from Task W1
+-- ============================================================================
 
+USE kandypack_db;
+
+-- Temporarily disable FK checks to clear existing order tables cleanly
 SET FOREIGN_KEY_CHECKS = 0;
-
--- Administrators
-TRUNCATE TABLE AdministratorRole;
-TRUNCATE TABLE Administrator;
-INSERT INTO Administrator (AdminID, Name, Username, Password, Email) VALUES
-(1, 'Admin User', 'admin', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash', 'admin@kandypack.lk'),
-(2, 'Logistics Manager', 'logistics_mgr', '$2a$12$e8YkYx9p8vJqWvLqUq7Wre...hash', 'manager@kandypack.lk');
-
-INSERT IGNORE INTO StaffRole (Code, DisplayName) VALUES
-('ADMIN', 'Administrator'),
-('ORDER_MANAGER', 'Order manager'),
-('RAIL_DISPATCHER', 'Rail dispatcher'),
-('FLEET_MANAGER', 'Fleet manager'),
-('ROSTER_DISPATCHER', 'Roster and delivery dispatcher'),
-('ANALYST', 'Analytics viewer');
-
-INSERT IGNORE INTO AdministratorRole (AdminID, RoleID)
-SELECT a.AdminID, r.RoleID
-FROM Administrator a CROSS JOIN StaffRole r
-WHERE a.Username = 'admin' AND r.Code = 'ADMIN';
-
--- Orders (42 distinct orders across 12 routes and 12 customers)
-TRUNCATE TABLE Orders;
-INSERT INTO Orders (OrderID, CustomerID, RouteID, AdminID, OrderDate, Status, TotalAmount) VALUES
-(1, 1, 1, 1, '2026-08-01', 'Delivered', 24500.00),
-(2, 2, 3, 1, '2026-08-02', 'Delivered', 18900.00),
-(3, 3, 5, 2, '2026-08-03', 'Delivered', 31200.00),
-(4, 4, 7, 2, '2026-08-04', 'Delivered', 15400.00),
-(5, 5, 9, 1, '2026-08-05', 'Delivered', 42000.00),
-(6, 6, 11, 2, '2026-08-06', 'Delivered', 28500.00),
-(7, 7, 2, 1, '2026-08-07', 'Delivered', 19800.00),
-(8, 8, 4, 2, '2026-08-08', 'Delivered', 22300.00),
-(9, 9, 6, 1, '2026-08-09', 'Delivered', 36700.00),
-(10, 10, 8, 2, '2026-08-10', 'Delivered', 17800.00),
-(11, 11, 10, 1, '2026-08-11', 'Delivered', 45600.00),
-(12, 12, 12, 2, '2026-08-12', 'Delivered', 29400.00),
-(13, 1, 1, 1, '2026-08-13', 'Delivered', 14200.00),
-(14, 2, 3, 1, '2026-08-14', 'Delivered', 21600.00),
-(15, 3, 5, 2, '2026-08-15', 'Delivered', 33400.00),
-(16, 4, 7, 2, '2026-08-16', 'Delivered', 18200.00),
-(17, 5, 9, 1, '2026-08-17', 'Delivered', 49100.00),
-(18, 6, 11, 2, '2026-08-18', 'Delivered', 25600.00),
-(19, 7, 2, 1, '2026-08-19', 'Delivered', 16700.00),
-(20, 8, 4, 2, '2026-08-20', 'Delivered', 24100.00),
-(21, 9, 6, 1, '2026-08-21', 'Delivered', 31500.00),
-(22, 10, 8, 2, '2026-08-22', 'Delivered', 19300.00),
-(23, 11, 10, 1, '2026-08-23', 'Delivered', 38900.00),
-(24, 12, 12, 2, '2026-08-24', 'Delivered', 27400.00),
-(25, 1, 1, 1, '2026-08-25', 'Delivered', 15800.00),
-(26, 2, 3, 1, '2026-08-26', 'Delivered', 22900.00),
-(27, 3, 5, 2, '2026-08-27', 'Delivered', 34800.00),
-(28, 4, 7, 2, '2026-08-28', 'Delivered', 17500.00),
-(29, 5, 9, 1, '2026-08-29', 'Delivered', 51200.00),
-(30, 6, 11, 2, '2026-08-30', 'Delivered', 26300.00),
-(31, 7, 2, 1, '2026-09-01', 'In Transit', 18400.00),
-(32, 8, 4, 2, '2026-09-02', 'In Transit', 23100.00),
-(33, 9, 6, 1, '2026-09-03', 'In Transit', 32700.00),
-(34, 10, 8, 2, '2026-09-04', 'In Transit', 19800.00),
-(35, 11, 10, 1, '2026-09-05', 'In Transit', 41200.00),
-(36, 12, 12, 2, '2026-09-06', 'In Transit', 28900.00),
-(37, 1, 1, 1, '2026-09-07', 'Processing', 16500.00),
-(38, 2, 3, 1, '2026-09-08', 'Processing', 21400.00),
-(39, 3, 5, 2, '2026-09-09', 'Processing', 35100.00),
-(40, 4, 7, 2, '2026-09-10', 'Placed', 18700.00),
-(41, 5, 9, 1, '2026-09-11', 'Placed', 44800.00),
-(42, 6, 11, 2, '2026-09-12', 'Placed', 27100.00);
-
--- Order Details (Line items for each order)
-TRUNCATE TABLE OrderDetail;
-INSERT INTO OrderDetail (OrderDetailID, OrderID, ProductID, Quantity, LineTotal) VALUES
-(1, 1, 1, 30, 13500.00), (2, 1, 3, 10, 6800.00), (3, 1, 4, 23, 4200.00),
-(4, 2, 2, 25, 9500.00), (5, 2, 5, 25, 6000.00), (6, 2, 6, 28, 3400.00),
-(7, 3, 3, 30, 20400.00), (8, 3, 7, 20, 5800.00), (9, 3, 8, 12, 5000.00),
-(10, 4, 4, 50, 9000.00), (11, 4, 10, 40, 6400.00),
-(12, 5, 1, 50, 22500.00), (13, 5, 2, 35, 13300.00), (14, 5, 9, 28, 6200.00),
-(15, 6, 5, 60, 14400.00), (16, 6, 8, 36, 14100.00),
-(17, 7, 1, 25, 11250.00), (18, 7, 6, 45, 5400.00), (19, 7, 10, 19, 3150.00),
-(20, 8, 3, 20, 13600.00), (21, 8, 7, 30, 8700.00),
-(22, 9, 2, 50, 19000.00), (23, 9, 4, 45, 8100.00), (24, 9, 9, 43, 9600.00),
-(25, 10, 5, 40, 9600.00), (26, 10, 8, 21, 8200.00),
-(27, 11, 1, 60, 27000.00), (28, 11, 3, 20, 13600.00), (29, 11, 10, 31, 5000.00),
-(30, 12, 2, 40, 15200.00), (31, 12, 7, 35, 10150.00), (32, 12, 6, 33, 4050.00),
-(33, 13, 4, 45, 8100.00), (34, 13, 5, 25, 6100.00),
-(35, 14, 3, 22, 14960.00), (36, 14, 8, 17, 6640.00),
-(37, 15, 1, 40, 18000.00), (38, 15, 2, 25, 9500.00), (39, 15, 9, 26, 5900.00),
-(40, 16, 6, 70, 8400.00), (41, 16, 7, 33, 9800.00),
-(42, 17, 1, 60, 27000.00), (43, 17, 3, 25, 17000.00), (44, 17, 10, 31, 5100.00),
-(45, 18, 2, 40, 15200.00), (46, 18, 5, 43, 10400.00),
-(47, 19, 4, 50, 9000.00), (48, 19, 8, 19, 7700.00),
-(49, 20, 3, 25, 17000.00), (50, 20, 7, 24, 7100.00),
-(51, 21, 1, 40, 18000.00), (52, 21, 2, 25, 9500.00), (53, 21, 6, 33, 4000.00),
-(54, 22, 5, 45, 10800.00), (55, 22, 9, 38, 8500.00),
-(56, 23, 1, 50, 22500.00), (57, 23, 3, 18, 12240.00), (58, 23, 10, 26, 4160.00),
-(59, 24, 2, 45, 17100.00), (60, 24, 7, 35, 10300.00),
-(61, 25, 4, 45, 8100.00), (62, 25, 8, 19, 7700.00),
-(63, 26, 3, 22, 14960.00), (64, 26, 5, 33, 7940.00),
-(65, 27, 1, 45, 20250.00), (66, 27, 2, 25, 9500.00), (67, 27, 9, 23, 5050.00),
-(68, 28, 6, 75, 9000.00), (69, 28, 7, 29, 8500.00),
-(70, 29, 1, 65, 29250.00), (71, 29, 3, 24, 16320.00), (72, 29, 10, 35, 5630.00),
-(73, 30, 2, 40, 15200.00), (74, 30, 8, 28, 11100.00),
-(75, 31, 3, 20, 13600.00), (76, 31, 4, 26, 4800.00),
-(77, 32, 1, 30, 13500.00), (78, 32, 5, 40, 9600.00),
-(79, 33, 2, 50, 19000.00), (80, 33, 7, 30, 8700.00), (81, 33, 9, 22, 5000.00),
-(82, 34, 4, 55, 9900.00), (83, 34, 8, 25, 9900.00),
-(84, 35, 1, 55, 24750.00), (85, 35, 3, 18, 12240.00), (86, 35, 6, 35, 4210.00),
-(87, 36, 2, 45, 17100.00), (88, 36, 5, 35, 8400.00), (89, 36, 10, 21, 3400.00),
-(90, 37, 3, 18, 12240.00), (91, 37, 7, 14, 4260.00),
-(92, 38, 1, 30, 13500.00), (93, 38, 4, 43, 7900.00),
-(94, 39, 2, 55, 20900.00), (95, 39, 8, 25, 9750.00), (96, 39, 9, 20, 4450.00),
-(97, 40, 4, 50, 9000.00), (98, 40, 6, 45, 5400.00), (99, 40, 10, 26, 4300.00),
-(100, 41, 1, 60, 27000.00), (101, 41, 3, 20, 13600.00), (102, 41, 9, 19, 4200.00),
-(103, 42, 2, 40, 15200.00), (104, 42, 5, 35, 8400.00), (105, 42, 7, 12, 3500.00);
-
--- Shipments (Scheduled cargo allocations)
-TRUNCATE TABLE Shipment;
-INSERT INTO Shipment (ShipmentID, OrderDetailID, ScheduleID, Quantity, ShipmentDate) VALUES
-(1, 1, 1, 30, '2026-08-02'), (2, 2, 1, 10, '2026-08-02'),
-(3, 4, 4, 25, '2026-08-03'), (4, 5, 4, 25, '2026-08-03'),
-(5, 7, 6, 30, '2026-08-04'), (6, 8, 6, 20, '2026-08-04'),
-(7, 10, 8, 50, '2026-08-05'), (8, 11, 8, 40, '2026-08-05'),
-(9, 12, 10, 50, '2026-08-06'), (10, 13, 10, 35, '2026-08-06'),
-(11, 15, 12, 60, '2026-08-07'), (12, 16, 12, 36, '2026-08-07'),
-(13, 17, 3, 25, '2026-08-08'), (14, 20, 5, 20, '2026-08-09'),
-(15, 22, 7, 50, '2026-08-10'), (16, 25, 9, 40, '2026-08-11'),
-(17, 27, 11, 60, '2026-08-12'), (18, 30, 12, 40, '2026-08-13'),
-(19, 33, 1, 45, '2026-08-14'), (20, 35, 4, 22, '2026-08-15'),
-(21, 37, 6, 40, '2026-08-16'), (22, 40, 8, 70, '2026-08-17'),
-(23, 42, 10, 60, '2026-08-18'), (24, 45, 12, 40, '2026-08-19'),
-(25, 47, 2, 50, '2026-08-20'), (26, 49, 5, 25, '2026-08-21'),
-(27, 51, 7, 40, '2026-08-22'), (28, 54, 9, 45, '2026-08-23'),
-(29, 56, 11, 50, '2026-08-24'), (30, 59, 12, 45, '2026-08-25');
-
--- Truck Trips (Dispatched trips respecting 40h/60h limits and non-overlapping slots)
-TRUNCATE TABLE TruckTrip;
-INSERT INTO TruckTrip (TripID, TruckID, RouteID, DriverID, AssistantID, TripDate, DispatchTime, ReturnTime) VALUES
-(1, 1, 1, 1, 1, '2026-08-05', '08:00:00', '11:30:00'),
-(2, 4, 3, 2, 2, '2026-08-06', '09:00:00', '12:00:00'),
-(3, 6, 5, 3, 3, '2026-08-07', '08:30:00', '13:00:00'),
-(4, 8, 7, 4, 4, '2026-08-08', '08:00:00', '13:30:00'),
-(5, 10, 9, 5, 5, '2026-08-09', '07:30:00', '14:30:00'),
-(6, 12, 11, 6, 6, '2026-08-10', '08:00:00', '14:00:00'),
-(7, 2, 2, 7, 7, '2026-08-11', '08:00:00', '12:00:00'),
-(8, 5, 4, 8, 8, '2026-08-12', '08:30:00', '12:00:00'),
-(9, 7, 6, 9, 9, '2026-08-13', '08:00:00', '13:00:00'),
-(10, 9, 8, 10, 10, '2026-08-14', '08:30:00', '13:30:00'),
-(11, 11, 10, 1, 1, '2026-08-16', '07:00:00', '14:30:00'),
-(12, 1, 1, 2, 2, '2026-08-17', '08:00:00', '11:30:00'),
-(13, 3, 2, 3, 3, '2026-08-18', '08:00:00', '12:00:00'),
-(14, 6, 5, 4, 4, '2026-08-19', '08:30:00', '13:00:00'),
-(15, 10, 9, 5, 5, '2026-08-20', '07:30:00', '14:30:00');
-
--- Deliveries (1:1 with Orders, linked to TruckTrips)
+TRUNCATE TABLE AuditLog;
 TRUNCATE TABLE Delivery;
-INSERT INTO Delivery (DeliveryID, OrderID, TripID, DeliveryDate, Status) VALUES
-(1, 1, 1, '2026-08-05', 'Delivered'),
-(2, 2, 2, '2026-08-06', 'Delivered'),
-(3, 3, 3, '2026-08-07', 'Delivered'),
-(4, 4, 4, '2026-08-08', 'Delivered'),
-(5, 5, 5, '2026-08-09', 'Delivered'),
-(6, 6, 6, '2026-08-10', 'Delivered'),
-(7, 7, 7, '2026-08-11', 'Delivered'),
-(8, 8, 8, '2026-08-12', 'Delivered'),
-(9, 9, 9, '2026-08-13', 'Delivered'),
-(10, 10, 10, '2026-08-14', 'Delivered'),
-(11, 11, 11, '2026-08-16', 'Delivered'),
-(12, 12, 12, '2026-08-17', 'Delivered'),
-(13, 13, 1, '2026-08-05', 'Delivered'),
-(14, 14, 2, '2026-08-06', 'Delivered'),
-(15, 15, 3, '2026-08-07', 'Delivered'),
-(16, 16, 4, '2026-08-08', 'Delivered'),
-(17, 17, 5, '2026-08-09', 'Delivered'),
-(18, 18, 6, '2026-08-10', 'Delivered'),
-(19, 19, 7, '2026-08-11', 'Delivered'),
-(20, 20, 8, '2026-08-12', 'Delivered'),
-(21, 21, 9, '2026-08-13', 'Delivered'),
-(22, 22, 10, '2026-08-14', 'Delivered'),
-(23, 23, 11, '2026-08-16', 'Delivered'),
-(24, 24, 12, '2026-08-17', 'Delivered'),
-(25, 25, 13, '2026-08-18', 'Delivered'),
-(26, 26, 2, '2026-08-06', 'Delivered'),
-(27, 27, 3, '2026-08-07', 'Delivered'),
-(28, 28, 4, '2026-08-08', 'Delivered'),
-(29, 29, 5, '2026-08-09', 'Delivered'),
-(30, 30, 6, '2026-08-10', 'Delivered'),
-(31, 31, 13, '2026-09-02', 'In Transit'),
-(32, 32, 8, '2026-09-03', 'In Transit'),
-(33, 33, 14, '2026-09-04', 'In Transit'),
-(34, 34, 10, '2026-09-05', 'In Transit'),
-(35, 35, 15, '2026-09-06', 'In Transit'),
-(36, 36, 6, '2026-09-07', 'In Transit'),
-(37, 37, 1, '2026-09-08', 'Scheduled'),
-(38, 38, 2, '2026-09-09', 'Scheduled'),
-(39, 39, 3, '2026-09-10', 'Scheduled'),
-(40, 40, 4, '2026-09-11', 'Scheduled'),
-(41, 41, 5, '2026-09-12', 'Scheduled'),
-(42, 42, 6, '2026-09-13', 'Scheduled');
-
+TRUNCATE TABLE Shipment;
+TRUNCATE TABLE TruckTrip;
+TRUNCATE TABLE OrderDetail;
+TRUNCATE TABLE Orders;
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- ----------------------------------------------------------------------------
+-- 1. SEED ORDERS (Q2, Q3, and Q4 2026)
+-- ----------------------------------------------------------------------------
+-- RouteID is dynamically populated based on Customer.AreaID lookup
+
+INSERT INTO Orders (OrderID, CustomerID, RouteID, AdminID, OrderDate, RequestedDeliveryDate, Status, TotalAmount)
+SELECT v.OrderID, c.CustomerID, fn_get_route_for_address(c.CustomerID), v.AdminID, v.OrderDate, v.RequestedDeliveryDate, v.Status, 0
+FROM (
+    -- Q2 Delivered Orders (Apr 2026 - Jun 2026) - 22 Orders
+    SELECT 1 AS OrderID, 1 AS CustomerID, 1 AS AdminID, DATE '2026-04-01' AS OrderDate, DATE '2026-04-09' AS RequestedDeliveryDate, 'Delivered' AS Status UNION ALL
+    SELECT 2, 2, 1, DATE '2026-04-03', DATE '2026-04-11', 'Delivered' UNION ALL
+    SELECT 3, 3, 1, DATE '2026-04-05', DATE '2026-04-14', 'Delivered' UNION ALL
+    SELECT 4, 4, 1, DATE '2026-04-08', DATE '2026-04-16', 'Delivered' UNION ALL
+    SELECT 5, 5, 1, DATE '2026-04-12', DATE '2026-04-20', 'Delivered' UNION ALL
+    SELECT 6, 6, 1, DATE '2026-04-15', DATE '2026-04-23', 'Delivered' UNION ALL
+    SELECT 7, 7, 1, DATE '2026-04-18', DATE '2026-04-27', 'Delivered' UNION ALL
+    SELECT 8, 8, 1, DATE '2026-04-22', DATE '2026-04-30', 'Delivered' UNION ALL
+    SELECT 9, 9, 1, DATE '2026-05-02', DATE '2026-05-10', 'Delivered' UNION ALL
+    SELECT 10, 10, 1, DATE '2026-05-05', DATE '2026-05-13', 'Delivered' UNION ALL
+    SELECT 11, 11, 1, DATE '2026-05-09', DATE '2026-05-17', 'Delivered' UNION ALL
+    SELECT 12, 12, 1, DATE '2026-05-12', DATE '2026-05-20', 'Delivered' UNION ALL
+    SELECT 13, 1, 1, DATE '2026-05-16', DATE '2026-05-24', 'Delivered' UNION ALL
+    SELECT 14, 2, 1, DATE '2026-05-20', DATE '2026-05-28', 'Delivered' UNION ALL
+    SELECT 15, 3, 1, DATE '2026-05-24', DATE '2026-06-01', 'Delivered' UNION ALL
+    SELECT 16, 4, 1, DATE '2026-05-28', DATE '2026-06-05', 'Delivered' UNION ALL
+    SELECT 17, 5, 1, DATE '2026-06-02', DATE '2026-06-10', 'Delivered' UNION ALL
+    SELECT 18, 6, 1, DATE '2026-06-06', DATE '2026-06-14', 'Delivered' UNION ALL
+    SELECT 19, 7, 1, DATE '2026-06-10', DATE '2026-06-18', 'Delivered' UNION ALL
+    SELECT 20, 8, 1, DATE '2026-06-14', DATE '2026-06-22', 'Delivered' UNION ALL
+    SELECT 21, 9, 1, DATE '2026-06-18', DATE '2026-06-26', 'Delivered' UNION ALL
+    SELECT 22, 10, 1, DATE '2026-06-22', DATE '2026-06-30', 'Delivered' UNION ALL
+
+    -- Q3 Delivered Orders (Jul 2026 - Sep 2026) - 26 Orders (Demonstrates quarterly growth)
+    SELECT 23, 11, 1, DATE '2026-07-01', DATE '2026-07-09', 'Delivered' UNION ALL
+    SELECT 24, 12, 1, DATE '2026-07-04', DATE '2026-07-12', 'Delivered' UNION ALL
+    SELECT 25, 1, 1, DATE '2026-07-07', DATE '2026-07-15', 'Delivered' UNION ALL
+    SELECT 26, 2, 1, DATE '2026-07-10', DATE '2026-07-18', 'Delivered' UNION ALL
+    SELECT 27, 3, 1, DATE '2026-07-14', DATE '2026-07-22', 'Delivered' UNION ALL
+    SELECT 28, 4, 1, DATE '2026-07-18', DATE '2026-07-26', 'Delivered' UNION ALL
+    SELECT 29, 5, 1, DATE '2026-07-21', DATE '2026-07-29', 'Delivered' UNION ALL
+    SELECT 30, 6, 1, DATE '2026-07-25', DATE '2026-08-02', 'Delivered' UNION ALL
+    SELECT 31, 7, 1, DATE '2026-07-28', DATE '2026-08-05', 'Delivered' UNION ALL
+    SELECT 32, 8, 1, DATE '2026-08-01', DATE '2026-08-09', 'Delivered' UNION ALL
+    SELECT 33, 9, 1, DATE '2026-08-04', DATE '2026-08-12', 'Delivered' UNION ALL
+    SELECT 34, 10, 1, DATE '2026-08-08', DATE '2026-08-16', 'Delivered' UNION ALL
+    SELECT 35, 11, 1, DATE '2026-08-11', DATE '2026-08-19', 'Delivered' UNION ALL
+    SELECT 36, 12, 1, DATE '2026-08-15', DATE '2026-08-23', 'Delivered' UNION ALL
+    SELECT 37, 1, 1, DATE '2026-08-18', DATE '2026-08-26', 'Delivered' UNION ALL
+    SELECT 38, 2, 1, DATE '2026-08-22', DATE '2026-08-30', 'Delivered' UNION ALL
+    SELECT 39, 3, 1, DATE '2026-08-25', DATE '2026-09-02', 'Delivered' UNION ALL
+    SELECT 40, 4, 1, DATE '2026-08-29', DATE '2026-09-06', 'Delivered' UNION ALL
+    SELECT 41, 5, 1, DATE '2026-09-02', DATE '2026-09-10', 'Delivered' UNION ALL
+    SELECT 42, 6, 1, DATE '2026-09-05', DATE '2026-09-13', 'Delivered' UNION ALL
+    SELECT 43, 7, 1, DATE '2026-09-09', DATE '2026-09-17', 'Delivered' UNION ALL
+    SELECT 44, 8, 1, DATE '2026-09-12', DATE '2026-09-20', 'Delivered' UNION ALL
+    SELECT 45, 9, 1, DATE '2026-09-16', DATE '2026-09-24', 'Delivered' UNION ALL
+    SELECT 46, 10, 1, DATE '2026-09-19', DATE '2026-09-27', 'Delivered' UNION ALL
+    SELECT 47, 11, 1, DATE '2026-09-22', DATE '2026-09-30', 'Delivered' UNION ALL
+    SELECT 48, 12, 1, DATE '2026-09-25', DATE '2026-10-03', 'Delivered' UNION ALL
+
+    -- Q4 October 2026 Open Orders - 6 Orders
+    SELECT 49, 1, 1, DATE '2026-10-01', DATE '2026-10-10', 'Processing' UNION ALL
+    SELECT 50, 2, 1, DATE '2026-10-02', DATE '2026-10-11', 'Processing' UNION ALL
+    SELECT 51, 3, 1, DATE '2026-10-03', DATE '2026-10-12', 'Placed' UNION ALL
+    SELECT 52, 4, 1, DATE '2026-10-04', DATE '2026-10-13', 'Placed' UNION ALL
+    SELECT 53, 5, 1, DATE '2026-10-05', DATE '2026-10-14', 'Placed' UNION ALL
+    SELECT 54, 6, 1, DATE '2026-10-06', DATE '2026-10-15', 'Placed'
+) v
+JOIN Customer c ON c.CustomerID = v.CustomerID;
+
+-- ----------------------------------------------------------------------------
+-- 2. SEED ORDER DETAILS
+-- ----------------------------------------------------------------------------
+INSERT INTO OrderDetail (OrderDetailID, OrderID, ProductID, Quantity, LineTotal)
+SELECT 
+    row_number() OVER (ORDER BY o.OrderID, p.ProductID) AS OrderDetailID,
+    o.OrderID,
+    p.ProductID,
+    (o.OrderID % 5 + 1) * 10 AS Quantity,
+    0 AS LineTotal
+FROM Orders o
+CROSS JOIN Product p
+WHERE p.ProductID IN (1, 2);
+
+-- Dynamically calculate exact LineTotal and TotalAmount
+UPDATE OrderDetail od 
+JOIN Product p ON p.ProductID = od.ProductID
+SET od.LineTotal = od.Quantity * p.UnitPrice;
+
+UPDATE Orders o
+JOIN (
+    SELECT OrderID, SUM(LineTotal) AS CalculatedTotal 
+    FROM OrderDetail 
+    GROUP BY OrderID
+) summary ON summary.OrderID = o.OrderID
+SET o.TotalAmount = summary.CalculatedTotal;
+
+-- ----------------------------------------------------------------------------
+-- 3. SEED TRUCK TRIPS
+-- ----------------------------------------------------------------------------
+INSERT INTO TruckTrip (TripID, TruckID, DriverID, AssistantID, TripDate, DispatchTime, ReturnTime) VALUES
+(1, 1, 1, 1, '2026-04-09', '08:00:00', '12:00:00'),
+(2, 2, 2, 2, '2026-04-11', '08:00:00', '12:00:00'),
+(3, 3, 3, 3, '2026-04-14', '08:00:00', '12:00:00'),
+(4, 4, 4, 4, '2026-04-16', '08:00:00', '12:00:00'),
+(5, 5, 5, 5, '2026-04-20', '08:00:00', '12:00:00'),
+(6, 6, 6, 6, '2026-04-23', '08:00:00', '12:00:00'),
+(7, 1, 1, 1, '2026-04-27', '08:00:00', '12:00:00'),
+(8, 2, 2, 2, '2026-04-30', '08:00:00', '12:00:00'),
+(9, 3, 3, 3, '2026-05-10', '08:00:00', '12:00:00'),
+(10, 4, 4, 4, '2026-05-13', '08:00:00', '12:00:00'),
+(11, 5, 5, 5, '2026-07-09', '08:00:00', '12:00:00'),
+(12, 6, 6, 6, '2026-07-12', '08:00:00', '12:00:00'),
+(13, 1, 1, 1, '2026-07-15', '08:00:00', '12:00:00'),
+(14, 2, 2, 2, '2026-07-18', '08:00:00', '12:00:00'),
+(15, 3, 3, 3, '2026-10-10', '08:00:00', '12:00:00'),
+(16, 4, 4, 4, '2026-10-11', '08:00:00', '12:00:00');
+
+-- ----------------------------------------------------------------------------
+-- 4. SEED SHIPMENTS (Mapped to Task W1 ScheduleIDs)
+-- ----------------------------------------------------------------------------
+-- ScheduleID Mapping:
+-- 1-2: Colombo | 3-4: Negombo | 5-6: Galle
+-- 7-8: Matara  | 9-10: Jaffna | 11-12: Trincomalee
+
+INSERT INTO Shipment (ShipmentID, OrderDetailID, ScheduleID, ShipmentDate, Status)
+SELECT 
+    od.OrderDetailID AS ShipmentID,
+    od.OrderDetailID,
+    CASE 
+        WHEN (o.CustomerID % 6) = 1 THEN 1  -- Colombo (ScheduleID 1)
+        WHEN (o.CustomerID % 6) = 2 THEN 3  -- Negombo (ScheduleID 3)
+        WHEN (o.CustomerID % 6) = 3 THEN 5  -- Galle (ScheduleID 5)
+        WHEN (o.CustomerID % 6) = 4 THEN 7  -- Matara (ScheduleID 7)
+        WHEN (o.CustomerID % 6) = 5 THEN 9  -- Jaffna (ScheduleID 9)
+        ELSE 11                             -- Trincomalee (ScheduleID 11)
+    END AS ScheduleID,
+    o.OrderDate + INTERVAL 2 DAY AS ShipmentDate,
+    IF(o.Status = 'Delivered', 'Completed', 'Scheduled') AS Status
+FROM OrderDetail od
+JOIN Orders o ON od.OrderID = o.OrderID;
+
+-- ----------------------------------------------------------------------------
+-- 5. SEED DELIVERIES
+-- ----------------------------------------------------------------------------
+INSERT INTO Delivery (DeliveryID, OrderID, TripID, DeliveryDate, Status)
+SELECT 
+    o.OrderID AS DeliveryID,
+    o.OrderID,
+    ((o.OrderID - 1) % 16) + 1 AS TripID,
+    o.RequestedDeliveryDate AS DeliveryDate,
+    o.Status
+FROM Orders o;
