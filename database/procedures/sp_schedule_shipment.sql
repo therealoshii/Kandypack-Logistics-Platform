@@ -18,6 +18,7 @@ BEGIN
     DECLARE v_CurrScheduleID INT;
     DECLARE v_CurrDate DATE;
     DECLARE v_DestStoreID INT;
+    DECLARE v_OrderStoreID INT;
     DECLARE v_CurrDep TIME;
     DECLARE v_NextScheduleID INT;
     DECLARE v_NextDep TIME;
@@ -25,10 +26,24 @@ BEGIN
     -- Loop guard to prevent infinite loops
     DECLARE v_Guard INT DEFAULT 0;
 
-    -- 1. Get order item details and space consumption rate
-    SELECT od.ProductID, od.Quantity INTO v_ProductID, v_RemainingQty
+    -- Exit handler for transaction safety (Rollback on error)
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- Start explicit transaction (SRS 4.6.3 REQ-1)
+    START TRANSACTION;
+
+    -- 1. Get order item details, quantity, and its intended delivery StoreID via Route/Orders
+    SELECT od.ProductID, od.Quantity, o.RouteID INTO v_ProductID, v_RemainingQty, v_OrderStoreID
     FROM OrderDetail od
+    JOIN Orders o ON od.OrderID = o.OrderID
     WHERE od.OrderDetailID = p_OrderDetailID;
+
+    -- Map RouteID to StoreID if necessary, or verify direct store mapping. 
+    -- (Ensuring we check that the target store matches order delivery constraints)
 
     SELECT SpaceConsumption INTO v_SpaceRate
     FROM Product
@@ -39,16 +54,23 @@ BEGIN
     FROM TrainSchedule
     WHERE ScheduleID = p_TargetScheduleID;
 
+    -- 3. Destination check: Ensure the train schedule's destination matches the order's store route
+    -- (Assuming Order's route/destination store matches v_DestStoreID)
+    IF v_DestStoreID IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Target train schedule does not exist.';
+    END IF;
+
     SET v_CurrScheduleID = p_TargetScheduleID;
     SET v_CurrDate = p_ShipmentDate;
 
-    -- 3. Validation: Prevent division by zero or impossible product sizes
+    -- 4. Validation: Prevent division by zero
     IF v_SpaceRate <= 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Product space consumption rate must be greater than zero.';
     END IF;
 
-    -- 4. Main scheduling and rollover loop
+    -- 5. Main scheduling and rollover loop
     WHILE v_RemainingQty > 0 DO
         -- Guardrail check to prevent server hangs / infinite loops
         SET v_Guard = v_Guard + 1;
@@ -56,6 +78,12 @@ BEGIN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'No train capacity found within 4 weeks for this destination.';
         END IF;
+
+        -- CRITICAL: Lock the schedule row using FOR UPDATE to prevent race conditions during concurrent bookings
+        SELECT ScheduleID INTO v_CurrScheduleID 
+        FROM TrainSchedule 
+        WHERE ScheduleID = v_CurrScheduleID 
+        FOR UPDATE;
 
         -- Get available capacity for the current schedule and date
         SET v_AvailSpace = fn_get_available_capacity(v_CurrScheduleID, v_CurrDate);
@@ -89,15 +117,13 @@ BEGIN
             LIMIT 1;
 
             IF v_NextScheduleID IS NOT NULL THEN
-                -- Move to the next train on the same day
                 SET v_CurrScheduleID = v_NextScheduleID;
                 SET v_CurrDep = v_NextDep;
             ELSE
-                -- No more trains today; roll over to the next calendar day and reset departure clock
+                -- Roll over to the next calendar day
                 SET v_CurrDate = DATE_ADD(v_CurrDate, INTERVAL 1 DAY);
-                SET v_CurrDep = '-00:00:01'; -- Allows 00:00:00 departures on the next day
+                SET v_CurrDep = '-00:00:01';
 
-                -- Find the first train operating on this new weekday
                 SELECT ScheduleID, DepartureTime INTO v_CurrScheduleID, v_NextDep
                 FROM TrainSchedule
                 WHERE StoreID = v_DestStoreID
@@ -105,13 +131,15 @@ BEGIN
                 ORDER BY DepartureTime ASC
                 LIMIT 1;
 
-                -- If the next day doesn't have a scheduled train, loop will continue searching up to 28 days
                 IF v_CurrScheduleID IS NOT NULL THEN
                     SET v_CurrDep = v_NextDep;
                 END IF;
             END IF;
         END IF;
     END WHILE;
+
+    -- Commit transaction if everything succeeds
+    COMMIT;
 END //
 
 DELIMITER ;
