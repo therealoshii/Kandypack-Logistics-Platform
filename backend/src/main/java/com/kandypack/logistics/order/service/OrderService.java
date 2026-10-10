@@ -26,6 +26,10 @@ public class OrderService {
 
     @Transactional
     public Long placeOrder(OrderRequest request) throws Exception {
+        if (request.getDeliveryDate() == null) {
+            throw new IllegalArgumentException("Delivery date cannot be null.");
+        }
+
         // Convert items list to JSON string for stored procedure
         ObjectMapper objectMapper = new ObjectMapper();
         String itemsJson = objectMapper.writeValueAsString(request.getItems());

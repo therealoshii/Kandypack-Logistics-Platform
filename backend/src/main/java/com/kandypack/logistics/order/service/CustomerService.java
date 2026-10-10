@@ -74,13 +74,16 @@ public class CustomerService {
         dto.setAreaId(customer.getAreaID());
         dto.setUsername(customer.getUsername());
 
-        // Fetch and fill areaName and city from DeliveryArea
+        // Fetch and fill areaName and city via DeliveryArea -> Route -> Store join query
         if (customer.getAreaID() != null) {
             Optional<DeliveryArea> areaOpt = deliveryAreaRepository.findById(customer.getAreaID());
             if (areaOpt.isPresent()) {
                 DeliveryArea area = areaOpt.get();
                 dto.setAreaName(area.getAreaName());
-                dto.setCity(area.getCity());
+                
+                // Fetch city using the repository join query
+                String city = deliveryAreaRepository.findCityByAreaId(customer.getAreaID());
+                dto.setCity(city);
             }
         }
 
