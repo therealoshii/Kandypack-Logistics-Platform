@@ -19,8 +19,8 @@ public class DeliveryArea {
     @Column(name = "AreaName", nullable = false)
     private String areaName;
 
-    @Column(name = "City", nullable = false)
-    private String city;
+    @Column(name = "RouteID")
+    private Integer routeID;
 
     // Getters and Setters
     public Integer getAreaID() {
@@ -39,11 +39,11 @@ public class DeliveryArea {
         this.areaName = areaName;
     }
 
-    public String getCity() {
-        return city;
+    public Integer getRouteID() {
+        return routeID;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void routeID(Integer routeID) {
+        this.routeID = routeID;
     }
 }
