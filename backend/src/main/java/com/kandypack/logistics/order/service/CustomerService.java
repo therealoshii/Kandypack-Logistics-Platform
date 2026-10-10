@@ -11,13 +11,18 @@ import org.springframework.stereotype.Service;
 import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
 import com.kandypack.logistics.order.entity.Customer;
+import com.kandypack.logistics.order.entity.DeliveryArea;
 import com.kandypack.logistics.order.repository.CustomerRepository;
+import com.kandypack.logistics.order.repository.DeliveryAreaRepository;
 
 @Service
 public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private DeliveryAreaRepository deliveryAreaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -47,7 +52,7 @@ public class CustomerService {
         customer.setAddress(request.address());
         customer.setAreaID(request.areaId());
         customer.setUsername(request.username());
-        //encrypt the password by bcrypt
+        // encrypt the password by bcrypt
         customer.setPassword(passwordEncoder.encode(request.password()));
 
         Customer savedCustomer = customerRepository.save(customer);
@@ -68,6 +73,17 @@ public class CustomerService {
         dto.setAddress(customer.getAddress());
         dto.setAreaId(customer.getAreaID());
         dto.setUsername(customer.getUsername());
+
+        // Fetch and fill areaName and city from DeliveryArea
+        if (customer.getAreaID() != null) {
+            Optional<DeliveryArea> areaOpt = deliveryAreaRepository.findById(customer.getAreaID());
+            if (areaOpt.isPresent()) {
+                DeliveryArea area = areaOpt.get();
+                dto.setAreaName(area.getAreaName());
+                dto.setCity(area.getCity());
+            }
+        }
+
         return dto;
     }
 }

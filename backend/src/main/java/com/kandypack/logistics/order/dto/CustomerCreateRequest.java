@@ -6,11 +6,25 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CustomerCreateRequest(
-    @NotBlank @Size(max = 100) String fullName,
-    @NotBlank @Email @Size(max = 100) String email,
-    @NotBlank @Size(max = 20) String contactNumber,
-    @NotBlank @Size(max = 255) String address,
-    @NotNull Integer areaId,
-    @NotBlank @Size(max = 50) String username,
-    @NotBlank @Size(min = 12, max = 72) String password
+    @NotBlank(message = "Full name is required")
+    String fullName,
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    String email,
+
+    @Size(max = 15, message = "Contact number must not exceed 15 characters")
+    String contactNumber,
+
+    @Size(max = 200, message = "Address must not exceed 200 characters")
+    String address,
+
+    @NotNull(message = "Area ID is required")
+    Integer areaId,
+
+    @NotBlank(message = "Username is required")
+    String username,
+
+    @NotBlank(message = "Password is required")
+    String password
 ) {}
