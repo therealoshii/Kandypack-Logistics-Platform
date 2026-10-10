@@ -20,6 +20,7 @@ BEGIN
     DECLARE v_DestStoreID INT;
     DECLARE v_OrderStoreID INT;
     DECLARE v_CurrDep TIME;
+    DECLARE v_ScheduleDay VARCHAR(20);
     DECLARE v_NextScheduleID INT;
     DECLARE v_NextDep TIME;
     
@@ -33,59 +34,81 @@ BEGIN
         RESIGNAL;
     END;
 
-    -- Start explicit transaction (SRS 4.6.3 REQ-1)
+    -- Start explicit transaction
     START TRANSACTION;
 
-    -- 1. Get order item details, quantity, and its intended delivery StoreID via Route/Orders
-    SELECT od.ProductID, od.Quantity, o.RouteID INTO v_ProductID, v_RemainingQty, v_OrderStoreID
+    -- 1. Validate order line existence, calculate remaining quantity, and get route StoreID
+    SELECT 
+        od.ProductID, 
+        od.Quantity - COALESCE((SELECT SUM(s.Quantity) FROM Shipment s WHERE s.OrderDetailID = od.OrderDetailID), 0),
+        r.StoreID 
+    INTO v_ProductID, v_RemainingQty, v_OrderStoreID
     FROM OrderDetail od
     JOIN Orders o ON od.OrderID = o.OrderID
+    JOIN Route r ON o.RouteID = r.RouteID
     WHERE od.OrderDetailID = p_OrderDetailID;
 
-    -- Map RouteID to StoreID if necessary, or verify direct store mapping. 
-    -- (Ensuring we check that the target store matches order delivery constraints)
+    IF v_ProductID IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Order line does not exist.';
+    END IF;
 
-    SELECT SpaceConsumption INTO v_SpaceRate
-    FROM Product
-    WHERE ProductID = v_ProductID;
+    IF v_RemainingQty <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Order line is already fully shipped.';
+    END IF;
 
-    -- 2. Retrieve destination StoreID and initial departure time from target schedule
-    SELECT StoreID, DepartureTime INTO v_DestStoreID, v_CurrDep
+    -- 2. Retrieve destination StoreID, departure time, and operating day from target schedule
+    SELECT StoreID, DepartureTime, DayOfWeek INTO v_DestStoreID, v_CurrDep, v_ScheduleDay
     FROM TrainSchedule
     WHERE ScheduleID = p_TargetScheduleID;
 
-    -- 3. Destination check: Ensure the train schedule's destination matches the order's store route
-    -- (Assuming Order's route/destination store matches v_DestStoreID)
     IF v_DestStoreID IS NULL THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Target train schedule does not exist.';
     END IF;
 
-    SET v_CurrScheduleID = p_TargetScheduleID;
-    SET v_CurrDate = p_ShipmentDate;
+    -- 3. Destination check: Compare schedule's StoreID with order route's StoreID
+    IF v_DestStoreID != v_OrderStoreID THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Train schedule destination does not match order route destination.';
+    END IF;
 
-    -- 4. Validation: Prevent division by zero
+    -- 4. Validate that the requested date matches the train's operating day
+    IF v_ScheduleDay != DAYNAME(p_ShipmentDate) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Requested shipment date does not match the operating day of the target train schedule.';
+    END IF;
+
+    SELECT SpaceConsumption INTO v_SpaceRate
+    FROM Product
+    WHERE ProductID = v_ProductID;
+
+    -- 5. Validation: Prevent division by zero
     IF v_SpaceRate <= 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Product space consumption rate must be greater than zero.';
     END IF;
 
-    -- 5. Main scheduling and rollover loop
+    SET v_CurrScheduleID = p_TargetScheduleID;
+    SET v_CurrDate = p_ShipmentDate;
+
+    -- 6. Main scheduling and rollover loop
     WHILE v_RemainingQty > 0 DO
-        -- Guardrail check to prevent server hangs / infinite loops
+        -- Guardrail check
         SET v_Guard = v_Guard + 1;
         IF v_Guard > 200 OR v_CurrDate > DATE_ADD(p_ShipmentDate, INTERVAL 28 DAY) THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'No train capacity found within 4 weeks for this destination.';
         END IF;
 
-        -- CRITICAL: Lock the schedule row using FOR UPDATE to prevent race conditions during concurrent bookings
+        -- Lock schedule row using FOR UPDATE
         SELECT ScheduleID INTO v_CurrScheduleID 
         FROM TrainSchedule 
         WHERE ScheduleID = v_CurrScheduleID 
         FOR UPDATE;
 
-        -- Get available capacity for the current schedule and date
+        -- Get available capacity
         SET v_AvailSpace = fn_get_available_capacity(v_CurrScheduleID, v_CurrDate);
 
         IF v_AvailSpace > 0 THEN
@@ -102,7 +125,7 @@ BEGIN
             END IF;
         END IF;
 
-        -- If quantity remains, find the next available train in chronological order for that weekday
+        -- If quantity remains, rollover to next available train slot
         IF v_RemainingQty > 0 THEN
             SET v_NextScheduleID = NULL;
             SET v_NextDep = NULL;
@@ -120,16 +143,26 @@ BEGIN
                 SET v_CurrScheduleID = v_NextScheduleID;
                 SET v_CurrDep = v_NextDep;
             ELSE
-                -- Roll over to the next calendar day
+                -- Roll over to the next calendar day and reset v_CurrScheduleID to NULL
                 SET v_CurrDate = DATE_ADD(v_CurrDate, INTERVAL 1 DAY);
                 SET v_CurrDep = '-00:00:01';
+                SET v_CurrScheduleID = NULL;
 
-                SELECT ScheduleID, DepartureTime INTO v_CurrScheduleID, v_NextDep
-                FROM TrainSchedule
-                WHERE StoreID = v_DestStoreID
-                  AND DayOfWeek = DAYNAME(v_CurrDate)
-                ORDER BY DepartureTime ASC
-                LIMIT 1;
+                -- Keep moving forward day by day until a day with a train is found
+                WHILE v_CurrScheduleID IS NULL AND v_Guard < 200 DO
+                    SET v_Guard = v_Guard + 1;
+                    
+                    SELECT ScheduleID, DepartureTime INTO v_CurrScheduleID, v_NextDep
+                    FROM TrainSchedule
+                    WHERE StoreID = v_DestStoreID
+                      AND DayOfWeek = DAYNAME(v_CurrDate)
+                    ORDER BY DepartureTime ASC
+                    LIMIT 1;
+
+                    IF v_CurrScheduleID IS NULL THEN
+                        SET v_CurrDate = DATE_ADD(v_CurrDate, INTERVAL 1 DAY);
+                    END IF;
+                END WHILE;
 
                 IF v_CurrScheduleID IS NOT NULL THEN
                     SET v_CurrDep = v_NextDep;
@@ -138,7 +171,6 @@ BEGIN
         END IF;
     END WHILE;
 
-    -- Commit transaction if everything succeeds
     COMMIT;
 END //
 
