@@ -1,5 +1,6 @@
-// REST Controller for staff working hours report
-// Calls sp_staff_weekly_hours_report stored procedure
+// REST Controller for staff working hours
+// - /api/reports/staff-hours  : week-by-week history (sp_staff_weekly_hours_report)
+// - /api/staff/roster-quota   : this week's quota for every driver and assistant (vw_staff_weekly_hours)
 
 package com.kandypack.logistics.delivery.controller;
 
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = {"/api/reports/staff-hours", "/api/staff/roster-quota"}) // Base URL path for each method
+@RequestMapping("/api") // Base URL path for each method
 @CrossOrigin
 public class StaffReportController {
 
@@ -27,10 +28,18 @@ public class StaffReportController {
 
     // Get week-by-week working hours report for all drivers and assistants.
     // eg: GET /api/reports/staff-hours?startDate=2026-08-01&endDate=2026-08-31
-    @GetMapping
+    @GetMapping("/reports/staff-hours")
     public ResponseEntity<List<StaffWeeklyHoursDTO>> getStaffWeeklyHoursReport(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(staffReportService.getStaffWeeklyHoursReport(startDate, endDate));
+    }
+
+    // Get the current week's hours and remaining quota for every driver and assistant.
+    // Used by the Roster page before assigning a trip.
+    // eg: GET /api/staff/roster-quota
+    @GetMapping("/staff/roster-quota")
+    public ResponseEntity<List<StaffWeeklyHoursDTO>> getCurrentWeekQuota() {
+        return ResponseEntity.ok(staffReportService.getCurrentWeekQuota());
     }
 }
