@@ -3,6 +3,7 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS DeliveryArea;
 DROP TABLE IF EXISTS Route;
 DROP TABLE IF EXISTS Store;
 DROP TABLE IF EXISTS Product;
@@ -31,6 +32,17 @@ CREATE TABLE Route (
 
     CONSTRAINT chk_route_time CHECK (MaxDeliveryTime > 0),
     CONSTRAINT chk_route_distance CHECK (Distance > 0)
+);
+
+-- DeliveryArea Table (Areas covered by each last-mile route)
+CREATE TABLE DeliveryArea (
+    AreaID INT AUTO_INCREMENT PRIMARY KEY,
+    AreaName VARCHAR(60) NOT NULL,
+    RouteID INT NOT NULL,
+
+    CONSTRAINT uq_area_per_route UNIQUE (RouteID, AreaName),
+    CONSTRAINT fk_area_route FOREIGN KEY (RouteID)
+        REFERENCES Route(RouteID) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- Product Table (Consumer goods with train space consumption factor)
