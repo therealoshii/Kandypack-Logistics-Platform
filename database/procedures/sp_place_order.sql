@@ -12,7 +12,7 @@ CREATE PROCEDURE sp_place_order(
 proc_label: BEGIN
     -- declare variables
     DECLARE v_lead_time_days INT;
-    DECLARE v_customer_city VARCHAR(50);
+    DECLARE v_exists INT;
     DECLARE v_route_id INT;
     DECLARE v_total_amount DECIMAL(12,2) DEFAULT 0.00;
     DECLARE v_item_count INT;
@@ -38,18 +38,23 @@ proc_label: BEGIN
         SET MESSAGE_TEXT = 'Advance Order Placement Rule Violation: Orders must be placed at least 7 days before expected delivery date.';
     END IF;
 
-    -- 2.validate customer existence and get destination city--
-    SELECT City INTO v_customer_city
+    -- 2. validate customer existence (H3)
+    SELECT COUNT(*) INTO v_exists
     FROM Customer
     WHERE CustomerID = p_CustomerID;
 
-    IF v_customer_city IS NULL THEN
+    IF v_exists = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Validation Error: Customer does not exist.';
     END IF;
 
-    -- 3.automatically match route for destination address--
-    SET v_route_id = fn_get_route_for_address(v_customer_city);
+    -- 3. automatically match route for destination area using AreaID (D2 & H3)
+    SET v_route_id = fn_get_route_for_address(p_CustomerID);
+
+    IF v_route_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: Delivery area route could not be resolved for customer.';
+    END IF;
 
     -- 4. ACID Transaction
     START TRANSACTION;
