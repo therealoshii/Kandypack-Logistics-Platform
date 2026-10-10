@@ -12,7 +12,7 @@ CREATE INDEX idx_orderdetail_order ON OrderDetail (OrderID);
 CREATE INDEX idx_orderdetail_product ON OrderDetail (ProductID);
 
 -- 3. Indexes on TrainSchedule & Shipment Tables
-CREATE INDEX idx_trainschedule_destination ON TrainSchedule (Destination);
+CREATE INDEX idx_trainschedule_store ON TrainSchedule (StoreID);
 CREATE INDEX idx_trainschedule_day ON TrainSchedule (DayOfWeek);
 CREATE INDEX idx_shipment_date ON Shipment (ShipmentDate);
 CREATE INDEX idx_shipment_schedule ON Shipment (ScheduleID);
