@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
 import com.kandypack.logistics.order.service.CustomerService;
 
@@ -35,8 +36,8 @@ public class CustomerController {
     }
 
     @PostMapping
-    public CustomerDTO createCustomer(@RequestBody CustomerDTO customerDTO) {
-        return customerService.saveCustomer(customerDTO);
+    public CustomerDTO createCustomer(@RequestBody CustomerCreateRequest request) {
+        return customerService.createCustomer(request);
     }
 
     @DeleteMapping("/{id}")
