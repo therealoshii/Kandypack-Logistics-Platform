@@ -43,7 +43,7 @@ CREATE TABLE Orders (
     RouteID INT NOT NULL,
     AdminID INT NULL, -- Assigned/updated when processed by administrative staff
     OrderDate DATE NOT NULL,
-    RequestedDeliveryDate DATE NULL, -- Added for lead time verification
+    RequestedDeliveryDate DATE NOT NULL,
     Status ENUM('Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered', 'Cancelled') NOT NULL DEFAULT 'Placed',
     TotalAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
 
@@ -56,8 +56,7 @@ CREATE TABLE Orders (
         
     -- Lead time validation constraint
     CONSTRAINT chk_order_lead_time
-        CHECK (RequestedDeliveryDate IS NULL
-               OR DATEDIFF(RequestedDeliveryDate, OrderDate) >= 7)
+    CHECK (DATEDIFF(RequestedDeliveryDate, OrderDate) >= 7)
 );
 
 -- OrderDetail Table
