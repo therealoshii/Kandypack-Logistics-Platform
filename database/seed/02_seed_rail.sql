@@ -1,21 +1,6 @@
 -- =========================================================================
 -- RAILWAY TIMETABLE SEED DATA (Task W1)
 -- =========================================================================
--- ScheduleID | City         | Day       | Departure | Capacity
-------------+--------------+-----------+-----------+---------
--- 1        | Colombo      | Monday    | 06:00:00  | 150.00
--- 2        | Colombo      | Monday    | 14:00:00  | 150.00 (Same-day rollover test)
--- 3        | Negombo      | Tuesday   | 07:00:00  | 120.00
--- 4        | Negombo      | Thursday  | 07:00:00  | 120.00
--- 5        | Galle        | Wednesday | 06:30:00  | 100.00
--- 6        | Galle        | Saturday  | 06:30:00  | 100.00
--- 7        | Matara       | Thursday  | 06:00:00  | 100.00
--- 8        | Matara       | Sunday    | 06:00:00  | 100.00
--- 9        | Jaffna       | Tuesday   | 05:00:00  | 200.00
--- 10       | Jaffna       | Friday    | 05:00:00  | 200.00
--- 11       | Trincomalee  | Wednesday | 05:30:00  | 150.00
--- 12       | Trincomalee  | Sunday    | 05:30:00  | 150.00
--- =========================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 
