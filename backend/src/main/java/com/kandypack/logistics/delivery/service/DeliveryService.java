@@ -16,6 +16,8 @@ import com.kandypack.logistics.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,9 +83,11 @@ public class DeliveryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Delivery not found with ID: " + id));
 
         // Call stored procedure for ACID-compliant status update
-        entityManager.createNativeQuery("CALL sp_update_delivery_status(:deliveryId, :newStatus)")
+        // The third argument is recorded in the AuditLog as the person who made the change
+        entityManager.createNativeQuery("CALL sp_update_delivery_status(:deliveryId, :newStatus, :changedBy)")
                 .setParameter("deliveryId", id)
                 .setParameter("newStatus", newStatus)
+                .setParameter("changedBy", currentUsername())
                 .executeUpdate();
 
         // Refresh entity to reflect the stored procedure's changes
@@ -114,6 +118,12 @@ public class DeliveryService {
         return deliveryRepository.findByDeliveryDateBetween(start, end).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Username of the logged-in staff member, or SYSTEM when there is no login (e.g. tests)
+    private String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "SYSTEM";
     }
 
     // (Entity -> DTO): Unpacks database records into safe data containers before returning them over the network
