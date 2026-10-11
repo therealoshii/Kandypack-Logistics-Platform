@@ -46,11 +46,11 @@ export default function CustomerOrdersPage() {
           <h1>My orders</h1>
           <p>Track your placed orders, requested delivery dates, and real-time delivery progress.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button type="button" className="button button-quiet" onClick={loadOrders} disabled={loading} title="Refresh orders">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button type="button" className="button button-quiet" style={{ minHeight: '40px', padding: '0 15px' }} onClick={loadOrders} disabled={loading} title="Refresh orders">
             <RefreshCw size={15} className={loading ? 'spin' : ''} /> Refresh
           </button>
-          <Link className="button button-primary" to="/portal/orders/new">
+          <Link className="button button-primary" style={{ marginTop: 0 }} to="/portal/orders/new">
             <Plus size={16} /> Create a new order
           </Link>
         </div>
