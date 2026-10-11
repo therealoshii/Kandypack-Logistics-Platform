@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
-import com.kandypack.logistics.order.entity.DeliveryArea;
 import com.kandypack.logistics.order.repository.DeliveryAreaRepository;
 import com.kandypack.logistics.order.service.CustomerService;
 
@@ -46,8 +45,8 @@ public class CustomerController {
     }
 
     @GetMapping("/areas")
-    public List<DeliveryArea> getAllDeliveryAreas() {
-        return deliveryAreaRepository.findAll();
+    public List<DeliveryAreaRepository.AreaOption> getAllDeliveryAreas() {
+        return deliveryAreaRepository.findAllWithCity();
     }
 
     @PostMapping

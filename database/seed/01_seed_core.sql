@@ -108,21 +108,21 @@ INSERT INTO Product (ProductID, ProductName, UnitPrice, SpaceConsumption, StockQ
 (9, 'Kandypack Hand Sanitizer 250ml', 220.00, 0.12, 11000, 'Personal Care'),
 (10, 'Kandypack Herbal Toothpaste 120g', 160.00, 0.08, 18000, 'Personal Care');
 
--- Demo Password for all seeded customers: KandypackDemo2026
--- Hash generated using app's BCryptPasswordEncoder: $2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm
-
-INSERT INTO Customer (FullName, Email, ContactNumber, Address, AreaID, Username, Password) VALUES
-('Lanka Super Center', 'lanka@super.lk', '0112345678', '123 Galle Road', 1, 'lanka_super', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Cargills Express Negombo', 'negombo@cargills.lk', '0312233445', '45 Main Street', 2, 'cargills_neg', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Keells Super Galle', 'galle@keells.lk', '0912244556', '78 Fort Road', 3, 'keells_galle', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Arpico Matara', 'matara@arpico.lk', '0412255667', '12 Beach Road', 4, 'arpico_matara', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Northern Wholesale Jaffna', 'jaffna@northern.lk', '0212266778', '90 Hospital Road', 5, 'northern_jaffna', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Eastern Traders', 'trinco@eastern.lk', '0262277889', '34 Dockyard Road', 6, 'eastern_traders', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Sunil Grocery', 'sunil@grocery.lk', '0112889900', '56 High Level Road', 7, 'sunil_grocery', '$2a$10$4ILDIMWNYDIrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Silva & Sons', 'silva@sons.lk', '0312990011', '89 Church Road', 8, 'silva_sons', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Southern Distributors', 'southern@dist.lk', '0912001122', '23 Matara Road', 9, 'southern_dist', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Ruhunu Food City', 'ruhunu@food.lk', '0412112233', '67 Station Road', 10, 'ruhunu_food', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Nallur Retailers', 'nallur@retail.lk', '0212334455', '88 Temple Road', 11, 'nallur_ret', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
-('Harbor View Mart', 'harbor@view.lk', '0262445566', '12 Sea View Lane', 12, 'harbor_mart', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm');
+-- Demo login for every seeded customer: password is KandypackDemo2026
+-- The value below is its BCrypt hash, generated with the app's BCryptPasswordEncoder.
+TRUNCATE TABLE Customer;
+INSERT INTO Customer (CustomerID, FullName, Email, ContactNumber, Address, AreaID, Username, Password) VALUES
+(1, 'Lanka Super Center Colombo', 'orders@lankasuper.lk', '0112345678', 'No. 45 Galle Road, Colpetty', 3, 'lankasuper_col', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(2, 'Cargills Express Negombo', 'negombo@cargills.lk', '0312233445', 'No. 12 Main Street', 7, 'cargills_neg', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(3, 'Keells Super Galle', 'galle@keells.lk', '0912244556', 'No. 88 Matara Road', 13, 'keells_gal', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(4, 'Arpico Supercentre Matara', 'matara@arpico.com', '0412223344', 'No. 15 Hakmana Road', 19, 'arpico_mat', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(5, 'Northern Wholesale Mart Jaffna', 'contact@northernmart.lk', '0212224455', 'No. 200 Hospital Road', 25, 'northmart_jaf', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(6, 'Eastern Traders Trincomalee', 'info@easterntraders.lk', '0262223311', 'No. 34 Dockyard Road', 31, 'eastern_trinco', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(7, 'Sunil Grocery Stores', 'sunil.stores@gmail.com', '0114567890', 'No. 102 High Level Road, Nugegoda', 4, 'sunilstores', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(8, 'Silva & Sons Wholesale', 'silva.sons@gmail.com', '0317894561', 'No. 54 Sea Street', 10, 'silvasons', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(9, 'Southern Distributors Galle', 'info@southerndist.lk', '0917418520', 'No. 19 Fort Street', 16, 'southerndist', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(10, 'Ruhunu Food City Matara', 'ruhunu.food@gmail.com', '0419638520', 'No. 77 Beach Road', 22, 'ruhunufood', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(11, 'Nallur Retailers Jaffna', 'nallur.retail@gmail.com', '0218529630', 'No. 14 Point Pedro Road', 28, 'nallurretail', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),
+(12, 'Harbor View Mart Trincomalee', 'harborview@yahoo.com', '0263692580', 'No. 6 Inner Harbor Road', 34, 'harborview', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm');
 
 SET FOREIGN_KEY_CHECKS = 1;
