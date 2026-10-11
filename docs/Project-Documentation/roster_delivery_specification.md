@@ -29,6 +29,9 @@ corrections needed in SRS 4.6.3 REQ-2, the glossary and the allocation document.
 - **Creating a trip.** The application calls `sp_assign_truck_trip`, which inserts the trip and its
   `AuditLog` row in one transaction. The procedure does not repeat the rules. If a rule fails, the
   transaction is rolled back and the rule's message is returned.
+- **Audit.** Trip creation and every trip change are written to `AuditLog` with the username of
+  the logged-in staff member: the procedure receives it on creation, and the audit trigger reads
+  it on a change. A change made directly in SQL, with no user, is recorded as `SYSTEM`.
 - **Error reporting.** Every rule raises `SQLSTATE '45000'` with a readable message. The backend
   returns it as HTTP 400 and the Roster page shows the message in the trip form.
 
