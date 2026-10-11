@@ -5,7 +5,9 @@ services:
     image: mysql:8.0
     container_name: kandypack-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      # Passwords are never written in this file. They come from the git-ignored .env file
+      # (copy .env.example to .env and set your own values).
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env - see .env.example}
       MYSQL_DATABASE: kandypack_db
     ports:
       - "3307:3306"
@@ -14,7 +16,7 @@ services:
       - ./database:/docker-entrypoint-initdb.d:ro
     # Health check uses 127.0.0.1 (not localhost) to verify the real server accepts TCP traffic after init scripts finish
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      test: ["CMD-SHELL", 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD"']
       interval: 5s
       timeout: 5s
       retries: 40
@@ -27,7 +29,10 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       DB_USERNAME: root
-      DB_PASSWORD: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+      # First administrator account, created at startup (see backend/README-SECURITY.md)
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Set BOOTSTRAP_ADMIN_PASSWORD in .env - see .env.example}
     depends_on:
       mysqldb:
         condition: service_healthy
