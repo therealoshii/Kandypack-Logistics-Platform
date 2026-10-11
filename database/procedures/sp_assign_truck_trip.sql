@@ -17,6 +17,7 @@ DELIMITER //
 -- The "p_" means parameter
 CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_DriverID INT, IN p_AssistantID INT, -- IN attributes
                                       IN p_TripDate DATE, IN p_DispatchTime TIME, IN p_ReturnTime TIME,
+                                      IN p_ChangedBy VARCHAR(50), -- username of the staff member creating the trip
                                       OUT p_TripID INT) -- OUT attribute
     BEGIN
         DECLARE EXIT HANDLER FOR SQLEXCEPTION -- If something fails during execution (including a roster rule)
@@ -36,7 +37,7 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
 
     -- Creates an immutable trail in the AuditLog table
     INSERT INTO AuditLog (TableName, ActionType, RecordID, ChangedBy, Details)
-    VALUES ('TruckTrip', 'INSERT', p_TripID, 'FLEET_COORDINATOR',
+    VALUES ('TruckTrip', 'INSERT', p_TripID, COALESCE(p_ChangedBy, 'SYSTEM'),
             CONCAT('TruckTrip #', p_TripID, ' created with Truck #', p_TruckID, ', Driver #', p_DriverID, ', Assistant #', p_AssistantID));
 
     COMMIT; -- Permanently writes both inserts (TruckTrip and AuditLog)
