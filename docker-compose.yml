@@ -33,5 +33,16 @@ services:
         condition: service_healthy
     restart: always
 
+  # React app served by nginx, which also proxies /api to the backend service
+  # (see frontend/nginx.conf). Open http://localhost once the stack is up.
+  frontend:
+    build: ./frontend
+    container_name: kandypack-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
 volumes:
   mysql_data:

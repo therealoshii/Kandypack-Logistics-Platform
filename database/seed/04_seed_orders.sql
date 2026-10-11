@@ -301,3 +301,44 @@ JOIN TruckTrip tt
    AND tt.TripDate = o.RequestedDeliveryDate
 WHERE o.Status NOT IN ('Placed', 'Cancelled')
   AND o.RequestedDeliveryDate IS NOT NULL;
+
+
+-- 8. ROLLOVER EXAMPLE
+-- SRS Section 6 asks for at least one order line that rolls over to a later train run.
+-- Order 55 is a bulk order from a Nugegoda customer (route 2, Colombo store), booked
+-- through sp_schedule_shipment so the real overflow logic produces its shipments.
+-- 700 units x 0.5 space = 350 space units. Colombo has two Monday runs of 150 each, so:
+--   Monday 2026-10-12, 06:00 run (schedule 1): 300 units
+--   Monday 2026-10-12, 14:00 run (schedule 2): 300 units
+--   Monday 2026-10-19, 06:00 run (schedule 1): 100 units
+-- The order is 'Shipped' (on the trains, not yet out for last-mile delivery), so it has
+-- no truck trip and no delivery. It is added after sections 5 and 7 for that reason.
+
+INSERT INTO Orders
+    (OrderID, CustomerID, RouteID, AdminID,
+     OrderDate, RequestedDeliveryDate, Status, TotalAmount)
+SELECT
+    55,
+    c.CustomerID,
+    fn_get_route_for_address(c.CustomerID),
+    1,
+    DATE '2026-10-07',
+    DATE '2026-10-21',
+    'Shipped',
+    700 * p.UnitPrice
+FROM Customer c
+JOIN Product p ON p.ProductID = 1
+WHERE c.CustomerID = 7;
+
+INSERT INTO OrderDetail
+    (OrderDetailID, OrderID, ProductID, Quantity, LineTotal)
+SELECT
+    242,
+    55,
+    p.ProductID,
+    700,
+    700 * p.UnitPrice
+FROM Product p
+WHERE p.ProductID = 1;
+
+CALL sp_schedule_shipment(242, 1, DATE '2026-10-12');

@@ -109,8 +109,14 @@ UNION ALL
 
 SELECT '13 - Placed orders have truck trips',
        COUNT(*)
+-- A seeded trip belongs to the order with the same ID, route and delivery date.
+-- Matching on all three keeps trips added later (other test files, the Roster page)
+-- from being mistaken for a Placed order's trip just because the IDs are equal.
 FROM Orders o
-JOIN TruckTrip tt ON tt.TripID = o.OrderID
+JOIN TruckTrip tt
+    ON tt.TripID = o.OrderID
+   AND tt.RouteID = o.RouteID
+   AND tt.TripDate = o.RequestedDeliveryDate
 WHERE o.Status = 'Placed'
 
 UNION ALL

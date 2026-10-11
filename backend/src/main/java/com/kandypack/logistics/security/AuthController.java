@@ -85,6 +85,11 @@ public class AuthController {
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);
 
+            // Session fixation: never keep a session ID that existed before login.
+            if (servletRequest.getSession(false) != null) {
+                servletRequest.changeSessionId();
+            }
+
             contextRepository.saveContext(
                     context, servletRequest, servletResponse
             );
