@@ -29,6 +29,10 @@ CREATE PROCEDURE sp_assign_truck_trip(IN p_TruckID INT, IN p_RouteID INT, IN p_D
     -- Insert new truck trip inside transaction
     START TRANSACTION;
 
+    -- Lock the truck, driver and assistant first, so a second transaction booking any of them
+    -- waits until this one commits and its rules then see this trip (isolation)
+    CALL sp_lock_trip_resources(p_TruckID, p_DriverID, p_AssistantID);
+
     -- Adds the new scheduled trip to the TruckTrip (the trigger validates it first)
     INSERT INTO TruckTrip (TruckID, RouteID, DriverID, AssistantID, TripDate, DispatchTime, ReturnTime)
     VALUES (p_TruckID, p_RouteID, p_DriverID, p_AssistantID, p_TripDate, p_DispatchTime, p_ReturnTime);
