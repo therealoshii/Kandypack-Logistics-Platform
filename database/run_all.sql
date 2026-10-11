@@ -59,6 +59,7 @@ SOURCE /docker-entrypoint-initdb.d/triggers/trg_before_insert_trucktrip.sql;
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_validate_delivery.sql;
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_update_stock_on_dispatch.sql; 
 SOURCE /docker-entrypoint-initdb.d/triggers/trg_audit_log.sql; 
+SOURCE /docker-entrypoint-initdb.d/triggers/trg_shipment_weekday_check.sql;
 
 -- --------------------------------------------------------------------
 -- 5. INDEXES (B-Tree Performance Optimization)
