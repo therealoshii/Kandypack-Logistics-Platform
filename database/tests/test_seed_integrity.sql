@@ -1,10 +1,8 @@
 
 USE kandypack_db;
 
--- ============================================================================
--- A6: Seed integrity checks
+-- A6: Seed integrity checks.
 -- Expected result: 17 rows, with bad = 0 for every check.
--- ============================================================================
 
 SELECT '01 - shipments without a valid train schedule' AS check_name,
        COUNT(*) AS bad
@@ -111,8 +109,8 @@ UNION ALL
 
 SELECT '13 - Placed orders have truck trips',
        COUNT(*)
-FROM TruckTrip tt
-JOIN Orders o ON o.OrderID = tt.OrderID
+FROM Orders o
+JOIN TruckTrip tt ON tt.TripID = o.OrderID
 WHERE o.Status = 'Placed'
 
 UNION ALL

@@ -88,7 +88,7 @@ FOR EACH ROW
 BEGIN
     DECLARE change_details TEXT DEFAULT '';
 
-    -- Build a description only for fields that actually changed.
+    -- Driver assignment
     IF NOT (OLD.DriverID <=> NEW.DriverID) THEN
         SET change_details = CONCAT(
             change_details,
@@ -100,6 +100,7 @@ BEGIN
         );
     END IF;
 
+    -- Assistant assignment
     IF NOT (OLD.AssistantID <=> NEW.AssistantID) THEN
         SET change_details = CONCAT(
             change_details,
@@ -111,6 +112,7 @@ BEGIN
         );
     END IF;
 
+    -- Truck assignment
     IF NOT (OLD.TruckID <=> NEW.TruckID) THEN
         SET change_details = CONCAT(
             change_details,
@@ -122,6 +124,7 @@ BEGIN
         );
     END IF;
 
+    -- Route assignment
     IF NOT (OLD.RouteID <=> NEW.RouteID) THEN
         SET change_details = CONCAT(
             change_details,
@@ -133,6 +136,7 @@ BEGIN
         );
     END IF;
 
+    -- Trip date
     IF NOT (OLD.TripDate <=> NEW.TripDate) THEN
         SET change_details = CONCAT(
             change_details,
@@ -144,6 +148,7 @@ BEGIN
         );
     END IF;
 
+    -- Dispatch time
     IF NOT (OLD.DispatchTime <=> NEW.DispatchTime) THEN
         SET change_details = CONCAT(
             change_details,
@@ -155,6 +160,7 @@ BEGIN
         );
     END IF;
 
+    -- Return time
     IF NOT (OLD.ReturnTime <=> NEW.ReturnTime) THEN
         SET change_details = CONCAT(
             change_details,
@@ -166,7 +172,7 @@ BEGIN
         );
     END IF;
 
-    -- Insert an audit row only when a tracked field changed.
+    -- Write an audit row only when a tracked field changed.
     IF change_details <> '' THEN
         INSERT INTO AuditLog (
             TableName,
@@ -180,7 +186,7 @@ BEGIN
             'TruckTrip',
             NEW.TripID,
             'UPDATE_TRIP',
-            'SYSTEM',
+            COALESCE(@audit_changed_by, 'SYSTEM'),
             CURRENT_TIMESTAMP,
             CONCAT('Truck trip updated: ', change_details)
         );

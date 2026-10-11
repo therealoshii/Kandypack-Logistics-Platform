@@ -29,6 +29,7 @@ FROM Administrator a
 JOIN StaffRole r ON r.Code = 'ADMIN'
 WHERE a.AdminID = 1;
 
+
 -- 2. CLEAR TRANSACTIONAL SEED DATA
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -39,6 +40,7 @@ TRUNCATE TABLE TruckTrip;
 TRUNCATE TABLE OrderDetail;
 TRUNCATE TABLE Orders;
 SET FOREIGN_KEY_CHECKS = 1;
+
 
 -- 3. SEED ORDERS
 -- Q2, Q3 and Q4 2026.
@@ -58,9 +60,9 @@ SELECT
     0
 FROM (
     SELECT 1 AS OrderID, 1 AS CustomerID, 1 AS AdminID,
-        DATE '2026-04-01' AS OrderDate,
-        DATE '2026-04-09' AS RequestedDeliveryDate,
-        'Delivered' AS Status
+           DATE '2026-04-01' AS OrderDate,
+           DATE '2026-04-09' AS RequestedDeliveryDate,
+           'Delivered' AS Status
     UNION ALL SELECT 2, 2, 1, DATE '2026-04-03', DATE '2026-04-11', 'Delivered'
     UNION ALL SELECT 3, 3, 1, DATE '2026-04-05', DATE '2026-04-14', 'Delivered'
     UNION ALL SELECT 4, 4, 1, DATE '2026-04-08', DATE '2026-04-16', 'Delivered'
@@ -119,6 +121,7 @@ FROM (
 ) v
 JOIN Customer c ON c.CustomerID = v.CustomerID;
 
+
 -- 4. SEED ORDER DETAILS
 -- Q2 and Q3 deliberately use different product mixes.
 
@@ -133,15 +136,15 @@ SELECT
 FROM Orders o
 JOIN Product p
   ON (
-       (MONTH(o.OrderDate) BETWEEN 4 AND 6
-        AND p.ProductID BETWEEN 1 AND 6
-        AND MOD(o.OrderID + p.ProductID, 3) <> 0)
-    OR (MONTH(o.OrderDate) BETWEEN 7 AND 9
-        AND p.ProductID BETWEEN 3 AND 10
-        AND MOD(o.OrderID + p.ProductID, 3) <> 0)
-    OR (MONTH(o.OrderDate) NOT BETWEEN 4 AND 9
-        AND p.ProductID BETWEEN 1 AND 5
-        AND MOD(o.OrderID + p.ProductID, 2) = 0)
+        (MONTH(o.OrderDate) BETWEEN 4 AND 6
+         AND p.ProductID BETWEEN 1 AND 6
+         AND MOD(o.OrderID + p.ProductID, 3) <> 0)
+     OR (MONTH(o.OrderDate) BETWEEN 7 AND 9
+         AND p.ProductID BETWEEN 3 AND 10
+         AND MOD(o.OrderID + p.ProductID, 3) <> 0)
+     OR (MONTH(o.OrderDate) NOT BETWEEN 4 AND 9
+         AND p.ProductID BETWEEN 1 AND 5
+         AND MOD(o.OrderID + p.ProductID, 2) = 0)
   );
 
 UPDATE Orders o
@@ -152,22 +155,20 @@ JOIN (
 ) totals ON totals.OrderID = o.OrderID
 SET o.TotalAmount = totals.CalculatedTotal;
 
+
 -- 5. SEED TRUCK TRIPS
 -- Each trip uses a truck belonging to the route's store.
 -- The 2-hour duration is within every route's maximum delivery time.
 -- TripID is kept equal to OrderID for straightforward delivery matching.
+-- Placed and Cancelled orders must not receive trips.
+-- Rotate eligible trucks at each store rather than always choosing MIN(TruckID).
 
 INSERT INTO TruckTrip
     (TripID, TruckID, RouteID, DriverID, AssistantID,
      TripDate, DispatchTime, ReturnTime)
 SELECT
     o.OrderID,
-    (
-        SELECT MIN(t.TruckID)
-        FROM Truck t
-        JOIN Route r2 ON r2.StoreID = t.StoreID
-        WHERE r2.RouteID = o.RouteID
-    ),
+    truck_choice.TruckID,
     o.RouteID,
     1 + MOD(o.OrderID - 1, 10),
     1 + MOD(o.OrderID - 1, 10),
@@ -175,12 +176,38 @@ SELECT
     '08:00:00',
     '10:00:00'
 FROM Orders o
+JOIN Route r ON r.RouteID = o.RouteID
+JOIN (
+    SELECT
+        ranked.TruckID,
+        ranked.StoreID,
+        ranked.TruckRank,
+        ranked.TruckCount
+    FROM (
+        SELECT
+            t.TruckID,
+            t.StoreID,
+            ROW_NUMBER() OVER (
+                PARTITION BY t.StoreID
+                ORDER BY t.TruckID
+            ) AS TruckRank,
+            COUNT(*) OVER (
+                PARTITION BY t.StoreID
+            ) AS TruckCount
+        FROM Truck t
+    ) ranked
+) truck_choice
+    ON truck_choice.StoreID = r.StoreID
+   AND truck_choice.TruckRank =
+       MOD(o.OrderID - 1, truck_choice.TruckCount) + 1
 WHERE o.RequestedDeliveryDate IS NOT NULL
-  AND o.Status <> 'Cancelled';
+  AND o.Status NOT IN ('Placed', 'Cancelled');
+
 
 -- 6. SEED SHIPMENTS
 -- Shipment has no Status column. Quantity is mandatory.
 -- Find the first train-operating date from OrderDate + 2 through +8 days.
+-- Placed and Cancelled orders must not receive shipments.
 
 INSERT INTO Shipment
     (ShipmentID, OrderDetailID, ScheduleID, Quantity, ShipmentDate)
@@ -230,7 +257,8 @@ SELECT
 FROM OrderDetail od
 JOIN Orders o ON o.OrderID = od.OrderID
 JOIN Route r ON r.RouteID = o.RouteID
-WHERE o.Status <> 'Cancelled';
+WHERE o.Status NOT IN ('Placed', 'Cancelled');
+
 
 -- 7. SEED DELIVERIES
 -- No deliveries for Placed or Cancelled orders.

@@ -3,16 +3,13 @@ package com.kandypack.logistics.security;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +24,8 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
@@ -50,7 +49,6 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(staffUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
-
         return new ProviderManager(provider);
     }
 
@@ -62,14 +60,12 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(customerUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
-
         return new ProviderManager(provider);
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         configuration.setAllowedOriginPatterns(
                 List.of("http://localhost:*", "http://127.0.0.1:*"));
         configuration.setAllowedMethods(
@@ -80,7 +76,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 
@@ -98,7 +93,6 @@ public class SecurityConfig {
 
         http
                 .cors(Customizer.withDefaults())
-
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
                         .csrfTokenRequestHandler(csrfHandler)
@@ -107,22 +101,18 @@ public class SecurityConfig {
                                 "/api/auth/csrf"
                         )
                 )
-
                 .securityContext(context -> context
                         .securityContextRepository(contextRepository)
                         .requireExplicitSave(true)
                 )
-
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation(fixation -> fixation.changeSessionId())
                 )
-
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
-
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, exception) ->
                                 response.sendError(
@@ -131,17 +121,14 @@ public class SecurityConfig {
                                 response.sendError(
                                         HttpServletResponse.SC_FORBIDDEN))
                 )
-
                 .authorizeHttpRequests(authorize -> authorize
 
-                        // Public GET endpoints
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/auth/csrf",
                                 "/api/public/delivery-areas"
                         ).permitAll()
 
-                        // Public POST endpoints
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/login",
@@ -149,15 +136,15 @@ public class SecurityConfig {
                                 "/api/customers"
                         ).permitAll()
 
-                        // Customer-only authentication endpoints
                         .requestMatchers("/api/auth/customer/**")
                         .hasRole("CUSTOMER")
 
-                        // Staff-only authentication endpoints
+                        .requestMatchers("/api/portal/**")
+                        .hasRole("CUSTOMER")
+
                         .requestMatchers(
                                 "/api/auth/me",
-                                "/api/auth/password",
-                                "/api/auth/logout"
+                                "/api/auth/password"
                         ).hasAnyRole(
                                 "ADMIN",
                                 "ORDER_MANAGER",
@@ -167,7 +154,9 @@ public class SecurityConfig {
                                 "ANALYST"
                         )
 
-                        // Do not expose any other authentication endpoint
+                        // Customers and staff can log out.
+                        .requestMatchers("/api/auth/logout").authenticated()
+
                         .requestMatchers("/api/auth/**").denyAll()
 
                         .requestMatchers("/api/admin/**")
@@ -201,7 +190,7 @@ public class SecurityConfig {
                                 "/api/shipments/**"
                         ).hasAnyRole("ADMIN", "RAIL_DISPATCHER")
 
-                        // Preserve O8's GET authorization rule
+                        // Preserve O8's GET rule.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/stores/**",
@@ -224,8 +213,15 @@ public class SecurityConfig {
                                 "/api/assistants/**"
                         ).hasAnyRole("ADMIN", "ROSTER_DISPATCHER")
 
-                        // Other API routes require an authenticated user.
-                        .requestMatchers("/api/**").authenticated()
+                        // Default: only staff roles can access other APIs.
+                        .requestMatchers("/api/**").hasAnyRole(
+                                "ADMIN",
+                                "ORDER_MANAGER",
+                                "RAIL_DISPATCHER",
+                                "FLEET_MANAGER",
+                                "ROSTER_DISPATCHER",
+                                "ANALYST"
+                        )
 
                         .anyRequest().permitAll()
                 );
