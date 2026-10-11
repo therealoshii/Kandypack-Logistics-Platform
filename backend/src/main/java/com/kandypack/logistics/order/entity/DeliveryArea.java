@@ -43,7 +43,7 @@ public class DeliveryArea {
         return routeID;
     }
 
-    public void routeID(Integer routeID) {
+    public void setRouteID(Integer routeID) {
         this.routeID = routeID;
     }
 }

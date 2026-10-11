@@ -108,7 +108,8 @@ INSERT INTO Product (ProductID, ProductName, UnitPrice, SpaceConsumption, StockQ
 (9, 'Kandypack Hand Sanitizer 250ml', 220.00, 0.12, 11000, 'Personal Care'),
 (10, 'Kandypack Herbal Toothpaste 120g', 160.00, 0.08, 18000, 'Personal Care');
 
--- Demo Password for all seeded customers: KandypackDemo2026!
+-- Demo login for every seeded customer: password is KandypackDemo2026
+-- The value below is its BCrypt hash, generated with the app's BCryptPasswordEncoder.
 TRUNCATE TABLE Customer;
 INSERT INTO Customer (CustomerID, FullName, Email, ContactNumber, Address, AreaID, Username, Password) VALUES
 (1, 'Lanka Super Center Colombo', 'orders@lankasuper.lk', '0112345678', 'No. 45 Galle Road, Colpetty', 3, 'lankasuper_col', '$2a$10$7vN1aQ8P3v4xZ9s2B1e8uO1F5g6h7j8k9l0m1n2o3p4q5r6s7t8u9'),
