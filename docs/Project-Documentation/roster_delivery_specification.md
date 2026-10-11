@@ -32,6 +32,13 @@ corrections needed in SRS 4.6.3 REQ-2, the glossary and the allocation document.
 - **Audit.** Trip creation and every trip change are written to `AuditLog` with the username of
   the logged-in staff member: the procedure receives it on creation, and the audit trigger reads
   it on a change. A change made directly in SQL, with no user, is recorded as `SYSTEM`.
+- **Concurrent bookings (isolation).** Before a trip is written, `sp_lock_trip_resources` locks the
+  trip's `Truck`, `Driver` and `Assistant` rows. A second transaction booking any of the same three
+  waits until the first commits, and its rules then see the first trip. `sp_assign_truck_trip` takes
+  the lock before its insert; the backend takes it before an update and runs that update at READ
+  COMMITTED, so the rules read what was committed while it waited. The locks are always taken in the
+  same order, so two bookings cannot deadlock on them. A trip written by direct SQL is still checked
+  by every rule, but is only protected against a simultaneous booking if the same lock is taken first.
 - **Error reporting.** Every rule raises `SQLSTATE '45000'` with a readable message. The backend
   returns it as HTTP 400 and the Roster page shows the message in the trip form.
 
