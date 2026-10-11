@@ -158,31 +158,51 @@ SET o.TotalAmount = totals.CalculatedTotal;
 
 -- 5. SEED TRUCK TRIPS
 -- Each trip uses a truck belonging to the route's store.
--- The 2-hour duration is within every route's maximum delivery time.
+-- Rotate by each store's own order sequence, not the global OrderID. This
+-- ensures every truck at a store receives trips before rotation repeats.
 -- TripID is kept equal to OrderID for straightforward delivery matching.
 -- Placed and Cancelled orders must not receive trips.
--- Rotate eligible trucks at each store rather than always choosing MIN(TruckID).
 
 INSERT INTO TruckTrip
     (TripID, TruckID, RouteID, DriverID, AssistantID,
      TripDate, DispatchTime, ReturnTime)
 SELECT
-    o.OrderID,
+    order_position.OrderID,
     truck_choice.TruckID,
-    o.RouteID,
-    1 + MOD(o.OrderID - 1, 10),
-    1 + MOD(o.OrderID - 1, 10),
-    o.RequestedDeliveryDate,
+    order_position.RouteID,
+    1 + MOD(order_position.OrderID - 1, 10),
+    1 + MOD(order_position.OrderID - 1, 10),
+    order_position.RequestedDeliveryDate,
     '08:00:00',
     '10:00:00'
-FROM Orders o
-JOIN Route r ON r.RouteID = o.RouteID
+FROM (
+    SELECT
+        eligible.OrderID,
+        eligible.RouteID,
+        eligible.StoreID,
+        eligible.RequestedDeliveryDate,
+        ROW_NUMBER() OVER (
+            PARTITION BY eligible.StoreID
+            ORDER BY eligible.OrderID
+        ) AS StoreOrderPosition
+    FROM (
+        SELECT
+            o.OrderID,
+            o.RouteID,
+            r.StoreID,
+            o.RequestedDeliveryDate
+        FROM Orders o
+        JOIN Route r ON r.RouteID = o.RouteID
+        WHERE o.RequestedDeliveryDate IS NOT NULL
+          AND o.Status NOT IN ('Placed', 'Cancelled')
+    ) eligible
+) order_position
 JOIN (
     SELECT
-        ranked.TruckID,
-        ranked.StoreID,
-        ranked.TruckRank,
-        ranked.TruckCount
+        ranked_trucks.TruckID,
+        ranked_trucks.StoreID,
+        ranked_trucks.TruckRank,
+        ranked_trucks.TruckCount
     FROM (
         SELECT
             t.TruckID,
@@ -195,13 +215,11 @@ JOIN (
                 PARTITION BY t.StoreID
             ) AS TruckCount
         FROM Truck t
-    ) ranked
+    ) ranked_trucks
 ) truck_choice
-    ON truck_choice.StoreID = r.StoreID
+    ON truck_choice.StoreID = order_position.StoreID
    AND truck_choice.TruckRank =
-       MOD(o.OrderID - 1, truck_choice.TruckCount) + 1
-WHERE o.RequestedDeliveryDate IS NOT NULL
-  AND o.Status NOT IN ('Placed', 'Cancelled');
+       MOD(order_position.StoreOrderPosition - 1, truck_choice.TruckCount) + 1;
 
 
 -- 6. SEED SHIPMENTS

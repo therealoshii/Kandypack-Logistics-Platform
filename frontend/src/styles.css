@@ -536,3 +536,224 @@ tbody tr:hover td { background: #fbfcfb; }
   .panel, .metric-card { box-shadow: none; break-inside: avoid; }
   body { background: #fff; }
 }
+
+/* ============================================================================
+   CUSTOMER PORTAL
+   ============================================================================ */
+.customer-portal {
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(169, 212, 189, .20), transparent 28rem),
+    var(--canvas);
+}
+.customer-portal-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 14px clamp(18px, 4vw, 56px);
+  background: rgba(255, 255, 255, .96);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 4px 20px rgba(29, 42, 37, .035);
+  backdrop-filter: blur(14px);
+}
+.customer-portal-brand {
+  display: inline-flex;
+  min-width: max-content;
+  align-items: center;
+  gap: 11px;
+  color: var(--forest);
+  text-decoration: none;
+}
+.customer-portal-brand .auth-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #18382d;
+  background: #dceee2;
+  border: 1px solid #c9e3d2;
+  border-radius: 10px;
+}
+.customer-portal-brand strong,
+.customer-portal-brand small {
+  display: block;
+}
+.customer-portal-brand strong {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+.customer-portal-brand small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .9px;
+}
+.customer-portal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+.customer-portal-nav a {
+  display: inline-flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  color: #64736a;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.customer-portal-nav a:hover {
+  color: var(--forest);
+  background: #f2f7f3;
+}
+.customer-portal-nav a.active {
+  color: var(--forest);
+  background: var(--green-soft);
+  border-color: #d5e9dc;
+}
+.customer-portal-account {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+  gap: 12px;
+}
+.customer-portal-account > span {
+  max-width: 190px;
+  overflow: hidden;
+  color: #425249;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.customer-portal-account .button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  color: #53635a;
+  background: #fff;
+  border: 1px solid #dfe7e1;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.customer-portal-account .button:hover:not(:disabled) {
+  color: var(--danger);
+  background: #fff8f6;
+  border-color: #efd7d1;
+}
+.customer-portal-content {
+  width: min(100% - 48px, 1240px);
+  min-height: calc(100vh - 82px);
+  padding: 42px 0 64px;
+  margin: 0 auto;
+}
+.customer-portal-content > section:not(.login-panel) {
+  padding: clamp(22px, 3vw, 36px);
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.customer-portal-content > section > h1 {
+  margin-bottom: 10px;
+}
+.customer-portal-content > section > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.customer-portal-content .login-panel {
+  width: min(100%, 680px);
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+.customer-portal-content .field-label {
+  margin-top: 17px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.customer-portal-content .field-label p {
+  margin: 6px 0 0;
+  padding: 11px 12px;
+  color: var(--ink);
+  background: #f7f9f7;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.customer-portal-content .button-primary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  margin-top: 12px;
+  text-decoration: none;
+}
+.customer-portal > .login-error {
+  width: min(100% - 48px, 1240px);
+  padding: 11px 14px;
+  margin: 14px auto 0;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid #f0d4d0;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .customer-portal-header {
+    flex-wrap: wrap;
+    gap: 13px 20px;
+  }
+  .customer-portal-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 8px;
+    border-top: 1px solid #edf1ed;
+  }
+  .customer-portal-account { margin-left: auto; }
+  .customer-portal-content { min-height: calc(100vh - 130px); padding-top: 28px; }
+}
+@media (max-width: 600px) {
+  .customer-portal-header { padding: 13px 15px 10px; }
+  .customer-portal-brand .auth-mark { width: 36px; height: 36px; }
+  .customer-portal-brand strong { font-size: 11px; }
+  .customer-portal-brand small { font-size: 8px; }
+  .customer-portal-account { gap: 7px; }
+  .customer-portal-account > span { max-width: 115px; font-size: 10px; }
+  .customer-portal-account .button { min-height: 33px; padding: 0 8px; font-size: 10px; }
+  .customer-portal-nav { gap: 3px; overflow-x: auto; }
+  .customer-portal-nav a { min-height: 36px; padding: 0 9px; font-size: 10px; }
+  .customer-portal-nav a svg { width: 14px; height: 14px; }
+  .customer-portal-content { width: calc(100% - 28px); padding: 20px 0 36px; }
+  .customer-portal-content > section:not(.login-panel) { padding: 20px 16px; }
+  .customer-portal-content .login-panel { padding: 20px 16px; }
+  .customer-portal > .login-error { width: calc(100% - 28px); }
+}
+
