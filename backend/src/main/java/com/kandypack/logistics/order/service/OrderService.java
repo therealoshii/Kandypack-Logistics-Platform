@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kandypack.logistics.order.dto.OrderRequest;
-import com.kandypack.logistics.order.entity.Order;
 import com.kandypack.logistics.order.repository.OrderRepository;
 
 @Service
@@ -50,8 +49,8 @@ public class OrderService {
         return orderId;
     }
 
-    // to get order history by customer ID
-    public List<Order> getOrdersByCustomerId(Integer customerId) {
-        return orderRepository.findByCustomerID(customerId);
+    // to get order history by customer ID, with each order's delivery status
+    public List<OrderRepository.OrderHistoryRow> getOrdersByCustomerId(Integer customerId) {
+        return orderRepository.findHistoryByCustomerId(customerId);
     }
 }

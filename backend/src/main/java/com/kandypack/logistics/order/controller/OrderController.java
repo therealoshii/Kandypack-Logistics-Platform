@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.order.dto.OrderRequest;
-import com.kandypack.logistics.order.entity.Order;
+import com.kandypack.logistics.order.repository.OrderRepository;
 import com.kandypack.logistics.order.service.OrderService;
 
 @RestController
@@ -40,8 +40,8 @@ public class OrderController {
 
     // Get orders history filtered by customerId
     @GetMapping
-    public ResponseEntity<List<Order>> getOrdersByCustomer(@RequestParam Integer customerId) {
-        List<Order> orders = orderService.getOrdersByCustomerId(customerId);
+    public ResponseEntity<List<OrderRepository.OrderHistoryRow>> getOrdersByCustomer(@RequestParam Integer customerId) {
+        List<OrderRepository.OrderHistoryRow> orders = orderService.getOrdersByCustomerId(customerId);
         return ResponseEntity.ok(orders);
     }
 }
