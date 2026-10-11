@@ -293,7 +293,7 @@ Group 24 · Department of Computer Science and Engineering, University of Moratu
 | Member | GitHub | Module |
 |---|---|---|
 | Haneef H. M. | [@mohamedhaneef22](https://github.com/mohamedhaneef22) | Customers and orders |
-| Kawya W. W. D. (Widushi) | [@widushiwickramage](https://github.com/widushiwickramage) | Rail cargo and shipments |
+| Kawya W. W. D. | [@widushiwickramage](https://github.com/widushiwickramage) | Rail cargo and shipments |
 | Shameera M. N. F. | [@fathimashameera1234](https://github.com/fathimashameera1234) | Stores, routes and fleet |
-| Vithanage K. O. (Oshan) | [@therealoshii](https://github.com/therealoshii) | Roster, trips and deliveries |
+| Vithanage K. O. | [@therealoshii](https://github.com/therealoshii) | Roster, trips and deliveries |
 | Aathiththan K. | [@Ihtaa2004](https://github.com/Ihtaa2004) | Reports and administration |
