@@ -6,6 +6,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Trucks (Assigned to regional stores for last-mile road dispatch)
+-- Truck capacity is in cargo space units, the same unit as train cargo capacity.
 TRUNCATE TABLE Truck;
 INSERT INTO Truck (TruckID, RegistrationNumber, Capacity, StoreID) VALUES
 
