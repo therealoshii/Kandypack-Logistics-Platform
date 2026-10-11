@@ -32,6 +32,7 @@ SELECT '>>> [3/7] Creating Stored Procedures...' AS Step;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_place_order.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_schedule_shipment.sql;
 -- Truck trip rules (called by the TruckTrip triggers, so they must load before the triggers block)
+SOURCE /docker-entrypoint-initdb.d/procedures/sp_lock_trip_resources.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_trip_route.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_schedule_conflict.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_driver_consecutive.sql;
