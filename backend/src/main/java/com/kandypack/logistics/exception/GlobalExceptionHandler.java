@@ -129,6 +129,32 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 5b. Malformed JSON / wrong field format -> HTTP 400
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex,
+            WebRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Malformed request body or invalid field format.",
+                request
+        );
+    }
+
+    // 5c. Duplicate email conflict -> HTTP 409
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmail(
+            DuplicateEmailException ex,
+            WebRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request
+        );
+    }
+
     // 6. Database integrity violations and MySQL business-rule errors
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
