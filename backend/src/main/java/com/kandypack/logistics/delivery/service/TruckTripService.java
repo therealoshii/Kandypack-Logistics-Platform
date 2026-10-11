@@ -15,6 +15,8 @@ import com.kandypack.logistics.delivery.repository.TruckTripRepository;
 import com.kandypack.logistics.exception.ResourceNotFoundException;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +83,7 @@ public class TruckTripService {
         }
 
         Integer tripId = jdbcTemplate.execute((Connection conn) -> {
-            try (CallableStatement cs = conn.prepareCall("{CALL sp_assign_truck_trip(?, ?, ?, ?, ?, ?, ?, ?)}")) {
+            try (CallableStatement cs = conn.prepareCall("{CALL sp_assign_truck_trip(?, ?, ?, ?, ?, ?, ?, ?, ?)}")) {
                 cs.setInt(1, dto.getTruckId());
                 cs.setInt(2, dto.getRouteId());
                 cs.setInt(3, dto.getDriverId());
@@ -89,9 +91,10 @@ public class TruckTripService {
                 cs.setDate(5, java.sql.Date.valueOf(dto.getTripDate()));
                 cs.setTime(6, java.sql.Time.valueOf(dto.getDispatchTime()));
                 cs.setTime(7, java.sql.Time.valueOf(dto.getReturnTime()));
-                cs.registerOutParameter(8, Types.INTEGER); // p_TripID
+                cs.setString(8, currentUsername()); // p_ChangedBy, recorded in the AuditLog
+                cs.registerOutParameter(9, Types.INTEGER); // p_TripID
                 cs.execute();
-                return cs.getInt(8);
+                return cs.getInt(9);
             }
         });
 
@@ -117,8 +120,17 @@ public class TruckTripService {
         trip.setDispatchTime(dto.getDispatchTime());
         trip.setReturnTime(dto.getReturnTime());
 
-        TruckTrip updated = truckTripRepository.save(trip);
-        return toDTO(updated);
+        // trg_audit_trucktrip_update records @audit_changed_by as the person who made the change.
+        // The variable lives on the database connection, so it is set just before the UPDATE is
+        // flushed and cleared straight after, even if a roster rule rejects the change. The
+        // connection pool reuses connections, and the next request must not inherit this user.
+        jdbcTemplate.update("SET @audit_changed_by = ?", currentUsername());
+        try {
+            TruckTrip updated = truckTripRepository.saveAndFlush(trip);
+            return toDTO(updated);
+        } finally {
+            jdbcTemplate.update("SET @audit_changed_by = NULL");
+        }
     }
 
     // Delete a truck trip
@@ -151,6 +163,12 @@ public class TruckTripService {
         return truckTripRepository.findByTripDateBetween(start, end).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Username of the logged-in staff member, or SYSTEM when there is no login (e.g. tests)
+    private String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "SYSTEM";
     }
 
     // (Entity -> DTO): Unpacks database records into safe data containers before returning them over the network
