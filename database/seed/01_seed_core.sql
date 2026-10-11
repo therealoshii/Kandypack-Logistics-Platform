@@ -3,6 +3,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Stores(Colombo,Negombo,Galle,Matara,Jaffna,Trincomalee)--
+-- Store capacity is in cargo space units, the same unit as train cargo capacity.
 TRUNCATE TABLE Store;
 INSERT INTO Store (StoreID, StoreName, Capacity, City) VALUES
 (1, 'Colombo Central Warehouse', 5000.00, 'Colombo'),
