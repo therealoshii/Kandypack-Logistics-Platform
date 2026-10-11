@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.CallableStatement;
@@ -103,6 +104,12 @@ public class TruckTripService {
     }
 
     // Update an existing truck trip
+    /* Two dispatchers can save at the same moment, so the truck, driver and assistant are locked
+     * (sp_lock_trip_resources) before the UPDATE runs the roster rules. READ COMMITTED makes the
+     * rules read what was committed while this request was waiting for the lock; with the default
+     * REPEATABLE READ they would still see the data as it was when the request started.
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TruckTripDTO updateTrip(Integer id, TruckTripDTO dto) {
         TruckTrip trip = truckTripRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TruckTrip not found with ID: " + id));
@@ -124,6 +131,9 @@ public class TruckTripService {
         // The variable lives on the database connection, so it is set just before the UPDATE is
         // flushed and cleared straight after, even if a roster rule rejects the change. The
         // connection pool reuses connections, and the next request must not inherit this user.
+        jdbcTemplate.update("CALL sp_lock_trip_resources(?, ?, ?)",
+                dto.getTruckId(), dto.getDriverId(), dto.getAssistantId());
+
         jdbcTemplate.update("SET @audit_changed_by = ?", currentUsername());
         try {
             TruckTrip updated = truckTripRepository.saveAndFlush(trip);
