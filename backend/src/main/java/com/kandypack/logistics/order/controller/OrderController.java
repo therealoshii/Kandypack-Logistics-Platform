@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kandypack.logistics.order.dto.OrderRequest;
@@ -38,9 +38,9 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // to get orders history
-    @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Order>> getOrdersByCustomer(@PathVariable Integer customerId) {
+    // Get orders history filtered by customerId
+    @GetMapping
+    public ResponseEntity<List<Order>> getOrdersByCustomer(@RequestParam Integer customerId) {
         List<Order> orders = orderService.getOrdersByCustomerId(customerId);
         return ResponseEntity.ok(orders);
     }
