@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.kandypack.logistics.order.dto.CustomerCreateRequest;
 import com.kandypack.logistics.order.dto.CustomerDTO;
+import com.kandypack.logistics.order.dto.CustomerPasswordChangeRequest;
+import com.kandypack.logistics.order.dto.CustomerUpdateRequest;
 import com.kandypack.logistics.order.entity.Customer;
 import com.kandypack.logistics.order.entity.DeliveryArea;
 import com.kandypack.logistics.order.repository.CustomerRepository;
@@ -61,6 +63,42 @@ public class CustomerService {
 
     public void deleteCustomer(Integer id) {
         customerRepository.deleteById(id);
+    }
+
+    public CustomerDTO updateCustomer(Integer customerId, CustomerUpdateRequest request) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new com.kandypack.logistics.exception.ResourceNotFoundException("Customer not found with id: " + customerId));
+
+        if (customerRepository.existsByEmailIgnoreCaseAndCustomerIDNot(request.email(), customerId)) {
+            throw new com.kandypack.logistics.exception.DuplicateEmailException("An account already uses that email.");
+        }
+
+        customer.setFullName(request.fullName());
+        customer.setEmail(request.email());
+        customer.setContactNumber(request.contactNumber());
+        customer.setAddress(request.address());
+        if (request.areaId() != null) {
+            customer.setAreaID(request.areaId());
+        }
+
+        Customer savedCustomer = customerRepository.save(customer);
+        return convertToDTO(savedCustomer);
+    }
+
+    public void changePassword(Integer customerId, CustomerPasswordChangeRequest request) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new com.kandypack.logistics.exception.ResourceNotFoundException("Customer not found with id: " + customerId));
+
+        if (!passwordEncoder.matches(request.currentPassword(), customer.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
+
+        if (request.newPassword() == null || request.newPassword().length() < 12 || request.newPassword().length() > 72) {
+            throw new IllegalArgumentException("New password must be between 12 and 72 characters.");
+        }
+
+        customer.setPassword(passwordEncoder.encode(request.newPassword()));
+        customerRepository.save(customer);
     }
 
     // Helper conversion methods

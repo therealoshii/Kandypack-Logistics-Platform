@@ -10,4 +10,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     Optional<Customer> findByUsernameIgnoreCase(String username);
     boolean existsByUsernameIgnoreCase(String username);
     boolean existsByEmailIgnoreCase(String email);
+    Optional<Customer> findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndCustomerIDNot(String email, Integer customerID);
 }
