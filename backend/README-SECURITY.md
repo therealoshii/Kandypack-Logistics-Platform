@@ -8,18 +8,28 @@ For a new database, run the regular schema and seed scripts; `schema/02_tables_o
 
 For an existing database, back it up and apply `../database/migrations/staff_roles.sql` once. Do not rerun the destructive schema setup scripts on a database containing data.
 
-The existing sample Administrator passwords are placeholder hashes and are not valid login credentials. Create a real initial administrator using environment variables before starting the backend:
+No administrator password is stored in the source code. The seeded `admin` account has a placeholder hash that cannot be used to log in. At startup the backend reads the first administrator's details from environment variables and gives that account a real BCrypt password hash:
+
+| Variable | Required | Default | Meaning |
+|---|---|---|---|
+| `BOOTSTRAP_ADMIN_PASSWORD` | Yes | none | Password, 12 to 72 characters |
+| `BOOTSTRAP_ADMIN_USERNAME` | No | `admin` | Account to create or to activate |
+| `BOOTSTRAP_ADMIN_EMAIL` | No | `admin@kandypack.lk` | Used only when the account is created |
+| `BOOTSTRAP_ADMIN_NAME` | No | `Kandypack Administrator` | Used only when the account is created |
+
+If `BOOTSTRAP_ADMIN_PASSWORD` is missing or the wrong length, the backend still starts, logs a warning and provisions no administrator, so nobody can log in as staff until it is set.
+
+With Docker Compose, copy `.env.example` to `.env` in the repository root and set `DB_ROOT_PASSWORD` and `BOOTSTRAP_ADMIN_PASSWORD`. `.env` is git-ignored.
+
+Without Docker, set the variables in the shell before starting the backend:
 
 ```powershell
-$env:BOOTSTRAP_ADMIN_NAME = "Kandypack Administrator"
-$env:BOOTSTRAP_ADMIN_USERNAME = "kandy-admin"
-$env:BOOTSTRAP_ADMIN_EMAIL = "admin@example.com"
 $env:BOOTSTRAP_ADMIN_PASSWORD = "use-a-unique-password-of-at-least-12-characters"
 $env:DB_PASSWORD = "your-mysql-password"
 .\mvnw.cmd spring-boot:run
 ```
 
-The bootstrap runs only when the requested username does not already exist. It creates that account with the `ADMIN` role and a BCrypt password hash. After the first successful startup, remove the four `BOOTSTRAP_ADMIN_*` variables from the shell. The existing sample `admin` account can then be disabled from the staff screen if desired.
+The bootstrap creates the account if the username does not exist, or replaces the password if the account still has the seed's placeholder hash. It never changes a real password, so changing `BOOTSTRAP_ADMIN_PASSWORD` later has no effect on an account that already works; use the Change password screen instead. Further staff accounts are created from the Staff and roles screen.
 
 ## Roles
 

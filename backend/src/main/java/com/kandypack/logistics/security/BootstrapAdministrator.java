@@ -38,24 +38,22 @@ public class BootstrapAdministrator implements ApplicationRunner {
             return;
         }
 
-        // 1. Process environment variables if specified
-        String envUser = environment.getProperty("BOOTSTRAP_ADMIN_USERNAME");
-        String envPass = environment.getProperty("BOOTSTRAP_ADMIN_PASSWORD");
-        String envEmail = environment.getProperty("BOOTSTRAP_ADMIN_EMAIL");
-        String envName = environment.getProperty("BOOTSTRAP_ADMIN_NAME");
+        // The administrator password is never stored in the source code. It is read from the
+        // environment (BOOTSTRAP_ADMIN_PASSWORD), which docker-compose.yml takes from the
+        // git-ignored .env file. BOOTSTRAP_ADMIN_USERNAME defaults to "admin", the account the
+        // seed creates with a placeholder hash that cannot be used to log in.
+        String username = environment.getProperty("BOOTSTRAP_ADMIN_USERNAME", "admin");
+        String password = environment.getProperty("BOOTSTRAP_ADMIN_PASSWORD");
+        String email = environment.getProperty("BOOTSTRAP_ADMIN_EMAIL", "admin@kandypack.lk");
+        String name = environment.getProperty("BOOTSTRAP_ADMIN_NAME", "Kandypack Administrator");
 
-        if (envUser != null && !envUser.isBlank() && envPass != null && envPass.length() >= 8) {
-            provisionAdmin(envUser, envPass,
-                    envEmail != null ? envEmail : "admin@kandypack.lk",
-                    envName != null ? envName : "Kandypack Administrator",
-                    adminRole);
+        if (username.isBlank() || password == null || password.length() < 12 || password.length() > 72) {
+            logger.warn("BOOTSTRAP_ADMIN_PASSWORD is not set, or is not 12 to 72 characters long. "
+                    + "No administrator account was provisioned; set it in the environment and restart.");
+            return;
         }
 
-        // 2. Ensure default "admin" account has a working valid BCrypt password
-        provisionAdmin("admin", "Admin@12345678", "admin@kandypack.lk", "Kandypack Administrator", adminRole);
-
-        // 3. Ensure "kandy-admin" account also exists with a working valid BCrypt password
-        provisionAdmin("kandy-admin", "Admin@12345678", "kandy-admin@kandypack.lk", "Kandypack Administrator", adminRole);
+        provisionAdmin(username.trim(), password, email, name, adminRole);
     }
 
     private void provisionAdmin(String username, String rawPassword, String email, String name, StaffRole adminRole) {
@@ -67,7 +65,7 @@ public class BootstrapAdministrator implements ApplicationRunner {
             roleSet.add(adminRole);
             account.setRoles(roleSet);
             accounts.save(account);
-            logger.info("Created default administrator account '{}'.", username);
+            logger.info("Created administrator account '{}'.", username);
         } else {
             // If the account exists with placeholder dummy hash from seed data (e.g. "...hash"), replace with valid hash
             String currentHash = account.getPasswordHash();
