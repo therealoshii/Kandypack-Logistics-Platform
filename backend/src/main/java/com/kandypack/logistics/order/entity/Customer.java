@@ -28,8 +28,8 @@ public class Customer {
     @Column(name = "Address")
     private String address;
 
-    @Column(name = "City")
-    private String city;
+    @Column(name = "AreaID")
+    private Integer areaID;
 
     @Column(name = "Username")
     private String username;
@@ -54,8 +54,8 @@ public class Customer {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public Integer getAreaID() { return areaID; }
+    public void setAreaID(Integer areaID) { this.areaID = areaID; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

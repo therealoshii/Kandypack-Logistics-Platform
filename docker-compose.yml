@@ -1,40 +1,53 @@
-
+version: '3.8'
 
 services:
   mysqldb:
     image: mysql:8.0
     container_name: kandypack-mysql
-    restart: always
     environment:
+      # Passwords are never written in this file. They come from the git-ignored .env file
+      # (copy .env.example to .env and set your own values).
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env - see .env.example}
       MYSQL_DATABASE: kandypack_db
-      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
+      - ./database:/docker-entrypoint-initdb.d:ro
+    # Health check uses 127.0.0.1 (not localhost) to verify the real server accepts TCP traffic after init scripts finish
+    healthcheck:
+      test: ["CMD-SHELL", 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD"']
+      interval: 5s
+      timeout: 5s
+      retries: 40
 
   backend:
     build: ./backend
     container_name: kandypack-backend
-    restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - mysqldb
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      DB_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/kandypack_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+      # First administrator account, created at startup (see backend/README-SECURITY.md)
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Set BOOTSTRAP_ADMIN_PASSWORD in .env - see .env.example}
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    restart: always
 
+  # React app served by nginx, which also proxies /api to the backend service
+  # (see frontend/nginx.conf). Open http://localhost once the stack is up.
   frontend:
     build: ./frontend
     container_name: kandypack-frontend
-    restart: always
     ports:
       - "80:80"
     depends_on:
       - backend
-      
+    restart: always
+
 volumes:
   mysql_data:

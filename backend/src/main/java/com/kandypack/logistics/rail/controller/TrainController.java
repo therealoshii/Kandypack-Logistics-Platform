@@ -17,6 +17,10 @@ public class TrainController {
         this.trainService = trainService;
     }
 
+    /**
+     * Get available train schedules filtered by the shipment date's weekday,
+     * returning destination city, train name, and remaining dynamic capacity.
+     */
     @GetMapping("/schedules")
     public List<Map<String, Object>> getTrainSchedules(@RequestParam("date") String shipmentDate) {
         return trainService.getTrainSchedules(shipmentDate);

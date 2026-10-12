@@ -14,9 +14,16 @@ import com.kandypack.logistics.delivery.repository.TruckTripRepository;
 // Exception handling imports
 import com.kandypack.logistics.exception.ResourceNotFoundException;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,12 +35,15 @@ public class TruckTripService {
     private final TruckTripRepository truckTripRepository;
     private final DriverRepository driverRepository;
     private final AssistantRepository assistantRepository;
+    private final JdbcTemplate jdbcTemplate; // For calling the sp_assign_truck_trip stored procedure
 
     // A truck trip be isolated it needs driver, assistant, truck, route
-    public TruckTripService(TruckTripRepository truckTripRepository, DriverRepository driverRepository, AssistantRepository assistantRepository) {
+    public TruckTripService(TruckTripRepository truckTripRepository, DriverRepository driverRepository,
+                            AssistantRepository assistantRepository, JdbcTemplate jdbcTemplate) {
         this.truckTripRepository = truckTripRepository;
         this.driverRepository = driverRepository;
         this.assistantRepository = assistantRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // Get all truck trips  
@@ -54,35 +64,52 @@ public class TruckTripService {
 
     
     // Create a new truck trip
-    /* The INSERT fires trigger trg_before_insert_trucktrip which validates:
-     *   - ReturnTime > DispatchTime
-     *   - No schedule conflicts
-     *   - Driver 30-min rest between trips
-     *   - Assistant max 2 consecutive trips
-     *   - Driver 40h weekly max
-     *   - Assistant 60h weekly max
+    /* Goes through the sp_assign_truck_trip stored procedure, which saves the trip and its
+     * AuditLog record in one transaction. Its INSERT fires trg_before_insert_trucktrip, which runs:
+     *   - sp_check_trip_route            (ReturnTime > DispatchTime, truck from the route's store, max delivery time)
+     *   - sp_check_schedule_conflict     (no overlapping truck, driver or assistant)
+     *   - sp_check_driver_consecutive    (driver 30-min rest between trips)
+     *   - sp_check_assistant_consecutive (assistant max 2 consecutive trips)
+     *   - sp_check_weekly_hours          (driver 40h and assistant 60h weekly max)
+     * A broken rule comes back as an SQLException with SQLSTATE 45000. It is not caught here,
+     * so the exception handler can still find it and return the rule's message.
      */
     public TruckTripDTO createTrip(TruckTripDTO dto) {
         // Validate driver and assistant existence
-        Driver driver = driverRepository.findById(dto.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with ID: " + dto.getDriverId()));
-        Assistant assistant = assistantRepository.findById(dto.getAssistantId())
-                .orElseThrow(() -> new ResourceNotFoundException("Assistant not found with ID: " + dto.getAssistantId()));
+        if (!driverRepository.existsById(dto.getDriverId())) {
+            throw new ResourceNotFoundException("Driver not found with ID: " + dto.getDriverId());
+        }
+        if (!assistantRepository.existsById(dto.getAssistantId())) {
+            throw new ResourceNotFoundException("Assistant not found with ID: " + dto.getAssistantId());
+        }
 
-        TruckTrip trip = new TruckTrip();
-        trip.setTruckId(dto.getTruckId());
-        trip.setRouteId(dto.getRouteId());
-        trip.setDriver(driver);
-        trip.setAssistant(assistant);
-        trip.setTripDate(dto.getTripDate());
-        trip.setDispatchTime(dto.getDispatchTime());
-        trip.setReturnTime(dto.getReturnTime());
+        Integer tripId = jdbcTemplate.execute((Connection conn) -> {
+            try (CallableStatement cs = conn.prepareCall("{CALL sp_assign_truck_trip(?, ?, ?, ?, ?, ?, ?, ?, ?)}")) {
+                cs.setInt(1, dto.getTruckId());
+                cs.setInt(2, dto.getRouteId());
+                cs.setInt(3, dto.getDriverId());
+                cs.setInt(4, dto.getAssistantId());
+                cs.setDate(5, java.sql.Date.valueOf(dto.getTripDate()));
+                cs.setTime(6, java.sql.Time.valueOf(dto.getDispatchTime()));
+                cs.setTime(7, java.sql.Time.valueOf(dto.getReturnTime()));
+                cs.setString(8, currentUsername()); // p_ChangedBy, recorded in the AuditLog
+                cs.registerOutParameter(9, Types.INTEGER); // p_TripID
+                cs.execute();
+                return cs.getInt(9);
+            }
+        });
 
-        TruckTrip saved = truckTripRepository.save(trip);
-        return toDTO(saved);
+        // Read the saved row back so the response has the driver and assistant names
+        return getTripById(tripId);
     }
 
     // Update an existing truck trip
+    /* Two dispatchers can save at the same moment, so the truck, driver and assistant are locked
+     * (sp_lock_trip_resources) before the UPDATE runs the roster rules. READ COMMITTED makes the
+     * rules read what was committed while this request was waiting for the lock; with the default
+     * REPEATABLE READ they would still see the data as it was when the request started.
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TruckTripDTO updateTrip(Integer id, TruckTripDTO dto) {
         TruckTrip trip = truckTripRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TruckTrip not found with ID: " + id));
@@ -100,8 +127,20 @@ public class TruckTripService {
         trip.setDispatchTime(dto.getDispatchTime());
         trip.setReturnTime(dto.getReturnTime());
 
-        TruckTrip updated = truckTripRepository.save(trip);
-        return toDTO(updated);
+        // trg_audit_trucktrip_update records @audit_changed_by as the person who made the change.
+        // The variable lives on the database connection, so it is set just before the UPDATE is
+        // flushed and cleared straight after, even if a roster rule rejects the change. The
+        // connection pool reuses connections, and the next request must not inherit this user.
+        jdbcTemplate.update("CALL sp_lock_trip_resources(?, ?, ?)",
+                dto.getTruckId(), dto.getDriverId(), dto.getAssistantId());
+
+        jdbcTemplate.update("SET @audit_changed_by = ?", currentUsername());
+        try {
+            TruckTrip updated = truckTripRepository.saveAndFlush(trip);
+            return toDTO(updated);
+        } finally {
+            jdbcTemplate.update("SET @audit_changed_by = NULL");
+        }
     }
 
     // Delete a truck trip
@@ -134,6 +173,12 @@ public class TruckTripService {
         return truckTripRepository.findByTripDateBetween(start, end).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Username of the logged-in staff member, or SYSTEM when there is no login (e.g. tests)
+    private String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "SYSTEM";
     }
 
     // (Entity -> DTO): Unpacks database records into safe data containers before returning them over the network

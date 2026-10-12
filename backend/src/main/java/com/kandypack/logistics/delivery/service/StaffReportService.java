@@ -35,7 +35,37 @@ public class StaffReportService {
                 .setParameter("endDate", endDate)
                 .getResultList();
 
-        // Mapping the Object[] results to StaffWeeklyHoursDTO
+        return toDTOs(results);
+    }
+
+    // Current-week quota for EVERY driver and assistant, read from vw_staff_weekly_hours.
+    // Staff with no trips this week are included with 0 hours, so the Roster page can show
+    // who still has hours left before assigning a trip.
+    // The columns are returned in the same order as sp_staff_weekly_hours_report.
+    @SuppressWarnings("unchecked")
+    public List<StaffWeeklyHoursDTO> getCurrentWeekQuota() {
+        List<Object[]> results = entityManager.createNativeQuery("""
+            SELECT v.StaffRole, v.StaffID, v.StaffName,
+                v.ReferenceNumber, v.ContactNumber,
+                DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AS WeekStartDate,
+                YEARWEEK(CURDATE(), 1) AS WeekNumber,
+                    (SELECT COUNT(*)
+                    FROM TruckTrip t
+                    WHERE YEARWEEK(t.TripDate, 1) = YEARWEEK(CURDATE(), 1)
+                        AND ((v.StaffRole = 'Driver' AND t.DriverID = v.StaffID)
+                        OR (v.StaffRole = 'Assistant' AND t.AssistantID = v.StaffID))) AS TripsInWeek,
+                            v.CurrentWeekHoursWorked, v.MaxWeeklyAllowance, v.RemainingHoursQuota,
+                        CASE WHEN v.CurrentWeekHoursWorked > v.MaxWeeklyAllowance
+                        THEN 'Exceeded' ELSE 'Within Limit' END AS LimitStatus
+            FROM vw_staff_weekly_hours v
+            ORDER BY v.StaffRole DESC, v.StaffName
+            """).getResultList();
+            
+        return toDTOs(results);
+    }
+
+    // Mapping the Object[] results to StaffWeeklyHoursDTO
+    private List<StaffWeeklyHoursDTO> toDTOs(List<Object[]> results) {
         List<StaffWeeklyHoursDTO> report = new ArrayList<>();
         for (Object[] row : results) {
             StaffWeeklyHoursDTO dto = new StaffWeeklyHoursDTO();

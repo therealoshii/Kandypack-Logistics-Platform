@@ -19,12 +19,16 @@ public class TrainRepository {
             SELECT 
                 ts.ScheduleID,
                 t.TrainName,
+                st.City AS destination,
                 ts.DepartureTime,
+                ts.DayOfWeek,
                 ts.CargoCapacity AS maxCapacity,
                 fn_get_available_capacity(ts.ScheduleID, ?) AS availableCapacity
             FROM TrainSchedule ts
             INNER JOIN Train t ON ts.TrainID = t.TrainID
+            INNER JOIN Store st ON ts.StoreID = st.StoreID
+            WHERE ts.DayOfWeek = DAYNAME(?)
             """;
-        return jdbcTemplate.queryForList(sql, shipmentDate);
+        return jdbcTemplate.queryForList(sql, shipmentDate, shipmentDate);
     }
 }

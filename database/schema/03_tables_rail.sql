@@ -21,15 +21,17 @@ CREATE TABLE TrainSchedule (
     ScheduleID INT AUTO_INCREMENT PRIMARY KEY,
     TrainID INT NOT NULL,
     CargoCapacity DECIMAL(10,2) NOT NULL,
-    Destination VARCHAR(50) NOT NULL,
+    StoreID INT NOT NULL,
     DepartureTime TIME NOT NULL,
     ArrivalTime TIME NOT NULL,
     DayOfWeek ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL, -- To avoid two people entrting same date differently
     
     CONSTRAINT fk_schedule_train FOREIGN KEY (TrainID)
         REFERENCES Train(TrainID) ON DELETE RESTRICT ON UPDATE CASCADE,
-
-    CONSTRAINT chk_schedule_capacity CHECK (CargoCapacity > 0)
+    CONSTRAINT fk_schedule_store FOREIGN KEY (StoreID)
+        REFERENCES Store(StoreID) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_schedule_capacity CHECK (CargoCapacity > 0),
+    CONSTRAINT uq_train_slot UNIQUE (TrainID, DayOfWeek, DepartureTime)
 );
 
 -- Shipment Table (Bulk shipment allocations given to specific train schedules and orders)

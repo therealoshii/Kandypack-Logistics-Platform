@@ -26,7 +26,11 @@ BEGIN
     INNER JOIN OrderDetail od
         ON o.OrderID = od.OrderID
 
-    WHERE o.OrderDate BETWEEN p_StartDate AND p_EndDate
+    -- A missing start or end date leaves that side of the range open.
+    -- Cancelled orders are not sales, the same as in the quarterly and top items reports.
+    WHERE (p_StartDate IS NULL OR o.OrderDate >= p_StartDate)
+      AND (p_EndDate IS NULL OR o.OrderDate <= p_EndDate)
+      AND o.Status <> 'Cancelled'
 
     GROUP BY
         s.City,

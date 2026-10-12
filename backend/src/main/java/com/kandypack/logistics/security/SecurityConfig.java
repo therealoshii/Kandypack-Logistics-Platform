@@ -1,12 +1,16 @@
+
 package com.kandypack.logistics.security;
 
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,9 +21,15 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -30,27 +40,55 @@ public class SecurityConfig {
         return new HttpSessionSecurityContextRepository();
     }
 
-    @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    @Bean(name = "staffAuthenticationManager")
+    @Primary
+    AuthenticationManager staffAuthenticationManager(
+            StaffUserDetailsService staffUserDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(staffUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
+    }
+
+    @Bean(name = "customerAuthenticationManager")
+    AuthenticationManager customerAuthenticationManager(
+            CustomerUserDetailsService customerUserDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(customerUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
     }
 
     @Bean
-    org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
-        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOriginPatterns(java.util.List.of("http://localhost:*", "http://127.0.0.1:*"));
-        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.List.of("*"));
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(
+                List.of("http://localhost:*", "http://127.0.0.1:*"));
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository contextRepository) throws Exception {
-        CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            SecurityContextRepository contextRepository) throws Exception {
+
+        CookieCsrfTokenRepository csrfRepository =
+                CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+        CsrfTokenRequestAttributeHandler csrfHandler =
+                new CsrfTokenRequestAttributeHandler();
         csrfHandler.setCsrfRequestAttributeName(null);
 
         http
@@ -58,31 +96,135 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
                         .csrfTokenRequestHandler(csrfHandler)
-                        .ignoringRequestMatchers("/api/auth/login", "/api/auth/csrf"))
-                .securityContext(context -> context.securityContextRepository(contextRepository))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        .ignoringRequestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/csrf"
+                        )
+                )
+                .securityContext(context -> context
+                        .securityContextRepository(contextRepository)
+                        .requireExplicitSave(true)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation(fixation -> fixation.changeSessionId())
+                )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                        .accessDeniedHandler((request, response, exception) -> response.sendError(HttpServletResponse.SC_FORBIDDEN)))
+                        .authenticationEntryPoint((request, response, exception) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_UNAUTHORIZED))
+                        .accessDeniedHandler((request, response, exception) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_FORBIDDEN))
+                )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports/staff-hours/**", "/api/reports/working-hours/**", "/api/staff/roster-quota/**").hasAnyRole("ADMIN", "ANALYST", "ROSTER_DISPATCHER")
-                        .requestMatchers("/api/reports/fleet-usage/**").hasAnyRole("ADMIN", "ANALYST", "FLEET_MANAGER")
-                        .requestMatchers("/api/reports/customer-order-history/**").hasAnyRole("ADMIN", "ANALYST", "ORDER_MANAGER")
-                        .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "ANALYST")
-                        .requestMatchers("/api/orders/**", "/api/customers/**", "/api/products/**").hasAnyRole("ADMIN", "ORDER_MANAGER")
-                        .requestMatchers("/api/trains/**", "/api/shipments/**").hasAnyRole("ADMIN", "RAIL_DISPATCHER")
-                        .requestMatchers("/api/stores/**", "/api/trucks/**").hasAnyRole("ADMIN", "FLEET_MANAGER")
-                        .requestMatchers("/api/truck-trips/**", "/api/deliveries/**", "/api/drivers/**", "/api/assistants/**").hasAnyRole("ADMIN", "ROSTER_DISPATCHER")
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll());
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/auth/csrf",
+                                "/api/public/delivery-areas"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/login",
+                                "/api/auth/customer/login",
+                                "/api/customers"
+                        ).permitAll()
+
+                        .requestMatchers("/api/auth/customer/**")
+                        .hasRole("CUSTOMER")
+
+                        .requestMatchers("/api/portal/**")
+                        .hasRole("CUSTOMER")
+
+                        .requestMatchers(
+                                "/api/auth/me",
+                                "/api/auth/password"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "ORDER_MANAGER",
+                                "RAIL_DISPATCHER",
+                                "FLEET_MANAGER",
+                                "ROSTER_DISPATCHER",
+                                "ANALYST"
+                        )
+
+                        // Customers and staff can log out.
+                        .requestMatchers("/api/auth/logout").authenticated()
+
+                        .requestMatchers("/api/auth/**").denyAll()
+
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/reports/staff-hours/**",
+                                "/api/reports/working-hours/**",
+                                "/api/staff/roster-quota/**"
+                        ).hasAnyRole(
+                                "ADMIN", "ANALYST", "ROSTER_DISPATCHER"
+                        )
+
+                        .requestMatchers("/api/reports/fleet-usage/**")
+                        .hasAnyRole("ADMIN", "ANALYST", "FLEET_MANAGER")
+
+                        .requestMatchers("/api/reports/customer-order-history/**")
+                        .hasAnyRole("ADMIN", "ANALYST", "ORDER_MANAGER")
+
+                        .requestMatchers("/api/reports/**")
+                        .hasAnyRole("ADMIN", "ANALYST")
+
+                        .requestMatchers(
+                                "/api/orders/**",
+                                "/api/customers/**",
+                                "/api/products/**"
+                        ).hasAnyRole("ADMIN", "ORDER_MANAGER")
+
+                        .requestMatchers(
+                                "/api/trains/**",
+                                "/api/shipments/**"
+                        ).hasAnyRole("ADMIN", "RAIL_DISPATCHER")
+
+                        // Preserve O8's GET rule.
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/stores/**",
+                                "/api/trucks/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "FLEET_MANAGER",
+                                "ROSTER_DISPATCHER"
+                        )
+
+                        .requestMatchers(
+                                "/api/stores/**",
+                                "/api/trucks/**"
+                        ).hasAnyRole("ADMIN", "FLEET_MANAGER")
+
+                        .requestMatchers(
+                                "/api/truck-trips/**",
+                                "/api/deliveries/**",
+                                "/api/drivers/**",
+                                "/api/assistants/**"
+                        ).hasAnyRole("ADMIN", "ROSTER_DISPATCHER")
+
+                        // Default: only staff roles can access other APIs.
+                        .requestMatchers("/api/**").hasAnyRole(
+                                "ADMIN",
+                                "ORDER_MANAGER",
+                                "RAIL_DISPATCHER",
+                                "FLEET_MANAGER",
+                                "ROSTER_DISPATCHER",
+                                "ANALYST"
+                        )
+
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }

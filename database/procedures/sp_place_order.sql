@@ -12,7 +12,7 @@ CREATE PROCEDURE sp_place_order(
 proc_label: BEGIN
     -- declare variables
     DECLARE v_lead_time_days INT;
-    DECLARE v_customer_city VARCHAR(50);
+    DECLARE v_exists INT;
     DECLARE v_route_id INT;
     DECLARE v_total_amount DECIMAL(12,2) DEFAULT 0.00;
     DECLARE v_item_count INT;
@@ -31,6 +31,12 @@ proc_label: BEGIN
         RESIGNAL;
     END;
 
+    -- 0. validate delivery date is not null
+    IF p_DeliveryDate IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: Delivery date cannot be null.';
+    END IF;
+
     -- 1. validate 7 day advance lead time rule
     SET v_lead_time_days = DATEDIFF(p_DeliveryDate, CURDATE());
     IF v_lead_time_days < 7 THEN
@@ -38,25 +44,30 @@ proc_label: BEGIN
         SET MESSAGE_TEXT = 'Advance Order Placement Rule Violation: Orders must be placed at least 7 days before expected delivery date.';
     END IF;
 
-    -- 2.validate customer existence and get destination city--
-    SELECT City INTO v_customer_city
+    -- 2. validate customer existence (H3)
+    SELECT COUNT(*) INTO v_exists
     FROM Customer
     WHERE CustomerID = p_CustomerID;
 
-    IF v_customer_city IS NULL THEN
+    IF v_exists = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Validation Error: Customer does not exist.';
     END IF;
 
-    -- 3.automatically match route for destination address--
-    SET v_route_id = fn_get_route_for_address(v_customer_city);
+    -- 3. automatically match route for destination area using AreaID (D2 & H3)
+    SET v_route_id = fn_get_route_for_address(p_CustomerID);
+
+    IF v_route_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: Delivery area route could not be resolved for customer.';
+    END IF;
 
     -- 4. ACID Transaction
     START TRANSACTION;
 
-    -- insert order master record
-    INSERT INTO Orders (CustomerID, RouteID, AdminID, OrderDate, Status, TotalAmount)
-    VALUES (p_CustomerID, v_route_id, NULL, CURDATE(), 'Placed', 0.00);
+    -- insert order master record with RequestedDeliveryDate 
+    INSERT INTO Orders (CustomerID, RouteID, AdminID, OrderDate, RequestedDeliveryDate, Status, TotalAmount)
+    VALUES (p_CustomerID, v_route_id, NULL, CURDATE(), p_DeliveryDate, 'Placed', 0.00);
 
     SET p_OrderID = LAST_INSERT_ID();
 
@@ -69,6 +80,9 @@ proc_label: BEGIN
     END IF;
 
     WHILE i < v_item_count DO
+        -- Reset loop variables to avoid carrying over previous item data (H2)
+        SET v_unit_price = NULL, v_stock = NULL;
+
         SET v_product_id = JSON_UNQUOTE(JSON_EXTRACT(p_Items, CONCAT('$[', i, '].productId')));
         SET v_quantity = JSON_UNQUOTE(JSON_EXTRACT(p_Items, CONCAT('$[', i, '].quantity')));
 

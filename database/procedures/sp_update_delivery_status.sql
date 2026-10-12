@@ -15,6 +15,7 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION -- If something fails during execution
     BEGIN
         ROLLBACK; -- Undo the changes that has been done
+        SET @audit_changed_by = NULL; -- Don't leave this user's name on the pooled connection
         RESIGNAL; -- Sends the error to the caller
     END;
 
@@ -84,6 +85,10 @@ BEGIN
     -- No need to update AuditLog because it's updated by triggers
 
     COMMIT;
+
+    -- @audit_changed_by lives on the database connection, and the backend's connection pool
+    -- reuses connections, so clear it or the next request would be logged under this user
+    SET @audit_changed_by = NULL;
 
 END //
 
