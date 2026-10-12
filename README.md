@@ -1,4 +1,4 @@
-# 📦 Kandypack Logistics Platform
+# Kandypack Logistics Platform
 
 **Rail and Road-based Supply Chain Distribution System** · Group 24 · Database Systems project
 
@@ -26,7 +26,7 @@ constraints), so they hold for the web app, the API and direct SQL alike.
 
 ---
 
-## 🚀 Setup
+## Setup
 
 The whole system (database, backend and web interface) starts with Docker Compose.
 
@@ -136,7 +136,7 @@ docker logs kandypack-mysql
 
 ---
 
-## 🧩 Modules and owners
+## Modules and owners
 
 Each member owns one slice end to end: tables, stored logic, API and page.
 
@@ -151,7 +151,7 @@ Each member owns one slice end to end: tables, stored logic, API and page.
 The full file-by-file allocation is in
 [`database_file_allocation.md`](docs/Project-Documentation/database_file_allocation.md).
 
-## ⚖️ Rules the database enforces
+## Rules the database enforces
 
 | Rule | Enforced by |
 |---|---|
@@ -169,7 +169,7 @@ The full file-by-file allocation is in
 A broken rule is raised as `SQLSTATE 45000` with its own message. The API returns it as
 HTTP 400 and the page shows that message.
 
-## 👥 Who can do what
+## Who can do what
 
 | Role | Access |
 |---|---|
@@ -186,7 +186,7 @@ Staff and customers sign in separately. Details are in
 
 ---
 
-## 🗂️ Repository layout
+## Repository layout
 
 ```text
 ├── backend/            Spring Boot REST API (Java 17, Maven)
@@ -206,7 +206,7 @@ Staff and customers sign in separately. Details are in
 └── .env.example        Template for your local passwords
 ```
 
-## 🌱 Seed data
+## Seed data
 
 | | |
 |---|---|
@@ -216,7 +216,7 @@ Staff and customers sign in separately. Details are in
 | **Catalogue** | 10 products, 12 customers |
 | **Orders** | 55 orders across April to October 2026, including one that rolls over three train runs |
 
-## 🧪 Tests
+## Tests
 
 The SQL test scripts are in `database/tests/`.
 
@@ -237,14 +237,14 @@ docker exec kandypack-mysql sh -c 'MYSQL_PWD=$MYSQL_ROOT_PASSWORD mysql -uroot -
 > Only the integrity script is read-only. The other three insert test trips and orders,
 > so run them on a database you are happy to rebuild.
 
-## 📊 Reports
+## Reports
 
 Quarterly sales · Top items · City and route sales · Working hours · Staff weekly hours ·
 Fleet usage · Customer order history
 
 Reports open on the Reports page, by role, and six of them download as PDF.
 
-## 📚 Documentation
+## Documentation
 
 | Document | Location |
 |---|---|
@@ -259,7 +259,7 @@ Reports open on the Reports page, by role, and six of them download as PDF.
 
 ---
 
-## 🛠️ Running without Docker
+## Running without Docker
 
 For development you can run the backend and web interface directly. You need JDK 17 or
 later, Node.js, and a MySQL 8 database built from `database/run_all.sql`.
@@ -281,12 +281,12 @@ The web interface runs on <http://127.0.0.1:5173> and forwards `/api` to the bac
 port 8080. The backend expects MySQL on `localhost:3306`; set `SPRING_DATASOURCE_URL` to
 use another address.
 
-## 🌿 Git workflow
+## Git workflow
 
 Each member works on their own branch and opens a pull request into `dev2`, the
 integration branch. `main` holds the submitted release.
 
-## 👤 Team
+## Team
 
 Group 24 · Department of Computer Science and Engineering, University of Moratuwa
 
