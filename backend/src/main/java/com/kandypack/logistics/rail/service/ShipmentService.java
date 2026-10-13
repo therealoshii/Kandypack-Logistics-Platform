@@ -4,6 +4,9 @@ import com.kandypack.logistics.rail.dto.ShipmentDTO;
 import com.kandypack.logistics.rail.repository.ShipmentRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class ShipmentService {
 
@@ -20,5 +23,9 @@ public class ShipmentService {
             shipmentDTO.getShipmentDate()
             
         );
+    }
+
+    public List<Map<String, Object>> getPendingOrderLines() {
+        return shipmentRepository.findPendingOrderLines();
     }
 }
