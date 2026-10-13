@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,6 +18,16 @@ public class ShipmentController {
 
     public ShipmentController(ShipmentService shipmentService) {
         this.shipmentService = shipmentService;
+    }
+
+    /**
+     * Order lines that still have units waiting for a train, with the customer, product,
+     * remaining quantity and destination city. The Train Cargo page lists them so the
+     * dispatcher can pick a line instead of typing its ID.
+     */
+    @GetMapping("/pending-lines")
+    public List<Map<String, Object>> getPendingOrderLines() {
+        return shipmentService.getPendingOrderLines();
     }
 
     @PostMapping("/schedule")
