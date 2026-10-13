@@ -1,4 +1,4 @@
-c-- Added: Stores (6), Routes (12), Products (10), Customers (12)--
+-- Added: Stores (6), Routes (12), Products (10), Customers (12)--
 
 SET FOREIGN_KEY_CHECKS = 0;
 
