@@ -14,6 +14,7 @@ import AnalyticsDashboardPage from './features/analytics/AnalyticsDashboardPage'
 import ReportsPage from './features/analytics/ReportsPage';
 import FleetOverviewPage from './features/fleet/FleetOverviewPage';
 import LoginPage from './features/auth/LoginPage';
+import BrandMark from './shared/BrandMark';
 import StaffUsersPage from './features/auth/StaffUsersPage';
 import PasswordChangePage from './features/auth/PasswordChangePage';
 import CustomerLoginPage from './features/auth/CustomerLoginPage';
@@ -158,7 +159,7 @@ function AppLayout() {
     <div className="app-shell">
       <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
         <div className="brand-lockup">
-          <div className="brand-mark"><Boxes size={21} strokeWidth={2.2} /></div>
+          <div className="brand-mark"><BrandMark size={25} /></div>
           <div><strong>KANDYPACK</strong><span>LOGISTICS / LK</span></div>
           <button className="icon-button sidebar-close" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={18} /></button>
         </div>

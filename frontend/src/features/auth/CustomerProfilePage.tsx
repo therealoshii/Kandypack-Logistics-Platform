@@ -160,11 +160,11 @@ export default function CustomerProfilePage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: '20px 0 10px' }}>
           <div className="field-label" style={{ marginTop: 0 }}>
             Customer ID
-            <p style={{ background: '#f0f3f0' }}>#{profile?.customerID}</p>
+            <p style={{ background: '#eff1f4' }}>#{profile?.customerID}</p>
           </div>
           <div className="field-label" style={{ marginTop: 0 }}>
             Username (Permanent)
-            <p style={{ background: '#f0f3f0' }}>{profile?.username}</p>
+            <p style={{ background: '#eff1f4' }}>{profile?.username}</p>
           </div>
         </div>
 

@@ -1,8 +1,9 @@
 
 import { useState } from 'react';
-import { ArrowRight, Boxes, CircleAlert, LockKeyhole } from 'lucide-react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { CircleAlert } from 'lucide-react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/auth';
+import SignInLayout, { SignInFields } from './SignInLayout';
 
 export default function LoginPage() {
   const { user, loading, login } = useAuth();
@@ -34,50 +35,18 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="auth-page">
-      <div className="auth-side">
-        <div className="auth-brand">
-          <span className="auth-mark"><Boxes size={23} /></span>
-          <span>KANDYPACK <small>LOGISTICS / LK</small></span>
-        </div>
-        <div className="auth-copy">
-          <p className="eyebrow">STAFF OPERATIONS</p>
-          <h1>Good logistics<br />starts together.</h1>
-          <p>One workspace for order flow, regional dispatch and the people who keep every delivery moving.</p>
-        </div>
-        <div className="auth-side-foot">
-          <span>INTERNAL OPERATIONS PORTAL</span>
-          <span>COLOMBO · SRI LANKA</span>
-        </div>
-      </div>
+    <SignInLayout audience="staff">
+      <form className="signin-form" onSubmit={submit}>
+        <h2>Sign in</h2>
+        <p className="signin-lead">Use your staff account to open your workspace.</p>
 
-      <section className="auth-main">
-        <form className="login-panel" onSubmit={submit}>
-          <div className="login-icon"><LockKeyhole size={19} /></div>
-          <p className="eyebrow">STAFF ACCESS</p>
-          <h2>Sign in to Kandypack</h2>
-          <p className="login-description">Use your staff account to open your workspace.</p>
+        {error && <div className="login-error"><CircleAlert size={16} />{error}</div>}
 
-          {error && <div className="login-error"><CircleAlert size={16} />{error}</div>}
+        <SignInFields username={username} password={password} onUsername={setUsername} onPassword={setPassword}
+          submitting={submitting} disabled={submitting || loading} />
 
-          <label className="field-label">Username
-            <input autoComplete="username" autoFocus required value={username}
-              onChange={(event) => setUsername(event.target.value)} placeholder="Enter your username" />
-          </label>
-
-          <label className="field-label">Password
-            <input autoComplete="current-password" type="password" required value={password}
-              onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" />
-          </label>
-
-          <button className="button button-primary login-submit" disabled={submitting || loading}>
-            {submitting ? 'Signing in…' : 'Sign in'} <ArrowRight size={16} />
-          </button>
-
-          <p className="login-help">Staff accounts are provisioned by a Kandypack administrator.</p>
-          <p className="login-help">Are you a customer? <Link to="/portal/login">Customer login</Link></p>
-        </form>
-      </section>
-    </main>
+        <p className="signin-note">Staff accounts are provisioned by a Kandypack administrator.</p>
+      </form>
+    </SignInLayout>
   );
 }
