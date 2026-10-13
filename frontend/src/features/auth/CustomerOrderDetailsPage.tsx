@@ -165,7 +165,7 @@ export default function CustomerOrderDetailsPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', zIndex: 1 }}>
-            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: (isInTransit || isDelivered) ? 'var(--brand)' : (isScheduled ? 'var(--surface-active, #cbe2d3)' : 'var(--line)'), color: (isInTransit || isDelivered) ? '#fff' : 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600 }}>
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: (isInTransit || isDelivered) ? 'var(--brand)' : (isScheduled ? 'var(--surface-active, #c5d2e8)' : 'var(--line)'), color: (isInTransit || isDelivered) ? '#fff' : 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600 }}>
               {isDelivered ? '✓' : (isInTransit ? '➔' : (isScheduled ? '•' : '3'))}
             </span>
             <span style={{ fontSize: '12px', fontWeight: 500 }}>In Transit</span>
@@ -180,7 +180,7 @@ export default function CustomerOrderDetailsPage() {
         </div>
 
         {/* Detailed Delivery Information */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', background: '#f7f9f7', padding: '16px', borderRadius: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', background: '#f6f8fa', padding: '16px', borderRadius: '8px' }}>
           <div>
             <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>DELIVERY STATUS</span>
             <p style={{ margin: '4px 0 0', fontWeight: 600, fontSize: '14px' }}>{order.deliveryStatus}</p>

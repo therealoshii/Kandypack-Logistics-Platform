@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
-import { Boxes, LogOut, Package, UserRound } from 'lucide-react';
+import { LogOut, Package, UserRound } from 'lucide-react';
+import BrandMark from '../../shared/BrandMark';
 import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useCustomerAuth } from '../../shared/customerAuth';
 
@@ -36,7 +37,7 @@ export default function CustomerPortalLayout() {
     <div className="customer-portal">
       <header className="customer-portal-header">
         <Link to="/portal" className="customer-portal-brand">
-          <span className="auth-mark"><Boxes size={22} /></span>
+          <span className="auth-mark"><BrandMark size={28} /></span>
           <span><strong>KANDYPACK</strong><small>CUSTOMER PORTAL</small></span>
         </Link>
 

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
-import { ArrowRight, Boxes, CircleAlert, UserRoundPlus } from 'lucide-react';
+import { ArrowRight, CircleAlert, UserRoundPlus } from 'lucide-react';
+import BrandMark from '../../shared/BrandMark';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, ApiError, get } from '../../api';
 
@@ -103,7 +104,7 @@ export default function CustomerRegisterPage() {
     <main className="auth-page">
       <div className="auth-side">
         <div className="auth-brand">
-          <span className="auth-mark"><Boxes size={23} /></span>
+          <span className="auth-mark"><BrandMark size={26} /></span>
           <span>KANDYPACK <small>LOGISTICS / LK</small></span>
         </div>
         <div className="auth-copy">

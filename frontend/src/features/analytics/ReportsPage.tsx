@@ -274,7 +274,7 @@ export default function ReportsPage() {
           <div>
             <p className="eyebrow">{activeTab?.eyebrow}</p>
             <h2>{activeTab?.label}</h2>
-            <small style={{ color: '#7a877f', display: 'block', marginTop: '2px' }}>
+            <small style={{ color: '#767e8b', display: 'block', marginTop: '2px' }}>
               {activeTab?.description}
             </small>
           </div>
@@ -471,12 +471,12 @@ export default function ReportsPage() {
               <div className="report-chart" style={{ marginBottom: '20px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 24 }}>
-                    <CartesianGrid strokeDasharray="3 4" vertical={false} stroke="#e9ede8" />
+                    <CartesianGrid strokeDasharray="3 4" vertical={false} stroke="#e7eaee" />
                     <XAxis
                       dataKey="label"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#77817c', fontSize: 10 }}
+                      tick={{ fill: '#747a84', fontSize: 10 }}
                       interval={0}
                       angle={-20}
                       textAnchor="end"
@@ -484,7 +484,7 @@ export default function ReportsPage() {
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#a0a8a3', fontSize: 10 }}
+                      tick={{ fill: '#9ea3aa', fontSize: 10 }}
                     />
                     <Tooltip
                       formatter={(val) =>
@@ -492,12 +492,12 @@ export default function ReportsPage() {
                           ? money(Number(val))
                           : `${Number(val)} hrs`
                       }
-                      contentStyle={{ borderRadius: 6, border: '1px solid #e6ebe5', fontSize: 12 }}
+                      contentStyle={{ borderRadius: 6, border: '1px solid #e4e8ee', fontSize: 12 }}
                     />
                     <Bar
                       dataKey="value"
                       name={kind === 'fleet' || kind === 'working-hours' ? 'Hours' : 'Revenue (LKR)'}
-                      fill="#43846f"
+                      fill="#2f5c9e"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={42}
                     />
