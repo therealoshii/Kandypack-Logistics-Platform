@@ -82,9 +82,19 @@ corrections needed in SRS 4.6.3 REQ-2, the glossary and the allocation document.
 - **Route:** the truck trip is on the same route as the order.
 - **Date:** the delivery date is the trip's date.
 - **Lead time:** the delivery is at least 7 days after the order date (SRS 4.2.3 REQ-1).
+- **Rail first:** every line of the order is booked on a train, and the truck trip leaves after the
+  last train carrying the order arrives at the store.
 
 The update trigger runs these checks only when the order, the trip or the date changes. A status
 change alone is not re-checked. `Delivery.OrderID` is unique, so an order has at most one delivery.
+
+**Assigning an order to a trip.** A delivery is for a whole order, never a single order line; one trip
+can carry many orders. On the Roster page, **Deliveries > Assign delivery** lists the orders without a
+delivery (those still waiting for a train are shown but cannot be chosen) and, for the chosen order,
+only trips on its route that leave after its last train arrives. Saving calls `sp_assign_delivery`,
+which locks the order, inserts the delivery (the trigger runs the checks above) with the trip's date,
+and writes the `AuditLog` record with the dispatcher's username, all in one transaction.
+API: `GET /api/deliveries/unassigned-orders` and `POST /api/deliveries/assign`.
 
 ## 6. Delivery State Transitions
 
@@ -105,3 +115,7 @@ change alone is not re-checked. `Delivery.OrderID` is unique, so an order has at
 driver rest, driver 40 hours, assistant 60 hours, assistant third trip at the end and in the middle
 of a run, truck from another store, trip over the route maximum, update into an overlap, delivery
 on another route, and delivery dated differently from its trip.
+
+`.github/scripts/database-checks.sh` (run by the CI workflow) runs every one of those negative cases
+automatically, plus delivery assignment: a truck leaving before the train arrives, an order still
+waiting for a train, an order assigned twice, and a valid assignment with its audit record.
