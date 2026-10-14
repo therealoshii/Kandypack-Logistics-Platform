@@ -21,6 +21,28 @@ public class ShipmentRepository {
     }
 
     /**
+     * Books every order line of an order that is still waiting for a train, in one transaction.
+     * If any line cannot be booked, nothing is saved for the order.
+     */
+    public void scheduleOrder(Integer orderId, Integer scheduleId, String shipmentDate) {
+        jdbcTemplate.update("CALL sp_schedule_order(?, ?, ?)", orderId, scheduleId, shipmentDate);
+    }
+
+    /**
+     * Both procedures move the order to Processing or Shipped, and the order status audit trigger
+     * records @audit_changed_by as the person who did it. The variable belongs to the database
+     * session, so it is set on the same connection as the CALL (the service runs both in one
+     * transaction) and cleared afterwards.
+     */
+    public void setAuditUser(String username) {
+        jdbcTemplate.update("SET @audit_changed_by = ?", username);
+    }
+
+    public void clearAuditUser() {
+        jdbcTemplate.update("SET @audit_changed_by = NULL");
+    }
+
+    /**
      * Order lines that still have units waiting for a train, oldest order first.
      * The remaining quantity is calculated the same way as in sp_schedule_shipment:
      * ordered quantity minus everything already booked onto a train run.

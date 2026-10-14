@@ -5,9 +5,9 @@ import {
   useLocation, useNavigate,
 } from 'react-router-dom';
 import {
-  Activity, ArrowRight, BarChart3, Boxes, CalendarDays, ChevronDown,
+  Activity, BarChart3, Boxes, CalendarDays, ChevronDown,
   ClipboardList, KeyRound, LayoutDashboard, LogOut, Menu, PackageCheck,
-  Search, ShieldCheck, TrainFront, Warehouse, X,
+  ShieldCheck, TrainFront, Warehouse, X,
 } from 'lucide-react';
 
 import AnalyticsDashboardPage from './features/analytics/AnalyticsDashboardPage';
@@ -226,8 +226,6 @@ function AppLayout() {
           <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu size={20} /></button>
           <div className="breadcrumb"><span>Kandypack</span><span className="crumb-slash">/</span><strong>{title}</strong></div>
           <div className="topbar-actions">
-            <label className="global-search"><Search size={16} /><input aria-label="Search" placeholder="Search this workspace" /><kbd>⌘ K</kbd></label>
-            <Link className="icon-button refresh-button" title="Go to your workspace" aria-label="Go to your workspace" to="/"><ArrowRight size={17} /></Link>
             <div className="topbar-date"><CalendarDays size={15} /><span>{new Intl.DateTimeFormat('en', { weekday: 'short', day: '2-digit', month: 'short' }).format(new Date())}</span></div>
           </div>
         </header>

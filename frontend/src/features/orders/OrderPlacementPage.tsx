@@ -106,7 +106,11 @@ export default function OrderPlacementPage() {
                   <span className="line-index">{String(index + 1).padStart(2, '0')}</span>
                   <select required aria-label={`Product for line ${index + 1}`} value={item.productId} onChange={(event) => setItems((current) => current.map((line, lineIndex) => lineIndex === index ? { ...line, productId: event.target.value } : line))}>
                     <option value="">Select product</option>
-                    {products.map((entry) => <option key={entry.productID} value={entry.productID}>{entry.productName} · {entry.stockQuantity.toLocaleString()} in stock</option>)}
+                    {products.map((entry) => {
+                      // A product can be on only one line; change that line's quantity instead
+                      const onAnotherLine = items.some((other, otherIndex) => otherIndex !== index && other.productId === String(entry.productID));
+                      return <option key={entry.productID} value={entry.productID} disabled={onAnotherLine}>{entry.productName} · {entry.stockQuantity.toLocaleString()} in stock{onAnotherLine ? ' · already in this order' : ''}</option>;
+                    })}
                   </select>
                   <input aria-label={`Quantity for line ${index + 1}`} type="number" min="1" max={product?.stockQuantity || undefined} value={item.quantity} onChange={(event) => setItems((current) => current.map((line, lineIndex) => lineIndex === index ? { ...line, quantity: Number(event.target.value) } : line))} />
                   <button type="button" className="icon-button remove-line" aria-label="Remove order line" disabled={items.length === 1} onClick={() => setItems((current) => current.filter((_, lineIndex) => lineIndex !== index))}><X size={16} /></button>

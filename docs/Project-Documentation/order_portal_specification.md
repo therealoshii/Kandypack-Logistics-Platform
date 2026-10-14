@@ -47,11 +47,16 @@ Status ENUM('Placed', 'Processing', 'Shipped', 'In Transit', 'Delivered', 'Cance
 ```
 
 1. **Placed:** Initial state immediately after customer placement via `sp_place_order` or staff order placement.
-2. **Processing:** Order line items are verified and inventory is confirmed/reserved at the source warehouse.
-3. **Shipped:** Inter-city rail freight shipment scheduled/dispatched (`Shipment` allocation to train schedule).
-4. **In Transit:** Final last-mile delivery scheduled and dispatched on a truck trip (`Delivery` assigned to `TruckTrip`).
+2. **Processing:** Some of the order's lines are booked on trains and others are still waiting (set by `sp_ship_order_line`).
+3. **Shipped:** Every line is booked on a train (set by `sp_ship_order_line`). The order can now be assigned to a truck trip (`sp_assign_delivery`), and its delivery starts as `Scheduled`.
+4. **In Transit:** The truck carrying the order has left (delivery status set to `In Transit` through `sp_update_delivery_status`).
 5. **Delivered:** Physical drop-off confirmed at customer destination; delivery record updated to `Delivered`.
 6. **Cancelled:** Order terminated prior to dispatch, releasing reserved inventory.
+
+**One line per product.** An order lists each product once. If the same product is sent twice,
+`sp_place_order` adds the quantities to one line (the stock check uses the total), and
+`UNIQUE (OrderID, ProductID)` on `OrderDetail` rejects a second line from anywhere else. The order
+forms also stop offering a product that is already on another line.
 
 ---
 

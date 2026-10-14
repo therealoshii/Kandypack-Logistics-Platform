@@ -1,5 +1,6 @@
 package com.kandypack.logistics.rail.controller;
 
+import com.kandypack.logistics.rail.dto.OrderShipmentDTO;
 import com.kandypack.logistics.rail.dto.ShipmentDTO;
 import com.kandypack.logistics.rail.service.ShipmentService;
 import jakarta.validation.Valid;
@@ -34,5 +35,16 @@ public class ShipmentController {
     public ResponseEntity<?> scheduleShipment(@Valid @RequestBody ShipmentDTO shipmentDTO) {
         shipmentService.processShipmentSchedule(shipmentDTO);
         return ResponseEntity.ok(Map.of("message", "Shipment scheduled successfully!"));
+    }
+
+    /**
+     * Books every order line of an order that is still waiting for a train, starting from the
+     * chosen run and date. Each line's overflow rolls over to the next run. All or nothing:
+     * if one line cannot be booked, no line of the order is.
+     */
+    @PostMapping("/schedule-order")
+    public ResponseEntity<?> scheduleOrder(@Valid @RequestBody OrderShipmentDTO orderShipmentDTO) {
+        shipmentService.processOrderSchedule(orderShipmentDTO);
+        return ResponseEntity.ok(Map.of("message", "Order #" + orderShipmentDTO.getOrderId() + " is booked onto trains."));
     }
 }

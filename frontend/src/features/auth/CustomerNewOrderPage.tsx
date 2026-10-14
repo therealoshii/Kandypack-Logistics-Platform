@@ -159,9 +159,11 @@ export default function CustomerNewOrderPage() {
                       <option value="">Select product</option>
                       {products.map((p) => {
                         const id = p.productID ?? p.productId;
+                        // A product can be on only one line; change that line's quantity instead
+                        const onAnotherLine = items.some((other, i) => i !== index && other.productId === String(id));
                         return (
-                          <option key={id} value={id}>
-                            {p.productName} · {money(p.unitPrice)} ({p.stockStatus ?? `${p.stockQuantity} in stock`})
+                          <option key={id} value={id} disabled={onAnotherLine}>
+                            {p.productName} · {money(p.unitPrice)} ({p.stockStatus ?? `${p.stockQuantity} in stock`}){onAnotherLine ? ' · already in this order' : ''}
                           </option>
                         );
                       })}

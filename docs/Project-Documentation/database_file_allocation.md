@@ -35,7 +35,9 @@ Core focus: train timetable, cargo capacity, overbooking prevention, and overflo
 | Schema | `schema/03_tables_rail.sql` | `Train`, `TrainSchedule` (with `StoreID` and the unique timetable slot), `Shipment` |
 | Function | `functions/fn_calculate_total_space.sql` | Space needed: quantity x space rate |
 | Function | `functions/fn_get_available_capacity.sql` | Remaining space on a run on a date |
-| Procedure | `procedures/sp_schedule_shipment.sql` | Books an order line onto runs, splitting and rolling over overflow, in one transaction with row locking |
+| Procedure | `procedures/sp_ship_order_line.sql` | Books an order line onto runs, splitting and rolling over overflow, with row locking; moves the order to Processing or Shipped |
+| Procedure | `procedures/sp_schedule_shipment.sql` | Books one order line in its own transaction |
+| Procedure | `procedures/sp_schedule_order.sql` | Books every waiting line of an order in one transaction (all or nothing) |
 | Trigger | `triggers/trg_check_cargo_capacity.sql` | Prevents train overbooking |
 | Trigger | `triggers/trg_shipment_weekday_check.sql` | Shipment date must fall on the schedule's day (insert and update) |
 | Trigger | `triggers/trg_update_stock_on_dispatch.sql` | Reduces stock when cargo is dispatched |
@@ -71,12 +73,13 @@ status tracking.
 | Function | `functions/fn_calculate_weekly_hours.sql` | Weekly hours for drivers and assistants |
 | Procedure | `procedures/sp_assign_truck_trip.sql` | Saves a trip and its audit entry in one transaction |
 | Procedure | `procedures/sp_update_delivery_status.sql` | Changes delivery status and the order status together |
+| Procedure | `procedures/sp_assign_delivery.sql` | Assigns a whole order to a truck trip and writes its audit entry in one transaction |
 | Procedure | `procedures/sp_check_trip_route.sql` | Truck from the route's store; trip within the route's maximum time |
 | Procedure | `procedures/sp_check_schedule_conflict.sql` | No overlapping truck, driver or assistant bookings |
 | Procedure | `procedures/sp_check_driver_consecutive.sql` | Driver: no two consecutive trips |
 | Procedure | `procedures/sp_check_assistant_consecutive.sql` | Assistant: at most two consecutive trips |
 | Procedure | `procedures/sp_check_weekly_hours.sql` | Driver 40 hours, assistant 60 hours per week |
-| Procedure | `procedures/sp_check_delivery.sql` | Delivery on the order's route, on the trip's date, 7 or more days after the order |
+| Procedure | `procedures/sp_check_delivery.sql` | Delivery on the order's route, on the trip's date, 7 or more days after the order, after its last train arrives |
 | Procedure | `procedures/sp_staff_weekly_hours_report.sql` | Week-by-week hours for the staff hours report |
 | Trigger | `triggers/trg_before_insert_trucktrip.sql` | Insert and update triggers on `TruckTrip`; call the five trip rules |
 | Trigger | `triggers/trg_validate_delivery.sql` | Insert and update triggers on `Delivery`; call `sp_check_delivery` |
@@ -103,7 +106,7 @@ indexes, order seed data, and deployment.
 | View | `views/vw_order_summary.sql` | Order summary with delivery status |
 | Indexes | `indexes/01_indexes.sql` | B-tree indexes for filtering and reports |
 | Seed | `seed/04_seed_orders.sql` | 55 orders (22 in Q2, 26 in Q3, 7 in October), trips, shipments, deliveries, one rollover order |
-| Test | `tests/test_seed_integrity.sql` | 17 checks that the seed breaks no rule |
+| Test | `tests/test_seed_integrity.sql` | 20 checks that the data breaks no rule |
 | Deployment | `run_all.sql`, `docker-compose.yml`, `README.md` | Build order and one-command start |
 
 Application slice: Spring Boot setup, `SecurityConfig`, `AuthController` (staff and customer
