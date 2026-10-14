@@ -2,9 +2,9 @@ name: CI - Build Backend and Frontend
 
 on:
   push:
-    branches: [dev]
+    branches: [shameera, dev]
   pull_request:
-    branches: [dev]
+    branches: [shameera, dev]
 
 jobs:
   backend-build:
