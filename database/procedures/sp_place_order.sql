@@ -23,6 +23,8 @@ proc_label: BEGIN
     DECLARE v_unit_price DECIMAL(12,2);
     DECLARE v_line_total DECIMAL(12,2);
     DECLARE v_stock INT;
+    DECLARE v_existing_line INT;
+    DECLARE v_existing_qty INT;
 
     -- Error handler for transaction rollback
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -104,8 +106,15 @@ proc_label: BEGIN
             SET MESSAGE_TEXT = 'Validation Error: Product does not exist.';
         END IF;
 
-        -- validate sufficient stock
-        IF v_stock < v_quantity THEN
+        -- a product listed more than once is added to the line already saved for it
+        -- (aggregates always return a row, so no "no data" warning when there is none yet)
+        SELECT MAX(OrderDetailID), COALESCE(SUM(Quantity), 0)
+        INTO v_existing_line, v_existing_qty
+        FROM OrderDetail
+        WHERE OrderID = p_OrderID AND ProductID = v_product_id;
+
+        -- validate sufficient stock for the product's total quantity in this order
+        IF v_stock < v_existing_qty + v_quantity THEN
             ROLLBACK;
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Insufficient Stock: Requested quantity exceeds available inventory.';
@@ -114,9 +123,16 @@ proc_label: BEGIN
         SET v_line_total = v_quantity * v_unit_price;
         SET v_total_amount = v_total_amount + v_line_total;
 
-        -- insert order detail
-        INSERT INTO OrderDetail (OrderID, ProductID, Quantity, LineTotal)
-        VALUES (p_OrderID, v_product_id, v_quantity, v_line_total);
+        IF v_existing_line IS NULL THEN
+            -- insert order detail
+            INSERT INTO OrderDetail (OrderID, ProductID, Quantity, LineTotal)
+            VALUES (p_OrderID, v_product_id, v_quantity, v_line_total);
+        ELSE
+            UPDATE OrderDetail
+            SET Quantity = Quantity + v_quantity,
+                LineTotal = LineTotal + v_line_total
+            WHERE OrderDetailID = v_existing_line;
+        END IF;
 
         SET i = i + 1;
     END WHILE;

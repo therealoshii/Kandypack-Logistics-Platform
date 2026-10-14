@@ -73,7 +73,9 @@ CREATE TABLE OrderDetail (
         REFERENCES Product(ProductID) ON DELETE RESTRICT ON UPDATE CASCADE,
         
     CONSTRAINT chk_detail_quantity CHECK (Quantity > 0),
-    CONSTRAINT chk_detail_total CHECK (LineTotal >= 0)
+    CONSTRAINT chk_detail_total CHECK (LineTotal >= 0),
+    -- One line per product in an order; sp_place_order adds repeated products together
+    CONSTRAINT uq_orderdetail_order_product UNIQUE (OrderID, ProductID)
 );
 
 CREATE TABLE AuditLog (
