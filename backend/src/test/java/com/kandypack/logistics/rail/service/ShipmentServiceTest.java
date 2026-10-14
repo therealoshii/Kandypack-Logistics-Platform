@@ -1,5 +1,6 @@
 package com.kandypack.logistics.rail.service;
 
+import com.kandypack.logistics.rail.dto.OrderShipmentDTO;
 import com.kandypack.logistics.rail.dto.ShipmentDTO;
 import com.kandypack.logistics.rail.repository.ShipmentRepository;
 import org.junit.jupiter.api.Test;
@@ -26,5 +27,17 @@ class ShipmentServiceTest {
         shipmentService.processShipmentSchedule(dto);
 
         verify(shipmentRepository).scheduleShipment(101, 202, "2026-10-15");
+    }
+
+    @Test
+    void testProcessOrderSchedule() {
+        OrderShipmentDTO dto = new OrderShipmentDTO(58, 1, "2026-10-19");
+
+        shipmentService.processOrderSchedule(dto);
+
+        // The audit name is set before the booking and cleared after it
+        verify(shipmentRepository).setAuditUser("SYSTEM");
+        verify(shipmentRepository).scheduleOrder(58, 1, "2026-10-19");
+        verify(shipmentRepository).clearAuditUser();
     }
 }

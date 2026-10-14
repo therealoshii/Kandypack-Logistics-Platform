@@ -3,6 +3,7 @@
 package com.kandypack.logistics.delivery.controller;
 
 // Internal project imports
+import com.kandypack.logistics.delivery.dto.DeliveryAssignmentDTO;
 import com.kandypack.logistics.delivery.dto.DeliveryDTO;
 import com.kandypack.logistics.delivery.service.DeliveryService;
 
@@ -40,6 +41,21 @@ public class DeliveryController {
     @GetMapping("/{id}")
     public ResponseEntity<DeliveryDTO> getDeliveryById(@PathVariable Integer id) {
         return ResponseEntity.ok(deliveryService.getDeliveryById(id));
+    }
+
+    // Orders that have no delivery yet, with how much is still waiting for a train
+    // eg: GET /api/deliveries/unassigned-orders
+    @GetMapping("/unassigned-orders")
+    public ResponseEntity<List<Map<String, Object>>> getOrdersWithoutDelivery() {
+        return ResponseEntity.ok(deliveryService.getOrdersWithoutDelivery());
+    }
+
+    // Assign a whole order to a truck trip. Body: {"orderId": 58, "tripId": 61}
+    // The delivery date is the trip's date; the database rules decide whether the pair is allowed
+    @PostMapping("/assign")
+    public ResponseEntity<DeliveryDTO> assignDelivery(@Valid @RequestBody DeliveryAssignmentDTO dto) {
+        DeliveryDTO created = deliveryService.assignDelivery(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // Create a new delivery

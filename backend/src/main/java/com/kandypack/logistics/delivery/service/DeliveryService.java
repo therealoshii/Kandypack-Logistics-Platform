@@ -3,9 +3,11 @@
 package com.kandypack.logistics.delivery.service;
 
 // Internal project imports
+import com.kandypack.logistics.delivery.dto.DeliveryAssignmentDTO;
 import com.kandypack.logistics.delivery.dto.DeliveryDTO;
 import com.kandypack.logistics.delivery.entity.Delivery;
 import com.kandypack.logistics.delivery.entity.TruckTrip;
+import com.kandypack.logistics.delivery.repository.DeliveryAssignmentRepository;
 import com.kandypack.logistics.delivery.repository.DeliveryRepository;
 import com.kandypack.logistics.delivery.repository.TruckTripRepository;
 
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,15 +34,18 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final TruckTripRepository truckTripRepository;
+    private final DeliveryAssignmentRepository deliveryAssignmentRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
     // The low-level interface behind Hibernate and Spring Data JPA
     // Direct interactions with stored procedures require injecting the EntityManager
 
-    public DeliveryService(DeliveryRepository deliveryRepository, TruckTripRepository truckTripRepository) {
+    public DeliveryService(DeliveryRepository deliveryRepository, TruckTripRepository truckTripRepository,
+                           DeliveryAssignmentRepository deliveryAssignmentRepository) {
         this.deliveryRepository = deliveryRepository;
         this.truckTripRepository = truckTripRepository;
+        this.deliveryAssignmentRepository = deliveryAssignmentRepository;
     }
 
     // Get all deliveries
@@ -71,6 +77,22 @@ public class DeliveryService {
 
         Delivery saved = deliveryRepository.save(delivery);
         return toDTO(saved);
+    }
+
+    // Orders that have no delivery yet, for the Assign delivery form
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getOrdersWithoutDelivery() {
+        return deliveryAssignmentRepository.findOrdersWithoutDelivery();
+    }
+
+    /* Assign a whole order to a truck trip through the sp_assign_delivery stored procedure, which
+     * saves the delivery and its AuditLog record in one transaction. Its INSERT fires
+     * trg_before_insert_delivery, which runs sp_check_delivery (same route, delivery on the trip's
+     * date, 7 days after the order, every line on a train, truck leaves after the last train arrives).
+     */
+    public DeliveryDTO assignDelivery(DeliveryAssignmentDTO dto) {
+        Integer deliveryId = deliveryAssignmentRepository.assignDelivery(dto.getOrderId(), dto.getTripId(), currentUsername());
+        return getDeliveryById(deliveryId);
     }
 
     /**

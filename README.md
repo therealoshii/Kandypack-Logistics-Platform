@@ -143,9 +143,9 @@ Each member owns one slice end to end: tables, stored logic, API and page.
 | Member | Module | Main database objects | Page |
 |---|---|---|---|
 | **Haneef** | Customers and orders | `sp_place_order`, `fn_get_route_for_address` | Order placement, customer portal |
-| **Widushi** | Rail cargo and shipments | `sp_schedule_shipment`, `trg_check_cargo_capacity` | Train cargo dispatch |
+| **Widushi** | Rail cargo and shipments | `sp_schedule_order`, `sp_schedule_shipment`, `trg_check_cargo_capacity` | Train cargo dispatch |
 | **Shameera** | Stores, routes and fleet | `vw_truck_utilization`, fleet and geographic reports | Store and fleet hub |
-| **Oshan** | Roster, trips and deliveries | `sp_check_*` rule procedures, `sp_assign_truck_trip`, `sp_update_delivery_status` | Roster and dispatch |
+| **Oshan** | Roster, trips and deliveries | `sp_check_*` rule procedures, `sp_assign_truck_trip`, `sp_assign_delivery`, `sp_update_delivery_status` | Roster and dispatch |
 | **Aathiththan** | Reports and administration | Sales reports, `trg_audit_log`, indexes, `run_all.sql` | Analytics, reports, login |
 
 The full file-by-file allocation is in
@@ -157,13 +157,15 @@ The full file-by-file allocation is in
 |---|---|
 | Orders are placed at least **7 days** before delivery | `sp_place_order` and a `CHECK` on `Orders` |
 | An order's route is the route of the customer's **delivery area** | `fn_get_route_for_address` and foreign keys |
-| A train run is **never overbooked**; overflow rolls to the next run | `trg_check_cargo_capacity`, `sp_schedule_shipment` |
+| An order lists each product **once**; repeated products are added together | `sp_place_order`, `UNIQUE (OrderID, ProductID)` |
+| A train run is **never overbooked**; overflow rolls to the next run | `trg_check_cargo_capacity`, `sp_ship_order_line` |
+| A whole order goes onto trains **in one step**, or not at all | `sp_schedule_order` |
 | A truck only serves routes from **its own store**, within the route's maximum time | `sp_check_trip_route` |
 | No overlapping bookings for a truck, driver or assistant | `sp_check_schedule_conflict` |
 | A driver never works **two consecutive trips** (30-minute rest) | `sp_check_driver_consecutive` |
 | An assistant works at most **two consecutive trips** | `sp_check_assistant_consecutive` |
 | Drivers **40 hours** a week, assistants **60 hours** | `sp_check_weekly_hours` |
-| A delivery uses a trip on the order's route and date | `sp_check_delivery` |
+| A whole order goes on **one truck trip**, on its route and date, after it **arrives by train** | `sp_assign_delivery`, `sp_check_delivery` |
 | Status and trip changes are **audited with the username** | `trg_audit_log` |
 
 A broken rule is raised as `SQLSTATE 45000` with its own message. The API returns it as
@@ -222,7 +224,7 @@ The SQL test scripts are in `database/tests/`.
 
 | Script | Checks |
 |---|---|
-| `test_seed_integrity.sql` | 17 checks that the seed breaks no rule. Read-only; every row must show `0` |
+| `test_seed_integrity.sql` | 20 checks that the data breaks no rule. Read-only; every row must show `0` |
 | `test_lead_time.sql` | The 7-day lead time and route matching |
 | `test_capacity_overflow.sql` | An order splitting 300 / 300 / 100 across three train runs |
 | `test_roster_violations.sql` | 11 negative cases, one per roster and delivery rule |
@@ -256,6 +258,7 @@ Reports open on the Reports page, by role, and six of them download as PDF.
 | Route and delivery area specification | [`route_delivery_area_specification.md`](docs/Project-Documentation/route_delivery_area_specification.md) |
 | Database file allocation | [`database_file_allocation.md`](docs/Project-Documentation/database_file_allocation.md) |
 | Staff login, roles and administrator bootstrap | [`backend/README-SECURITY.md`](backend/README-SECURITY.md) |
+| Cloud deployment on Azure | [`README-DEPLOYMENT.md`](README-DEPLOYMENT.md) |
 
 ---
 

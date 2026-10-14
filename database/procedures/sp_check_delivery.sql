@@ -6,6 +6,8 @@
 --   2 - The trip is on the same route as the order
 --   3 - The delivery date is the trip's date
 --   4 - The delivery is at least 7 days after the order was placed (SRS Section 4.2.3 / REQ-1)
+--   5 - Every order line is booked on a train, and the truck trip leaves after the last train
+--       carrying the order arrives at the store (SRS Section 4.3.2 to 4.3.3: rail first, then road)
 
 -- Called by trg_before_insert_delivery and trg_before_update_delivery (see triggers/trg_validate_delivery.sql),
 -- so the rule exists in one place, the same way as the sp_check_* truck trip rules (decision D6)
@@ -23,13 +25,16 @@ BEGIN
     DECLARE order_date DATE DEFAULT NULL;
     DECLARE trip_route INT DEFAULT NULL;
     DECLARE trip_date DATE DEFAULT NULL;
+    DECLARE trip_start DATETIME DEFAULT NULL;
+    DECLARE units_waiting INT DEFAULT 0;
+    DECLARE last_arrival DATETIME DEFAULT NULL;
 
     -- 1.
     SELECT RouteID, OrderDate INTO order_route, order_date
     FROM Orders
     WHERE OrderID = p_OrderID;
 
-    SELECT RouteID, TripDate INTO trip_route, trip_date
+    SELECT RouteID, TripDate, TIMESTAMP(TripDate, DispatchTime) INTO trip_route, trip_date, trip_start
     FROM TruckTrip
     WHERE TripID = p_TripID;
 
@@ -59,6 +64,29 @@ BEGIN
     IF DATEDIFF(p_DeliveryDate, order_date) < 7 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Delivery Violation: The delivery must be at least 7 days after the order date.';
+    END IF;
+
+    -- 5.
+    SELECT CAST(COALESCE(SUM(od.Quantity - COALESCE(
+               (SELECT SUM(s.Quantity) FROM Shipment s WHERE s.OrderDetailID = od.OrderDetailID), 0)), 0) AS SIGNED)
+    INTO units_waiting
+    FROM OrderDetail od
+    WHERE od.OrderID = p_OrderID;
+
+    IF units_waiting > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Delivery Violation: Part of the order is still waiting for a train.';
+    END IF;
+
+    SELECT MAX(TIMESTAMP(s.ShipmentDate, ts.ArrivalTime)) INTO last_arrival
+    FROM Shipment s
+    JOIN OrderDetail od ON od.OrderDetailID = s.OrderDetailID
+    JOIN TrainSchedule ts ON ts.ScheduleID = s.ScheduleID
+    WHERE od.OrderID = p_OrderID;
+
+    IF last_arrival > trip_start THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Delivery Violation: The truck trip leaves before the order arrives at the store by train.';
     END IF;
 END //
 

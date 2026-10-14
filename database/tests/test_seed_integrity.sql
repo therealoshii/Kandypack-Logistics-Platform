@@ -2,7 +2,7 @@
 USE kandypack_db;
 
 -- A6: Seed integrity checks.
--- Expected result: 17 rows, with bad = 0 for every check.
+-- Expected result: 20 rows, with bad = 0 for every check.
 
 SELECT '01 - shipments without a valid train schedule' AS check_name,
        COUNT(*) AS bad
@@ -128,7 +128,8 @@ JOIN Orders o ON o.OrderID = d.OrderID
 WHERE NOT (
        (o.Status = 'Delivered' AND d.Status = 'Delivered')
     OR (o.Status = 'In Transit' AND d.Status = 'In Transit')
-    OR (o.Status = 'Processing' AND d.Status = 'Scheduled')
+    OR (o.Status IN ('Processing', 'Shipped') AND d.Status = 'Scheduled')
+    OR (o.Status = 'Cancelled' AND d.Status = 'Cancelled')
 )
 
 UNION ALL
@@ -148,4 +149,42 @@ UNION ALL
 SELECT '17 - train schedules cover fewer than 6 cities',
        IF(COUNT(DISTINCT st.City) >= 6, 0, 1)
 FROM TrainSchedule ts
-JOIN Store st ON st.StoreID = ts.StoreID;
+JOIN Store st ON st.StoreID = ts.StoreID
+
+UNION ALL
+
+SELECT '18 - orders that list the same product on more than one line',
+       COUNT(*)
+FROM (
+    SELECT OrderID, ProductID
+    FROM OrderDetail
+    GROUP BY OrderID, ProductID
+    HAVING COUNT(*) > 1
+) repeated
+
+UNION ALL
+
+SELECT '19 - deliveries for orders still waiting for a train',
+       COUNT(*)
+FROM Delivery d
+WHERE EXISTS (
+    SELECT 1
+    FROM OrderDetail od
+    WHERE od.OrderID = d.OrderID
+      AND od.Quantity > COALESCE((SELECT SUM(s.Quantity) FROM Shipment s WHERE s.OrderDetailID = od.OrderDetailID), 0)
+)
+
+UNION ALL
+
+SELECT '20 - truck trips that leave before the order arrives by train',
+       COUNT(*)
+FROM Delivery d
+JOIN TruckTrip tt ON tt.TripID = d.TripID
+JOIN (
+    SELECT od.OrderID, MAX(TIMESTAMP(s.ShipmentDate, ts.ArrivalTime)) AS LastArrival
+    FROM OrderDetail od
+    JOIN Shipment s ON s.OrderDetailID = od.OrderDetailID
+    JOIN TrainSchedule ts ON ts.ScheduleID = s.ScheduleID
+    GROUP BY od.OrderID
+) arrival ON arrival.OrderID = d.OrderID
+WHERE arrival.LastArrival > TIMESTAMP(tt.TripDate, tt.DispatchTime);

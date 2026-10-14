@@ -30,7 +30,10 @@ SOURCE /docker-entrypoint-initdb.d/functions/fn_get_route_for_address.sql;
 -- --------------------------------------------------------------------
 SELECT '>>> [3/7] Creating Stored Procedures...' AS Step;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_place_order.sql;
+-- sp_ship_order_line is the shared step behind sp_schedule_shipment (one line) and sp_schedule_order (a whole order)
+SOURCE /docker-entrypoint-initdb.d/procedures/sp_ship_order_line.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_schedule_shipment.sql;
+SOURCE /docker-entrypoint-initdb.d/procedures/sp_schedule_order.sql;
 -- Truck trip rules (called by the TruckTrip triggers, so they must load before the triggers block)
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_lock_trip_resources.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_trip_route.sql;
@@ -41,6 +44,7 @@ SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_weekly_hours.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_check_delivery.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_assign_truck_trip.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_update_delivery_status.sql;
+SOURCE /docker-entrypoint-initdb.d/procedures/sp_assign_delivery.sql;
 SOURCE /docker-entrypoint-initdb.d/procedures/sp_staff_weekly_hours_report.sql;
 
 -- Management Reports (Moved to /reports directory)
