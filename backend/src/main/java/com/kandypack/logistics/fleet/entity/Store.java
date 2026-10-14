@@ -2,31 +2,31 @@ package com.kandypack.logistics.fleet.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-//represents a regional store/warehouse in the logistics system
-
+// Represents a regional store/warehouse in the logistics system
 @Entity
 @Table(name = "Store")
 public class Store {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "StoreID")
     private Integer storeID;
 
-    @Column(name = "StoreName")
+    @Column(name = "StoreName", nullable = false)
     private String storeName;
 
-    @Column(name = "Capacity")
+    @Column(name = "Capacity", nullable = false)
     private Double capacity;
 
-    @Column(name = "City")
+    @Column(name = "City", nullable = false)
     private String city;
 
-
-    public Store() {
-    }
+    public Store() {}
 
     public Integer getStoreID() {
         return storeID;
