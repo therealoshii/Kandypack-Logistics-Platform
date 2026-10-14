@@ -115,7 +115,3 @@ API: `GET /api/deliveries/unassigned-orders` and `POST /api/deliveries/assign`.
 driver rest, driver 40 hours, assistant 60 hours, assistant third trip at the end and in the middle
 of a run, truck from another store, trip over the route maximum, update into an overlap, delivery
 on another route, and delivery dated differently from its trip.
-
-`.github/scripts/database-checks.sh` (run by the CI workflow) runs every one of those negative cases
-automatically, plus delivery assignment: a truck leaving before the train arrives, an order still
-waiting for a train, an order assigned twice, and a valid assignment with its audit record.
