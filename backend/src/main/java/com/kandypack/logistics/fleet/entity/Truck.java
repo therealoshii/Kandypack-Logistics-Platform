@@ -1,24 +1,32 @@
 package com.kandypack.logistics.fleet.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-//Represents a truck assigned to a regional store
-
+// Represents a truck assigned to a regional store
 @Entity
 @Table(name = "Truck")
 public class Truck {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "TruckID")
     private Integer truckID;
 
+    @Column(name = "RegistrationNumber", nullable = false, unique = true)
     private String registrationNumber;
+
+    @Column(name = "Capacity", nullable = false)
     private Double capacity;
+
+    @Column(name = "StoreID", nullable = false)
     private Integer storeID;
 
-    public Truck() {
-    }
+    public Truck() {}
 
     public Integer getTruckID() {
         return truckID;
