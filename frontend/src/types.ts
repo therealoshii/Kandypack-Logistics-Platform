@@ -47,6 +47,7 @@ export interface Store {
   storeName: string;
   capacity: number;
   city: string;
+  address: string;
   routes: Route[];
 }
 
