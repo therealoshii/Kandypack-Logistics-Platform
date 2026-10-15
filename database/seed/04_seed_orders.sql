@@ -1,13 +1,8 @@
-
--- ============================================================================
--- Kandypack Order & Logistics Seed Data
--- ============================================================================
+-- Seed data for orders, order details, truck trips, shipments, and deliveries (Q2–Q4 2026).
 
 USE kandypack_db;
 
--- 1. ADMINISTRATOR AND STAFF ROLES
--- Run before inserting orders that reference AdminID = 1.
-
+-- Admin must exist before orders reference AdminID = 1
 INSERT IGNORE INTO Administrator
     (AdminID, Name, Username, Password, Email, Enabled)
 VALUES
@@ -29,9 +24,6 @@ FROM Administrator a
 JOIN StaffRole r ON r.Code = 'ADMIN'
 WHERE a.AdminID = 1;
 
-
--- 2. CLEAR TRANSACTIONAL SEED DATA
-
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE AuditLog;
 TRUNCATE TABLE Delivery;
@@ -41,11 +33,7 @@ TRUNCATE TABLE OrderDetail;
 TRUNCATE TABLE Orders;
 SET FOREIGN_KEY_CHECKS = 1;
 
-
--- 3. SEED ORDERS
--- Q2, Q3 and Q4 2026.
--- RouteID is calculated from the customer's delivery area.
-
+-- RouteID derived from the customer's delivery area via fn_get_route_for_address
 INSERT INTO Orders
     (OrderID, CustomerID, RouteID, AdminID,
      OrderDate, RequestedDeliveryDate, Status, TotalAmount)
@@ -121,10 +109,7 @@ FROM (
 ) v
 JOIN Customer c ON c.CustomerID = v.CustomerID;
 
-
--- 4. SEED ORDER DETAILS
--- Q2 and Q3 deliberately use different product mixes.
-
+-- Q2 and Q3 use different product mixes to vary the data
 INSERT INTO OrderDetail
     (OrderDetailID, OrderID, ProductID, Quantity, LineTotal)
 SELECT
@@ -155,14 +140,9 @@ JOIN (
 ) totals ON totals.OrderID = o.OrderID
 SET o.TotalAmount = totals.CalculatedTotal;
 
-
--- 5. SEED TRUCK TRIPS
--- Each trip uses a truck belonging to the route's store.
--- Rotate by each store's own order sequence, not the global OrderID. This
--- ensures every truck at a store receives trips before rotation repeats.
--- TripID is kept equal to OrderID for straightforward delivery matching.
--- Placed and Cancelled orders must not receive trips.
-
+-- Rotate trucks per-store so every truck gets trips before repeating.
+-- TripID = OrderID for straightforward delivery matching.
+-- Placed/Cancelled orders are excluded.
 INSERT INTO TruckTrip
     (TripID, TruckID, RouteID, DriverID, AssistantID,
      TripDate, DispatchTime, ReturnTime)
@@ -221,12 +201,8 @@ JOIN (
    AND truck_choice.TruckRank =
        MOD(order_position.StoreOrderPosition - 1, truck_choice.TruckCount) + 1;
 
-
--- 6. SEED SHIPMENTS
--- Shipment has no Status column. Quantity is mandatory.
--- Find the first train-operating date from OrderDate + 2 through +8 days.
--- Placed and Cancelled orders must not receive shipments.
-
+-- Find the first train-operating date within OrderDate +2..+8 days.
+-- Placed/Cancelled orders are excluded.
 INSERT INTO Shipment
     (ShipmentID, OrderDetailID, ScheduleID, Quantity, ShipmentDate)
 SELECT
@@ -277,11 +253,6 @@ JOIN Orders o ON o.OrderID = od.OrderID
 JOIN Route r ON r.RouteID = o.RouteID
 WHERE o.Status NOT IN ('Placed', 'Cancelled');
 
-
--- 7. SEED DELIVERIES
--- No deliveries for Placed or Cancelled orders.
--- Delivery date, trip date, and order route must match.
-
 INSERT INTO Delivery
     (DeliveryID, OrderID, TripID, DeliveryDate, Status)
 SELECT
@@ -302,18 +273,9 @@ JOIN TruckTrip tt
 WHERE o.Status NOT IN ('Placed', 'Cancelled')
   AND o.RequestedDeliveryDate IS NOT NULL;
 
-
--- 8. ROLLOVER EXAMPLE
--- SRS Section 6 asks for at least one order line that rolls over to a later train run.
--- Order 55 is a bulk order from a Nugegoda customer (route 2, Colombo store), booked
--- through sp_schedule_shipment so the real overflow logic produces its shipments.
--- 700 units x 0.5 space = 350 space units. Colombo has two Monday runs of 150 each, so:
---   Monday 2026-10-12, 06:00 run (schedule 1): 300 units
---   Monday 2026-10-12, 14:00 run (schedule 2): 300 units
---   Monday 2026-10-19, 06:00 run (schedule 1): 100 units
--- The order is 'Shipped' (on the trains, not yet out for last-mile delivery), so it has
--- no truck trip and no delivery. It is added after sections 5 and 7 for that reason.
-
+-- Rollover example (SRS Section 6): 700 units × 0.5 space = 350 space units.
+-- Colombo has two Monday runs of 150 each, so the overflow spills to the next week.
+-- 'Shipped' status means no truck trip or delivery yet — added after trips/deliveries above.
 INSERT INTO Orders
     (OrderID, CustomerID, RouteID, AdminID,
      OrderDate, RequestedDeliveryDate, Status, TotalAmount)

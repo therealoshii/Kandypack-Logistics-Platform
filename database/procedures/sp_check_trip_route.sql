@@ -1,16 +1,10 @@
--- Rule: a truck trip must make sense for its route
--- Requirements: SRS Section 4.3.3 / REQ-1 (trucks dispatch only from the store the route belongs to)
---               SRS Section 4.3.3 / REQ-2 (a trip must stay within the route's maximum delivery time)
-
--- Checks, in order:
---   1 - ReturnTime > DispatchTime (basic time sanity)
---   2 - The truck and the route both exist (clear message instead of a foreign key error)
---   3 - The truck is based at the same store as the route
---   4 - The trip is no longer than the route's MaxDeliveryTime (in hours)
-
--- Called first by trg_before_insert_trucktrip and trg_before_update_trucktrip, so these
--- clear errors appear before overlap and weekly-hours errors
--- p_SelfID is not needed here (no other trips are read), but every rule takes the same parameters
+-- RULE: Trip must match its route constraints (SRS 4.3.3 / REQ-1, REQ-2)
+-- Validates:
+-- 1. ReturnTime > DispatchTime.
+-- 2. Truck and Route exist.
+-- 3. Truck belongs to the route's store.
+-- 4. Trip duration <= route's MaxDeliveryTime.
+-- Called first by trg_before_insert/update_trucktrip.
 
 DROP PROCEDURE IF EXISTS sp_check_trip_route;
 

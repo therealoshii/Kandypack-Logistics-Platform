@@ -1,11 +1,7 @@
--- Books EVERY order line of an order that is still waiting for a train, in one transaction.
--- All lines start from the same train run and date; each line's overflow rolls over to the next
--- run on its own (see sp_ship_order_line). If any line cannot be booked, for example because no
--- train has room within 4 weeks, nothing is saved for the whole order (atomicity).
--- Requirement: SRS Section 4.3.2
---
--- The lines are walked in ID order with MIN(...) instead of a cursor: a cursor's NOT FOUND
--- handler would also catch the "no row" warnings raised inside sp_ship_order_line.
+-- RULE: Atomic train booking for all pending order lines (SRS 4.3.2)
+-- Books every unassigned line for an order in one transaction; rolls back entirely if any line fails.
+-- Lines start on the same train/date and roll over individually via sp_ship_order_line.
+-- Iterates using MIN(ID) instead of a cursor to prevent handler conflicts.
 
 DROP PROCEDURE IF EXISTS sp_schedule_order;
 

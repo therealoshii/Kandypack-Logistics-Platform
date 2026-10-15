@@ -22,6 +22,10 @@ The booking of one order line lives in `sp_ship_order_line`. It is used by `sp_s
 ## 4. Validation Rules & Integrity Constraints
 Before committing shipments, the procedure enforces strict checks:
 - Verifies that the target order line exists, is **not already fully shipped**, and does not belong to a **cancelled** order.
+- **Stock check:** stock leaves the warehouse when it is loaded on a train (`trg_update_stock_on_dispatch`), not when the order is placed.
+  `sp_place_order` checks stock for each order, but two orders placed before either is shipped can together need more than the warehouse holds.
+  The product row is therefore locked (`FOR UPDATE`) and the line is refused if stock is below its remaining units:
+  *"Insufficient Stock: The warehouse does not have enough stock to ship this order line."* Nothing is booked, and for a whole order no line is booked.
 - Validates that the schedule's destination store matches the order's designated delivery route.
 - Ensures the requested shipment date matches the operating weekday of the train schedule.
 - **Database Trigger Enforcement:** The weekday rule is also permanently enforced by the `trg_shipment_weekday_check` trigger on direct table insertions and updates.

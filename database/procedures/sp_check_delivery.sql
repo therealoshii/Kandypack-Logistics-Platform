@@ -1,19 +1,10 @@
--- Rule: a Delivery must fit the Order it delivers and the TruckTrip that carries it
--- Requirement: SRS Section 4.3.3 / REQ-4
-
--- Checks, in order:
---   1 - The order and the trip both exist (clear message instead of a foreign key error)
---   2 - The trip is on the same route as the order
---   3 - The delivery date is the trip's date
---   4 - The delivery is at least 7 days after the order was placed (SRS Section 4.2.3 / REQ-1)
---   5 - Every order line is booked on a train, and the truck trip leaves after the last train
---       carrying the order arrives at the store (SRS Section 4.3.2 to 4.3.3: rail first, then road)
-
--- Called by trg_before_insert_delivery and trg_before_update_delivery (see triggers/trg_validate_delivery.sql),
--- so the rule exists in one place, the same way as the sp_check_* truck trip rules (decision D6)
-
--- Check 4 uses OrderDate + 7 days. RequestedDeliveryDate is already checked against OrderDate
--- when the order is placed, so this rule does not depend on that column
+-- RULE: Delivery must match its Order and TruckTrip (SRS 4.3.3 / REQ-4)
+-- Validates:
+-- 1. Order and Trip exist.
+-- 2. Trip is on the order's route on the same date.
+-- 3. Delivery date is >= OrderDate + 7 days.
+-- 4. All lines arrived by rail before truck departs.
+-- Called by trg_before_insert/update_delivery.
 
 DROP PROCEDURE IF EXISTS sp_check_delivery;
 

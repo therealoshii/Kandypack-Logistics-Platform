@@ -1,37 +1,27 @@
--- This file contains the Fleet and Roster Seed Data for Tables: Truck, Driver, Assistant
--- Added: Trucks (12), Drivers (10), Assistants (10)
-
--- At the time of adding this file, I cannot test how these data behave eith other tables (the queries run fine btw)
+-- Seed data for fleet and roster: Trucks (12), Drivers (10), Assistants (10).
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Trucks (Assigned to regional stores for last-mile road dispatch)
--- Truck capacity is in cargo space units, the same unit as train cargo capacity.
+-- Truck capacity is in cargo space units (same unit as train cargo capacity)
 TRUNCATE TABLE Truck;
 INSERT INTO Truck (TruckID, RegistrationNumber, Capacity, StoreID) VALUES
-
--- Colombo Trucks (Store 1)
+-- Colombo (Store 1)
 (1, 'WP-CAA-1020', 120.00, 1),
 (2, 'WP-CAA-1021', 150.00, 1),
 (3, 'WP-CAB-3304', 100.00, 1),
-
--- Negombo Trucks (Store 2)
+-- Negombo (Store 2)
 (4, 'WP-CBA-4512', 120.00, 2),
 (5, 'WP-CBA-4513', 100.00, 2),
-
--- Galle Trucks (Store 3)
+-- Galle (Store 3)
 (6, 'SP-DAA-2101', 120.00, 3),
 (7, 'SP-DAB-8890', 150.00, 3),
-
--- Matara Trucks (Store 4)
+-- Matara (Store 4)
 (8, 'SP-DBA-3311', 100.00, 4),
 (9, 'SP-DBA-3312', 120.00, 4),
-
--- Jaffna Trucks (Store 5)
+-- Jaffna (Store 5)
 (10, 'NP-EAA-5520', 150.00, 5),
 (11, 'NP-EAA-5521', 120.00, 5),
-
--- Trincomalee Trucks (Store 6)
+-- Trincomalee (Store 6)
 (12, 'EP-FAA-7714', 120.00, 6);
 
 -- Drivers (Heavy vehicle licensed staff)
@@ -63,4 +53,3 @@ INSERT INTO Assistant (AssistantID, Name, ContactNumber) VALUES
 (10, 'Suresh Kumar', '0710011223');
 
 SET FOREIGN_KEY_CHECKS = 1;
-

@@ -1,15 +1,7 @@
--- Books one order line onto train runs, splitting it across runs and rolling the overflow over
--- to the next running day. This is the shared step used by:
---   - sp_schedule_shipment (one order line)
---   - sp_schedule_order    (every line of an order at once)
--- It has no transaction or error handler of its own: each caller opens the transaction and
--- rolls everything back if any step fails, so a whole order is booked completely or not at all.
--- Requirement: SRS Section 4.3.2 (train capacity, overbooking prevention, rollover)
---
--- After booking it moves the order forward:
---   Placed or Processing -> Processing  (some lines are still waiting for a train)
---   Placed or Processing -> Shipped     (every line is on a train)
--- Orders that are already further on (Shipped, In Transit, Delivered) are not changed.
+-- RULE: Book order line onto train runs with rollover (SRS 4.3.2)
+-- Splits line capacity across train runs and rolls overflow to subsequent days.
+-- Shared by sp_schedule_shipment and sp_schedule_order (caller manages transaction).
+-- Updates order status to Processing (partial lines booked) or Shipped (all lines booked).
 
 DROP PROCEDURE IF EXISTS sp_ship_order_line;
 

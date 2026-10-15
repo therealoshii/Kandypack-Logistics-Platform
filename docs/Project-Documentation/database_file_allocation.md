@@ -35,7 +35,7 @@ Core focus: train timetable, cargo capacity, overbooking prevention, and overflo
 | Schema | `schema/03_tables_rail.sql` | `Train`, `TrainSchedule` (with `StoreID` and the unique timetable slot), `Shipment` |
 | Function | `functions/fn_calculate_total_space.sql` | Space needed: quantity x space rate |
 | Function | `functions/fn_get_available_capacity.sql` | Remaining space on a run on a date |
-| Procedure | `procedures/sp_ship_order_line.sql` | Books an order line onto runs, splitting and rolling over overflow, with row locking; moves the order to Processing or Shipped |
+| Procedure | `procedures/sp_ship_order_line.sql` | Books an order line onto runs, splitting and rolling over overflow, with row locking and a stock check; moves the order to Processing or Shipped |
 | Procedure | `procedures/sp_schedule_shipment.sql` | Books one order line in its own transaction |
 | Procedure | `procedures/sp_schedule_order.sql` | Books every waiting line of an order in one transaction (all or nothing) |
 | Trigger | `triggers/trg_check_cargo_capacity.sql` | Prevents train overbooking |

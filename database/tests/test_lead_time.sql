@@ -1,4 +1,6 @@
--- TEST CASE 1: Invalid Lead Time (Should fail with advance order rule violation)
+-- Tests sp_place_order: lead time validation, product checks, route resolution, and stock limits.
+
+-- TEST 1: Invalid lead time – should fail (3 days is too short)
 -- CALL sp_place_order(
 --     1,
 --     DATE_ADD(CURDATE(), INTERVAL 3 DAY),
@@ -6,7 +8,7 @@
 --     @v_order_id
 -- );
 
--- TEST CASE 2: Valid Lead Time (Should succeed)
+-- TEST 2: Valid lead time – should succeed
 CALL sp_place_order(
     1,
     DATE_ADD(CURDATE(), INTERVAL 8 DAY),
@@ -14,8 +16,7 @@ CALL sp_place_order(
     @v_order_id
 );
 
--- verify created order (Updated to use DeliveryArea instead of removed Customer.City)
-SELECT 
+SELECT
     o.OrderID, o.CustomerID, c.FullName, da.AreaName,
     o.RouteID, r.RouteName, o.OrderDate, o.RequestedDeliveryDate, o.Status, o.TotalAmount
 FROM Orders o
@@ -24,18 +25,14 @@ INNER JOIN DeliveryArea da ON c.AreaID = da.AreaID
 INNER JOIN Route r ON o.RouteID = r.RouteID
 WHERE o.OrderID = @v_order_id;
 
--- verify line items
-SELECT 
+SELECT
     od.OrderDetailID, od.OrderID, p.ProductName,
     od.Quantity, p.UnitPrice, od.LineTotal
 FROM OrderDetail od
 INNER JOIN Product p ON od.ProductID = p.ProductID
 WHERE od.OrderID = @v_order_id;
 
-
--- =========================================================================
--- TEST CASE 3: Unknown product as a later item (Should fail and roll back)
--- =========================================================================
+-- TEST 3: Unknown product in list – should fail and roll back
 -- CALL sp_place_order(
 --     1,
 --     DATE_ADD(CURDATE(), INTERVAL 8 DAY),
@@ -44,23 +41,17 @@ WHERE od.OrderID = @v_order_id;
 -- );
 -- Expected error: "Validation Error: Product does not exist."
 
-
--- =========================================================================
--- TEST CASE 4: Customer route verification (Nugegoda -> Route 2, Colpetty -> Route 1)
--- =========================================================================
-SELECT 
-    c.CustomerID, 
-    c.FullName, 
-    da.AreaName, 
+-- TEST 4: Customer route resolution (Nugegoda -> Route 2, Colpetty -> Route 1)
+SELECT
+    c.CustomerID,
+    c.FullName,
+    da.AreaName,
     fn_get_route_for_address(c.CustomerID) AS ResolvedRouteID
 FROM Customer c
 INNER JOIN DeliveryArea da ON c.AreaID = da.AreaID
 WHERE c.CustomerID IN (1, 7);
 
-
--- =========================================================================
--- TEST CASE 5: Insufficient stock (Should fail and leave no partial rows)
--- =========================================================================
+-- TEST 5: Insufficient stock – should fail with no partial rows
 -- CALL sp_place_order(
 --     1,
 --     DATE_ADD(CURDATE(), INTERVAL 8 DAY),

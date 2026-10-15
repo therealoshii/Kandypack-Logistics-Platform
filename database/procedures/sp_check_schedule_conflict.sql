@@ -1,10 +1,6 @@
--- Rule: the same Truck, Driver or Assistant cannot be booked on two trips with overlapping times
--- (runs after sp_check_trip_route, which has already checked ReturnTime > DispatchTime)
--- Requirement: SRS Section 4.4 / REQ-6
-
--- Called by trg_before_insert_trucktrip and trg_before_update_trucktrip (see triggers/trg_before_insert_trucktrip.sql)
--- p_SelfID is NULL on insert and the trip's own TripID on update,
--- so an updated trip is not compared against its own old row
+-- RULE: Trucks, Drivers, and Assistants cannot have overlapping trips (SRS 4.4 / REQ-6)
+-- Prevents double-booking any resource across the same time window.
+-- Called by trg_before_insert/update_trucktrip (pass p_SelfID to ignore self on update).
 
 DROP PROCEDURE IF EXISTS sp_check_schedule_conflict;
 
