@@ -179,7 +179,7 @@ export default function FleetOverviewPage() {
     />
 
     {error && <div className="inline-feedback" role="alert">{error}</div>}
-    {success && <div className="inline-feedback" role="status">{success}</div>}
+    {success && <div className="notice-success" role="status">{success}</div>}
 
     {formMode && (
       <section className="panel fleet-form-panel">
@@ -317,6 +317,7 @@ export default function FleetOverviewPage() {
               <input
                 type="number"
                 min="0.01"
+                max="999"
                 step="0.01"
                 value={routeMaxDeliveryTime}
                 onChange={(event) =>
