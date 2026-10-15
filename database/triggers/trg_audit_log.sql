@@ -1,11 +1,10 @@
+-- Audit triggers: log status changes on Delivery, Orders, and TruckTrip updates.
 
 USE kandypack_db;
 
 DELIMITER //
 
--- ============================================================
 -- 1. Audit changes to Delivery.Status
--- ============================================================
 DROP TRIGGER IF EXISTS trg_audit_delivery_status //
 
 CREATE TRIGGER trg_audit_delivery_status
@@ -38,9 +37,7 @@ BEGIN
 END //
 
 
--- ============================================================
 -- 2. Audit changes to Orders.Status
--- ============================================================
 DROP TRIGGER IF EXISTS trg_audit_order_status //
 
 CREATE TRIGGER trg_audit_order_status
@@ -77,9 +74,7 @@ BEGIN
 END //
 
 
--- ============================================================
 -- 3. Audit changes to TruckTrip assignments and timings
--- ============================================================
 DROP TRIGGER IF EXISTS trg_audit_trucktrip_update //
 
 CREATE TRIGGER trg_audit_trucktrip_update

@@ -1,20 +1,7 @@
--- Rule: an Assistant can be scheduled for a maximum of two consecutive trips
--- Requirement: SRS Section 4.4 / REQ-3
-
--- Decision D1 (same definition as the driver rule): two trips are LINKED (consecutive) if the next
--- one starts less than 30 minutes after the previous one returns. Exactly 30 minutes counts as rested.
--- A new trip is rejected if it would create a run of 3 linked trips. It can join a run at the end,
--- at the start, or in the middle, so we look up to two linked trips before it and two after it:
---
---     prev2 -> prev1 -> [new trip] -> next1 -> next2
---
--- Rejected when: prev1 and prev2 exist (new trip is 3rd)
---            or: prev1 and next1 exist (new trip is in the middle)
---            or: next1 and next2 exist (new trip is 1st)
-
--- Called by trg_before_insert_trucktrip and trg_before_update_trucktrip
--- p_SelfID is NULL on insert and the trip's own TripID on update, so an updated trip
--- is never linked to its own old row
+-- Assistant Trip Limit (SRS 4.4 / REQ-3)
+-- Max 2 consecutive trips (trips with <30 min gap are linked; >=30 min = rested).
+-- Rejects runs of 3: (prev2 + prev1), (prev1 + next1), or (next1 + next2).
+-- Pass p_SelfID = NULL on INSERT, or TripID on UPDATE to ignore current row.
 
 DROP PROCEDURE IF EXISTS sp_check_assistant_consecutive;
 

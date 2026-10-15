@@ -1,14 +1,6 @@
--- This procedure assigns truck trips to Drivers and Assistants
--- Automated dispatch controller that saves a trip and its audit record together
-
--- Requirements:
---   - SRS Section 4.4: Driver 40h & Assistant 60h caps, consecutive trip rules
---   - SRS Section 4.4 / REQ-6: Schedule conflict validation
-
--- The roster rules are NOT repeated here. The BEFORE INSERT trigger on TruckTrip
--- (triggers/trg_before_insert_trucktrip.sql) runs every sp_check_* rule on the INSERT below.
--- If a rule fails, its error reaches the EXIT HANDLER, everything is rolled back,
--- and the rule's message is sent to the caller.
+-- Dispatch Controller (SRS 4.4 / REQ-6)
+-- Assigns trips to driver/assistant and logs audit. 
+-- Validates weekly caps (Driver 40h, Assistant 60h) and conflicts via triggers; rolls back on error.
 
 DROP PROCEDURE IF EXISTS sp_assign_truck_trip;
 

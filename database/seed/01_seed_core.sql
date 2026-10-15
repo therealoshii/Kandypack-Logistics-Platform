@@ -1,9 +1,8 @@
--- Added: Stores (6), Routes (12), Products (10), Customers (12)--
+-- Seed data for core entities: Stores (6), Routes (12), DeliveryAreas (36), Products (10), Customers (12).
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Stores(Colombo,Negombo,Galle,Matara,Jaffna,Trincomalee)--
--- Store capacity is in cargo space units, the same unit as train cargo capacity.
+-- Store capacity is in cargo space units (same unit as train cargo capacity)
 TRUNCATE TABLE Store;
 INSERT INTO Store (StoreID, StoreName, Capacity, City) VALUES
 (1, 'Colombo Central Warehouse', 5000.00, 'Colombo'),
@@ -13,8 +12,7 @@ INSERT INTO Store (StoreID, StoreName, Capacity, City) VALUES
 (5, 'Jaffna Northern Hub', 4500.00, 'Jaffna'),
 (6, 'Trincomalee Eastern Center', 3200.00, 'Trincomalee');
 
--- Routes (12 routes connecting regional stores to delivery zones)
--- Distance is the estimated total round-trip road distance in kilometres.
+-- Distance is estimated total round-trip road distance in kilometres
 TRUNCATE TABLE Route;
 
 INSERT INTO Route (RouteID, StoreID, RouteName, MaxDeliveryTime, Distance) VALUES
@@ -109,8 +107,7 @@ INSERT INTO Product (ProductID, ProductName, UnitPrice, SpaceConsumption, StockQ
 (9, 'Kandypack Hand Sanitizer 250ml', 220.00, 0.12, 11000, 'Personal Care'),
 (10, 'Kandypack Herbal Toothpaste 120g', 160.00, 0.08, 18000, 'Personal Care');
 
--- Demo login for every seeded customer: password is KandypackDemo2026
--- The value below is its BCrypt hash, generated with the app's BCryptPasswordEncoder.
+-- Demo login password: KandypackDemo2026 (BCrypt hash below)
 TRUNCATE TABLE Customer;
 INSERT INTO Customer (CustomerID, FullName, Email, ContactNumber, Address, AreaID, Username, Password) VALUES
 (1, 'Lanka Super Center Colombo', 'orders@lankasuper.lk', '0112345678', 'No. 45 Galle Road, Colpetty', 3, 'lankasuper_col', '$2a$10$4ILDIMWNYDYrFXVGK/LRiOuhF58IdaIC71JmB8hNx9Y9fdIlAu4mm'),

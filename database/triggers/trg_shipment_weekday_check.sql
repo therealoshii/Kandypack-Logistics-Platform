@@ -1,8 +1,6 @@
--- =========================================================================
 -- Trigger: trg_shipment_weekday_check
 -- Description: Task W4b - Prevent inserting or updating a shipment date 
 -- that does not match the train schedule's operating day of week.
--- =========================================================================
 
 DROP TRIGGER IF EXISTS trg_shipment_weekday_check_insert;
 DROP TRIGGER IF EXISTS trg_shipment_weekday_check_update;

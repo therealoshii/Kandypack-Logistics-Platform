@@ -1,11 +1,6 @@
--- Rule: a Driver must not be scheduled for two consecutive truck trips
--- Requirement: SRS Section 4.4 / REQ-2
-
--- Decision D1: two trips are consecutive if the next one starts less than 30 minutes
--- after the previous one returns (exactly 30 minutes counts as rested)
-
--- Called by trg_before_insert_trucktrip and trg_before_update_trucktrip
--- p_SelfID is NULL on insert and the trip's own TripID on update
+-- RULE: Drivers cannot take consecutive trips (SRS 4.4 / REQ-2)
+-- Trips are consecutive if the gap is < 30 mins (>= 30 mins counts as rested).
+-- Called by trg_before_insert/update_trucktrip (pass p_SelfID to ignore self on update).
 
 DROP PROCEDURE IF EXISTS sp_check_driver_consecutive;
 
