@@ -31,6 +31,28 @@ public class StoreService {
                 .toList();
     }
 
+    public StoreDTO createStore(Store store) {
+        if (store.getStoreName() == null || store.getStoreName().isBlank()) {
+            throw new IllegalArgumentException("Store name is required.");
+        }
+
+        if (store.getCity() == null || store.getCity().isBlank()) {
+            throw new IllegalArgumentException("City is required.");
+        }
+
+        
+        if (store.getCapacity() == null || store.getCapacity() <= 0) {
+            throw new IllegalArgumentException("Capacity must be greater than zero.");
+        }
+
+        store.setStoreName(store.getStoreName().trim());
+        store.setCity(store.getCity().trim());
+        store.setStoreID(null);
+
+
+        Store savedStore = storeRepository.save(store);
+        return toDTO(savedStore);}
+
     private StoreDTO toDTO(Store store) {
         StoreDTO dto = new StoreDTO();
 

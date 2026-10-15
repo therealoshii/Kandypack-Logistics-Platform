@@ -201,9 +201,10 @@ public class SecurityConfig {
                                 "ROSTER_DISPATCHER"
                         )
 
-                        .requestMatchers(
+                       .requestMatchers(
                                 "/api/stores/**",
-                                "/api/trucks/**"
+                                "/api/trucks/**",
+                                "/api/routes/**"
                         ).hasAnyRole("ADMIN", "FLEET_MANAGER")
 
                         .requestMatchers(

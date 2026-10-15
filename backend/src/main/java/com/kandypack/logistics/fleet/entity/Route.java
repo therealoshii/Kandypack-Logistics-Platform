@@ -1,6 +1,9 @@
 package com.kandypack.logistics.fleet.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -11,11 +14,20 @@ import jakarta.persistence.Table;
 public class Route {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "RouteID")
     private Integer routeID;
 
+    @Column(name = "StoreID", nullable = false)
     private Integer storeID;
+
+    @Column(name = "RouteName", nullable = false)
     private String routeName;
+
+    @Column(name = "MaxDeliveryTime", nullable = false)
     private Double maxDeliveryTime;
+
+    @Column(name = "Distance", nullable = false)
     private Double distance;
 
     public Route() {
